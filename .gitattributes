@@ -1,0 +1,3 @@
+# Line endings: shell scripts LF (Linux/CI), PowerShell CRLF (Windows)
+*.sh text eol=lf
+*.ps1 text eol=crlf

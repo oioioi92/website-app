@@ -1,0 +1,20 @@
+.next
+node_modules
+.env
+.env.local
+.env.backup*
+dist
+coverage
+*.log
+.cursor
+.vercel
+.snapshots
+*.zip
+smoke_cookies.txt
+tsconfig.tsbuildinfo
+
+# Screenshots: 不提交，CI 上传 artifacts；若团队选择「提交截图做 PR 视觉对比」可删此行
+screenshots/
+
+# Local Netlify folder
+.netlify

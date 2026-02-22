@@ -1,0 +1,65 @@
+# V3.1 关门检查：谁跑都一样、跑完就能合并
+# Linux 跑 pr:final:v3.1；可选 Windows 跑 pr:final:v3.1:win
+name: PR Final Check (V3.1)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+    # 只改 docs 时不跑（省 CI 资源）；若希望 docs 改动也跑，删掉下面 3 行
+    paths-ignore:
+      - "docs/**"
+
+concurrency:
+  group: pr-final-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Linux — pr:final:v3.1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure shell scripts executable
+        run: chmod +x scripts/pr-final-check-v3.1.sh RUN-SMOKE.sh scripts/smoke.sh
+
+      # 若截图步骤报错缺浏览器，取消下面注释：npx playwright install chromium --with-deps
+      # - name: Install Playwright Chromium (for screenshots)
+      #   run: npx playwright install chromium --with-deps
+
+      - name: Run PR final check (V3.1)
+        run: npm run pr:final:v3.1
+
+      # always()：失败也上传已生成的截图，方便排障
+      - name: Upload screenshots (artifacts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-v3.1
+          path: screenshots/
+          if-no-files-found: ignore
+
+  # Windows 可选：需要时取消注释
+  # windows:
+  #   name: Windows — pr:final:v3.1:win
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
+  #         cache: "npm"
+  #     - run: npm ci
+  #     - name: Run PR final check (Windows)
+  #       run: npm run pr:final:v3.1:win

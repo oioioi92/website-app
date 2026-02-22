@@ -1,0 +1,138 @@
+name: Deploy (VPS Releases + Rollback)
+
+on:
+  push:
+    branches: ["main", "master"]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package source (tar.gz)
+        run: |
+          set -euo pipefail
+          tar \
+            --exclude=".git" \
+            --exclude="node_modules" \
+            --exclude=".next" \
+            --exclude=".env" \
+            --exclude=".env.*" \
+            --exclude="prisma/dev.db" \
+            -czf deploy.tgz .
+
+      - name: Upload package to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "deploy.tgz"
+          target: "/tmp"
+
+      - name: Deploy on VPS (release + symlink + pm2 + health + rollback)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+
+            APP_DIR="${{ secrets.APP_DIR }}"
+            DOMAIN="${{ secrets.DOMAIN }}"
+            PM2_APP_NAME="${{ secrets.PM2_APP_NAME }}"
+            if [ -z "${PM2_APP_NAME}" ]; then PM2_APP_NAME="web"; fi
+
+            TS="$(date +%Y%m%d_%H%M%S)"
+            RELEASE_DIR="${APP_DIR}/releases/${TS}"
+            CURRENT_LINK="${APP_DIR}/current"
+            SHARED_ENV="${APP_DIR}/shared/.env.production"
+
+            mkdir -p "${APP_DIR}/releases" "${APP_DIR}/shared"
+            if [ ! -f "${SHARED_ENV}" ]; then
+              echo "MISSING: ${SHARED_ENV}"
+              echo "Create it once and keep secrets there."
+              exit 1
+            fi
+
+            PREV_RELEASE=""
+            if [ -L "${CURRENT_LINK}" ]; then
+              PREV_RELEASE="$(readlink -f "${CURRENT_LINK}" || true)"
+            fi
+
+            echo "== [1] Extract release: ${RELEASE_DIR} =="
+            mkdir -p "${RELEASE_DIR}"
+            tar -xzf /tmp/deploy.tgz -C "${RELEASE_DIR}"
+            rm -f /tmp/deploy.tgz
+
+            echo "== [2] Link shared env (.env + .env.production) =="
+            ln -sf "${SHARED_ENV}" "${RELEASE_DIR}/.env"
+            ln -sf "${SHARED_ENV}" "${RELEASE_DIR}/.env.production"
+
+            echo "== [3] Stamp deploy version =="
+            mkdir -p "${RELEASE_DIR}/public"
+            echo "${TS} sha=${{ github.sha }}" > "${RELEASE_DIR}/public/__deploy_version.txt"
+
+            echo "== [4] Install deps + build =="
+            cd "${RELEASE_DIR}"
+            npm ci
+            npm run build
+
+            echo "== [5] Prisma generate + migrate (Postgres) =="
+            # Use db push to avoid migration drift on VPS release directories.
+            node scripts/prisma-generate-auto.cjs
+            node scripts/prisma-db-push-auto.cjs
+
+            echo "== [6] Switch current -> new release =="
+            ln -sfn "${RELEASE_DIR}" "${CURRENT_LINK}"
+
+            echo "== [7] PM2 reload (cluster + --update-env) =="
+            cd "${CURRENT_LINK}"
+            set -o allexport
+            # shellcheck disable=SC1090
+            source .env.production
+            set +o allexport
+
+            # Prefer ecosystem.config.js so we can always use --update-env.
+            if [ -f ecosystem.config.js ]; then
+              pm2 start ecosystem.config.js --update-env || pm2 reload ecosystem.config.js --update-env || true
+            fi
+
+            if pm2 describe "${PM2_APP_NAME}" >/dev/null 2>&1; then
+              pm2 reload "${PM2_APP_NAME}" --update-env
+            else
+              # Fallback if ecosystem.config.js isn't available.
+              pm2 start node_modules/next/dist/bin/next --name "${PM2_APP_NAME}" -- start -p 3000 -i 2
+            fi
+            pm2 save
+
+            echo "== [8] Health check + rollback =="
+            set +e
+            curl -fsS "${DOMAIN}/api/public/deploy-version" >/dev/null
+            HC1=$?
+            curl -fsS "${DOMAIN}/api/public/health" >/dev/null
+            HC2=$?
+            set -e
+            if [ "${HC1}" != "0" ] || [ "${HC2}" != "0" ]; then
+              echo "HEALTH_FAIL: rolling back"
+              if [ -n "${PREV_RELEASE}" ] && [ -d "${PREV_RELEASE}" ]; then
+                ln -sfn "${PREV_RELEASE}" "${CURRENT_LINK}"
+                cd "${CURRENT_LINK}"
+                pm2 reload "${PM2_APP_NAME}" --update-env || pm2 restart "${PM2_APP_NAME}" --update-env
+                pm2 save
+                echo "ROLLBACK_OK -> ${PREV_RELEASE}"
+              else
+                echo "NO_PREV_RELEASE_TO_ROLLBACK"
+              fi
+              exit 1
+            fi
+
+            echo "DEPLOY_OK current=${RELEASE_DIR}"
+

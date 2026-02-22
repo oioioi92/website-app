@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1200" y2="675" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#04050C"/>
+      <stop offset="1" stop-color="#101B35"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg3)"/>
+  <circle cx="970" cy="210" r="250" fill="#F2BE56" fill-opacity="0.2"/>
+  <circle cx="1040" cy="290" r="170" fill="#F2BE56" fill-opacity="0.14"/>
+  <rect x="55" y="55" width="1090" height="565" rx="26" fill="white" fill-opacity="0.02" stroke="#F2BE56" stroke-opacity="0.38" stroke-width="2"/>
+  <text x="112" y="228" fill="#F7D58F" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700">EXCLUSIVE EVENT</text>
+  <text x="112" y="312" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="74" font-weight="800">JACKPOT WEEK</text>
+  <text x="112" y="378" fill="#D9DEE8" font-family="Arial, Helvetica, sans-serif" font-size="30">Live game table and automated lucky draws</text>
+  <rect x="112" y="436" width="258" height="66" rx="33" fill="#F2BE56"/>
+  <text x="175" y="478" fill="#0A0A0A" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700">PLAY NOW</text>
+</svg>

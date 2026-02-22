@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="675" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#05070F"/>
+      <stop offset="1" stop-color="#311900"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg2)"/>
+  <path d="M0 675L540 120L760 260L1200 0V675H0Z" fill="#F6C15B" fill-opacity="0.18"/>
+  <path d="M1200 675L600 0H1200V675Z" fill="#F6C15B" fill-opacity="0.08"/>
+  <rect x="54" y="54" width="1092" height="567" rx="28" fill="white" fill-opacity="0.02" stroke="#F6C15B" stroke-opacity="0.4" stroke-width="2"/>
+  <text x="110" y="220" fill="#F8D58E" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700">LIMITED TIME</text>
+  <text x="110" y="305" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="800">WEEKEND CASHBACK</text>
+  <text x="110" y="372" fill="#E5E5E5" font-family="Arial, Helvetica, sans-serif" font-size="30">High return campaigns every Friday to Sunday</text>
+  <rect x="110" y="430" width="280" height="66" rx="33" fill="#F6C15B"/>
+  <text x="170" y="472" fill="#070707" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700">VIEW DETAILS</text>
+</svg>

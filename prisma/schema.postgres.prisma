@@ -1,0 +1,391 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         String    @default("admin")
+  // Phase 7: TOTP (2FA)
+  totpEnabled         Boolean   @default(false)
+  totpSecretEnc       String?
+  totpVerifiedAt      DateTime?
+  totpBackupCodesHash Json?
+  totpLastUsedStep    Int?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
+  audits       AuditLog[]
+  themesUpdated Theme[] @relation("ThemeUpdatedBy")
+  themeHistory  ThemeHistory[] @relation("ThemeHistoryUpdatedBy")
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  // Phase 7: TOTP gate status (stored server-side, not in cookies)
+  totpOk         Boolean   @default(false)
+  totpVerifiedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  actorId    String
+  action     String
+  entityType String
+  entityId   String
+  diffJson   Json
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  actor      AdminUser @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model Promotion {
+  id         String   @id @default(cuid())
+  title      String
+  subtitle   String?
+  coverUrl   String?
+  detailJson Json
+  percent    Decimal  @default(0) @db.Decimal(5,2)
+  startAt    DateTime?
+  endAt      DateTime?
+  isClaimable Boolean @default(true)
+  ruleJson   Json?
+  ctaLabel   String?
+  ctaUrl     String?
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  claims     PromotionClaim[]
+}
+
+model GameProvider {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  code      String?  // optional: for bulk upload match (e.g. MEGA888.png -> code MEGA888)
+  logoUrl   String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  providerTx ProviderTransaction[]
+  reconcileLines ReconcileLine[]
+  snapshots BalanceSnapshot[]
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  label     String
+  url       String
+  iconUrl   String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  valueJson Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Enterprise Theme Engine (Phase 1):
+// - Keep existing SiteSetting(theme_json) untouched
+// - Theme/ThemeHistory are additive for versioning + rollback
+model Theme {
+  id               String   @id @default(cuid())
+  key              String   @unique
+  themeJson        Json
+  version          Int      @default(1)
+  updatedByAdminId String
+  updatedBy        AdminUser @relation("ThemeUpdatedBy", fields: [updatedByAdminId], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  history          ThemeHistory[]
+
+  @@index([key])
+  @@index([updatedAt])
+}
+
+model ThemeHistory {
+  id               String   @id @default(cuid())
+  themeId          String
+  version          Int
+  themeJson        Json
+  updatedByAdminId String
+  updatedBy        AdminUser @relation("ThemeHistoryUpdatedBy", fields: [updatedByAdminId], references: [id])
+  createdAt        DateTime @default(now())
+  theme            Theme     @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  @@index([themeId, version])
+  @@index([createdAt])
+}
+
+model Member {
+  id          String   @id @default(cuid())
+  userRef     String   @unique
+  displayName String?
+  isActive    Boolean  @default(true)
+  mobile      String?
+  bankName    String?
+  bankAccount String?
+  referralCode String?
+  referrerId  String?
+  referrer    Member?  @relation("MemberReferrer", fields: [referrerId], references: [id])
+  referrals   Member[] @relation("MemberReferrer")
+  agentId     String?
+  lastLoginAt DateTime?
+  lastLoginIp String?
+  depositCount Int     @default(0)
+  withdrawCount Int    @default(0)
+  lastDepositAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  walletTx    WalletTransaction[]
+  providerTx  ProviderTransaction[]
+  promoClaims PromotionClaim[]
+  depositRequests DepositRequest[]
+  withdrawalRequests WithdrawalRequest[]
+
+  @@index([referrerId])
+  @@index([agentId])
+}
+
+model DepositRequest {
+  id                   String    @id @default(cuid())
+  txId                 String    @unique
+  memberId             String
+  member               Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  amount               Decimal   @db.Decimal(18,2)
+  channel              String
+  referenceNo          String?
+  status               String    @default("PENDING")
+  rejectReason         String?
+  burnReason           String?
+  remark               String?
+  createdAt            DateTime  @default(now())
+  firstViewedAt       DateTime?
+  assignedAt          DateTime?
+  firstActionAt       DateTime?
+  completedAt         DateTime?
+  processingDurationSec Int?
+  handlerId           String?
+
+  @@index([status, createdAt])
+  @@index([memberId, createdAt])
+  @@index([referenceNo])
+}
+
+model WithdrawalRequest {
+  id                   String    @id @default(cuid())
+  wdId                 String    @unique
+  memberId             String
+  member               Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  amount               Decimal   @db.Decimal(18,2)
+  walletSnapshot      Decimal?  @db.Decimal(18,2)
+  bankName             String?
+  bankAccount          String?
+  status               String    @default("PENDING")
+  rejectReason         String?
+  burnReason           String?
+  paymentReferenceNo   String?
+  assignedTo           String?
+  assignedAt           DateTime?
+  handlerId            String?
+  createdAt            DateTime  @default(now())
+  firstViewedAt       DateTime?
+  firstActionAt        DateTime?
+  completedAt          DateTime?
+  processingDurationSec Int?
+
+  @@index([status, createdAt])
+  @@index([memberId, createdAt])
+}
+
+model WalletTransaction {
+  id               String   @id @default(cuid())
+  memberId         String
+  member           Member   @relation(fields: [memberId], references: [id])
+  type             String
+  amountSigned     Decimal  @db.Decimal(18,2)
+  currency         String   @default("MYR")
+  channel          String?
+  status           String   @default("COMPLETED")
+  refNo            String?  @unique
+  note             String?
+  happenedAt       DateTime
+  createdByAdminId String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+}
+
+model ProviderTransaction {
+  id               String   @id @default(cuid())
+  providerId       String
+  provider         GameProvider @relation(fields: [providerId], references: [id])
+  memberId         String?
+  member           Member?  @relation(fields: [memberId], references: [id])
+  type             String
+  amountSigned     Decimal  @db.Decimal(18,2)
+  currency         String   @default("MYR")
+  refNo            String?
+  note             String?
+  happenedAt       DateTime
+  createdByAdminId String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+}
+
+model ReconcileSheet {
+  id              String   @id @default(cuid())
+  date            DateTime
+  status          String   @default("OPEN")
+  openedAt        DateTime?
+  closedAt        DateTime?
+  openedByAdminId String?
+  closedByAdminId String?
+  note            String?
+  lines           ReconcileLine[]
+  snapshots       BalanceSnapshot[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+}
+
+model BalanceSnapshot {
+  id               String   @id @default(cuid())
+  providerId       String
+  provider         GameProvider @relation(fields: [providerId], references: [id])
+  sheetId          String
+  sheet            ReconcileSheet @relation(fields: [sheetId], references: [id])
+  balance          Decimal  @db.Decimal(18,2)
+  takenAt          DateTime
+  createdByAdminId String
+  createdAt        DateTime @default(now())
+
+  @@unique([providerId, sheetId])
+  @@index([providerId, takenAt])
+}
+
+model ReconcileLine {
+  id                     String   @id @default(cuid())
+  sheetId                String
+  sheet                  ReconcileSheet @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  providerId             String
+  provider               GameProvider @relation(fields: [providerId], references: [id])
+
+  openingBalance         Decimal  @db.Decimal(18,2)
+  totalIn                Decimal  @db.Decimal(18,2)
+  totalOut               Decimal  @db.Decimal(18,2)
+  closingBalanceExpected Decimal  @db.Decimal(18,2)
+  closingBalanceActual   Decimal?
+  diff                   Decimal?
+  isMatched              Boolean  @default(false)
+
+  updatedAt              DateTime @updatedAt
+
+}
+
+model RiskRule {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  valueJson Json
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PromotionClaim {
+  id               String    @id @default(cuid())
+  promotionId      String
+  promotion        Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  memberId         String
+  member           Member    @relation(fields: [memberId], references: [id])
+  status           String    @default("APPROVED")
+  amountGranted    Decimal?  @db.Decimal(18,2)
+  metaJson         Json?
+  claimedAt        DateTime  @default(now())
+  createdByAdminId String?
+
+  @@index([promotionId, claimedAt])
+  @@index([memberId, claimedAt])
+}
+
+model PromotionClaimAttempt {
+  id          String   @id @default(cuid())
+  promotionId String
+  memberId    String?
+  ok          Boolean
+  reason      String?
+  ip          String?
+  userAgent   String?
+  happenedAt  DateTime @default(now())
+
+  @@index([promotionId, happenedAt])
+  @@index([memberId, happenedAt])
+  @@index([ok, reason, happenedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Ledger：统一账务（所有资金/分数变化进 Ledger，报表从同一套数据出）
+// ---------------------------------------------------------------------------
+
+model LedgerTx {
+  id          String   @id @default(cuid())
+  txId        String   @unique
+  txType      String
+  userId      String?
+  gameId      String?
+  provider    String?
+  channel     String?
+  externalRef String?
+  status      String   @default("PENDING")
+  remark      String?
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+  operatorId  String?
+  lines       LedgerLine[]
+
+  @@index([txType, createdAt])
+  @@index([userId, createdAt])
+  @@index([externalRef])
+  @@index([status, createdAt])
+}
+
+model LedgerLine {
+  id          String   @id @default(cuid())
+  ledgerTxId  String
+  tx          LedgerTx @relation(fields: [ledgerTxId], references: [id], onDelete: Cascade)
+  accountKey  String
+  amount      Decimal  @db.Decimal(18,2)
+  currency    String   @default("MYR")
+  createdAt   DateTime @default(now())
+
+  @@index([ledgerTxId])
+  @@index([accountKey, createdAt])
+}

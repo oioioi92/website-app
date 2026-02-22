@@ -1,0 +1,25 @@
+# CUSTOMER_UI_TASK_V3 — Bash 任务书（可直接复制给 Cursor/开发）
+
+Goal:
+  - Header center: Logo + Language switch
+  - Add top marquee (ticker)
+  - Main row: Sliding Promotion (big image) + optional middle image slot + Live Transaction (auto scroll, 6 visible rows)
+  - Move Login/Register (or Login/Sign out) BELOW Live Transaction, full width
+  - Add Balance + Deposit + Withdraw + Refresh (functional hooks / API placeholder ok)
+  - Deposit blue / Withdraw gold but configurable colors
+  - Buttons support image replacement via admin upload
+  - Live Transaction has subtle stripes + soft separators for tidy look
+
+Non-goals:
+  - Do NOT redo whole HomeCover; only update specified regions
+
+1) Header: Center logo + language switch; remove login/register/signout from header (move below liveTx).
+2) Marquee: TopMarquee.tsx; theme/siteConfig.marqueeMessages[]; scroll left, loop; prefers-reduced-motion: disable.
+3) Main row: Left = Promotion slider; Middle = ImageSlot (admin upload); Right = LiveTransactionPanel (auto scroll 6 rows); spacing/gap.
+4) Promotion slider: carousel; click => expand details (reuse detailJson); must NOT reset to first; data-testid="promotion-slide".
+5) Live Transaction: visible 6 rows; auto scroll vertical loop; soft separators + subtle stripes; tail4 + amount rules; hover pause; prefers-reduced-motion stop; data-testid="live-tx-item".
+6) Action bar BELOW liveTx (full width): Logged out = Login + Register; Logged in = Balance + Deposit + Withdraw + Refresh + Sign out; Deposit blue / Withdraw gold (configurable); each button imageUrl override; min/max deposit/withdraw text (admin config).
+7) Admin config: marqueeMessages[]; promoMiddleImageUrl; liveTxBgImageUrl; partnershipBadgeUrl; actionBar depositColor/withdrawColor, min/max, buttonImages; upload UI.
+8) Screenshots: home_top_marquee_promo_liveTx_desktop.png, home_actionbar_desktop.png; use testids.
+9) Verify: npm run build; RUN-SMOKE.sh --skip-seed; npm run screenshots:capture.
+10) Acceptance: UI_WEB_V3_OK: marquee=on header=centerLogo+lang promo=slider+expand liveTx=autoScroll6 stripes=on authMoved=belowTx actionBar=balance+deposit+withdraw+refresh colors=cfg buttonImages=cfg screenshots=ok
