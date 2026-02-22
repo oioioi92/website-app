@@ -24,17 +24,18 @@ function toDateInputValue(d: Date): string {
 }
 
 export function AdminDashboardSummary() {
-  const today = toDateInputValue(new Date());
-  const [dateFrom, setDateFrom] = useState(today);
-  const [dateTo, setDateTo] = useState(today);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
 
   function load() {
+    const from = dateFrom || toDateInputValue(new Date());
+    const to = dateTo || toDateInputValue(new Date());
     setLoading(true);
     const sp = new URLSearchParams();
-    sp.set("dateFrom", dateFrom);
-    sp.set("dateTo", dateTo);
+    sp.set("dateFrom", from);
+    sp.set("dateTo", to);
     fetch(`/api/admin/summary?${sp}`)
       .then((r) => r.json())
       .then((d) => setData(d))
@@ -43,7 +44,18 @@ export function AdminDashboardSummary() {
   }
 
   useEffect(() => {
-    load();
+    const today = toDateInputValue(new Date());
+    setDateFrom(today);
+    setDateTo(today);
+    setLoading(true);
+    const sp = new URLSearchParams();
+    sp.set("dateFrom", today);
+    sp.set("dateTo", today);
+    fetch(`/api/admin/summary?${sp}`)
+      .then((r) => r.json())
+      .then((d) => setData(d))
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
   }, []);
 
   const runSearch = () => load();
@@ -60,6 +72,7 @@ export function AdminDashboardSummary() {
           value={dateFrom}
           onChange={(e) => setDateFrom(e.target.value)}
           className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+          suppressHydrationWarning
         />
         <span className="text-sm text-slate-600">To</span>
         <input
@@ -67,6 +80,7 @@ export function AdminDashboardSummary() {
           value={dateTo}
           onChange={(e) => setDateTo(e.target.value)}
           className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+          suppressHydrationWarning
         />
         <button
           type="button"
