@@ -1,0 +1,84 @@
+:root{
+  --topbar-h: 48px;
+  --page-pad: 12px;
+
+  --sb-w: 236px;
+  --sb-bg: #1f2937;
+  --sb-border: rgba(255,255,255,.08);
+  --sb-item-h: 32px;
+  --sb-font: 13px;
+  --sb-group-font: 11px;
+  --sb-text: rgba(255,255,255,.86);
+  --sb-muted: rgba(255,255,255,.55);
+  --sb-hover: rgba(255,255,255,.06);
+  --sb-active: rgba(255,255,255,.10);
+
+  --control-h: 32px;
+  --font: 13px;
+
+  --table-font: 13px;
+  --cell-py: 6px;
+  --cell-px: 10px;
+  --border: rgba(15,23,42,.10);
+}
+
+.sidebar{
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-border);
+}
+.sidebar .group-title{
+  padding: 10px 12px 6px;
+  font-size: var(--sb-group-font);
+  letter-spacing: .08em;
+  color: var(--sb-muted);
+}
+.sidebar .nav-item{
+  height: var(--sb-item-h);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 0 12px;
+  color: var(--sb-text);
+  text-decoration:none;
+
+  /* MUST: single line */
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
+.sidebar .nav-item:hover{ background: var(--sb-hover); }
+.sidebar .nav-item.active{ background: var(--sb-active); }
+.sidebar .nav-item .label{
+  font-size: var(--sb-font);
+  line-height: 1;
+  overflow:hidden;
+  text-overflow: ellipsis;
+}
+
+input, select, button{
+  height: var(--control-h);
+  font-size: var(--font);
+}
+
+.table{
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--table-font);
+}
+.table th,.table td{
+  padding: var(--cell-py) var(--cell-px);
+  border-bottom: 1px solid var(--border);
+}
+.table thead th{
+  position: sticky;
+  top: 0;
+  background:#fff;
+  z-index:1;
+}
+.table tbody tr:nth-child(even){
+  background: rgba(15,23,42,.02);
+}
+.table td.num, .table th.num{
+  text-align:right;
+  font-variant-numeric: tabular-nums;
+}
