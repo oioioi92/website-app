@@ -789,7 +789,7 @@ a {
 }
 
 .marquee-scroll {
-  animation: marquee 14s linear infinite;
+  animation: marquee 25s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

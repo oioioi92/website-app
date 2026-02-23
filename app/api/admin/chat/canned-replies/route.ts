@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 
 function getChatServerBase(): string {
   return (
-    process.env.CHAT_SERVER_INTERNAL_URL?.replace(/\/$/, "") ??
-    process.env.NEXT_PUBLIC_CHAT_SERVER_URL?.replace(/\/$/, "") ??
+    process.env["CHAT_SERVER_INTERNAL_URL"]?.replace(/\/$/, "") ??
+    process.env["NEXT_PUBLIC_CHAT_SERVER_URL"]?.replace(/\/$/, "") ??
     ""
   );
 }

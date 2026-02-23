@@ -7,7 +7,7 @@ function base64UrlEncode(buf: Buffer): string {
 }
 
 export function signChatAdminJwt(payload: { sub: string; role?: string | null }, ttlSeconds = 900): string {
-  const secret = process.env.CHAT_ADMIN_JWT_SECRET;
+  const secret = process.env["CHAT_ADMIN_JWT_SECRET"];
   if (!secret) throw new Error("CHAT_ADMIN_JWT_SECRET not set");
 
   const header = { alg: ALG, typ: "JWT" };

@@ -16,7 +16,10 @@ export function AnnouncementMarquee({
       className="overflow-hidden border-b border-[color:var(--p44-green-dark)] bg-[color:var(--p44-bar-green)] lg:border-t"
       data-testid="announcement-marquee"
     >
-      <div className="marquee-scroll whitespace-nowrap px-4 py-2 text-[12px] font-semibold tracking-wide text-white">
+      <div
+        className="marquee-scroll inline-block whitespace-nowrap px-4 py-2 text-[12px] font-semibold tracking-wide text-white will-change-transform"
+        style={{ minWidth: "max-content" }}
+      >
         {displayText} {SEP} {displayText}
       </div>
     </div>

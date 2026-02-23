@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const FEATURES = [
   { icon: "👥", label: "DOWNLINE COMMISSION SYSTEM" },
@@ -11,6 +13,40 @@ const FEATURES = [
 ];
 
 export function LoginSplitClient() {
+  const router = useRouter();
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/public/member/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, password }),
+        credentials: "include"
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        router.push("/");
+        router.refresh();
+        return;
+      }
+      if (data.error === "INVALID_CREDENTIALS") setError("手机号或密码错误。");
+      else if (data.error === "ACCOUNT_DISABLED") setError("账号已停用。");
+      else if (data.error === "RATE_LIMITED") setError("请求过于频繁，请稍后再试。");
+      else setError("登录失败，请重试。");
+    } catch {
+      setError("网络错误，请重试。");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <main className="min-h-screen flex flex-col lg:flex-row bg-[color:var(--p44-grey-bg)]">
       <div className="flex-1 flex flex-col justify-center p-8 lg:p-12">
@@ -42,31 +78,39 @@ export function LoginSplitClient() {
       <div className="w-full lg:w-[420px] shrink-0 flex items-center justify-center p-8 bg-[color:var(--p44-grey-panel)]/30 border-t lg:border-t-0 lg:border-l border-[color:var(--p44-grey-light)]/20">
         <div className="w-full max-w-sm rounded-2xl border border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)] p-6 shadow-xl">
           <h1 className="text-xl font-extrabold text-[color:var(--p44-text-dark)]">SIGN IN</h1>
-          <form className="mt-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             <div>
               <label className="block text-xs font-semibold text-[color:var(--p44-text-dark)]/80">Mobile No *</label>
               <input
                 type="tel"
-                placeholder=""
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+60xxxxxxxxx"
                 className="mt-1 w-full rounded-lg border border-[color:var(--p44-grey-light)] bg-white px-3 py-2.5 text-sm text-[color:var(--p44-text-dark)] outline-none focus:border-[color:var(--p44-green)]"
+                required
               />
             </div>
             <div>
               <label className="block text-xs font-semibold text-[color:var(--p44-text-dark)]/80">Password</label>
               <input
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder=""
                 className="mt-1 w-full rounded-lg border border-[color:var(--p44-grey-light)] bg-white px-3 py-2.5 text-sm text-[color:var(--p44-text-dark)] outline-none focus:border-[color:var(--p44-green)]"
+                required
               />
               <p className="mt-1 text-right text-xs">
-                <a href="#" className="text-[color:var(--p44-text-dark)]/70 hover:underline">Forgot password?</a>
+                <Link href="#" className="text-[color:var(--p44-text-dark)]/70 hover:underline">Forgot password?</Link>
               </p>
             </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
             <button
               type="submit"
-              className="w-full rounded-lg bg-[color:var(--p44-text-dark)] py-3 text-sm font-bold text-white hover:opacity-90"
+              disabled={submitting}
+              className="w-full rounded-lg bg-[color:var(--p44-text-dark)] py-3 text-sm font-bold text-white hover:opacity-90 disabled:opacity-60"
             >
-              LOGIN
+              {submitting ? "登录中…" : "LOGIN"}
             </button>
           </form>
           <p className="mt-4 text-center text-sm text-[color:var(--p44-text-dark)]/80">
