@@ -1,4 +1,6 @@
-# Live Chat P0 Deploy (Ubuntu + Nginx + PM2 + HTTPS)
+# Live Chat P0 完整部署（Ubuntu + Nginx + PM2 + HTTPS）
+
+> **配套文档**：[LIVE-CHAT-上线检查.md](./LIVE-CHAT-上线检查.md) — 快速核对清单与故障对照；本文为完整部署步骤与 Nginx 示例。
 
 本项目的 P0 chat 由两部分组成：
 
@@ -9,9 +11,9 @@
 
 ### 主站 Next.js（现有 `.env`）
 
-- `CHAT_ADMIN_JWT_SECRET`：用于签发客服 WS JWT（15min）
-- `NEXT_PUBLIC_CHAT_SERVER_URL`：后台连接 chat-server 的 base url
-  - 若 Nginx 反代把 chat-server 挂到同域名，则可留空或写 `https://your-domain.com`
+- `CHAT_ADMIN_JWT_SECRET`：用于签发客服 WS JWT（15min），**必须与 chat-server 一致**
+- `CHAT_SERVER_INTERNAL_URL`：主站请求 chat-server 的内网地址，如 `http://127.0.0.1:4000`（未配置则后台会提示「Live Chat 服务未连接」）
+- `NEXT_PUBLIC_CHAT_SERVER_URL`：后台/前台连接 chat 的 base url；同域名反代时可留空或写 `https://your-domain.com`
 
 ### chat-server（`services/chat-server/.env`）
 

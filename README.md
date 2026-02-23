@@ -167,6 +167,8 @@ pm2 start npm --name website-phase2 -- start
 
 1) Nginx 反代到 `localhost:3000`
 
+**Live Chat 上线**：需单独部署 `services/chat-server` 并配置 Nginx 反代。详见 [docs/LIVE-CHAT-上线检查.md](docs/LIVE-CHAT-上线检查.md)。
+
 ## 5. 安全说明
 
 - 所有 Admin 写接口都要求 `x-csrf-token`

@@ -56,6 +56,8 @@ bash scripts/server-pull-and-deploy.sh
 
 配置好并重启后，后台 Live Chat 的黄色提示会消失，会话列表和收发消息才会正常。
 
+**完整检查清单与故障对照**：见 [LIVE-CHAT-上线检查.md](./LIVE-CHAT-上线检查.md)。
+
 ---
 
 ## 四、验证

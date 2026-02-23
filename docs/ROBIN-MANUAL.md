@@ -157,6 +157,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\dev-sqlite.ps1
 
 ### 截图位置占位：Sheet 详情 + 导出成功
 
+## 7.5) Live Chat 验收（可选）
+
+若已部署 chat-server 并配置主站 .env（`CHAT_SERVER_INTERNAL_URL`、`CHAT_ADMIN_JWT_SECRET`）：
+
+- 打开 `/admin/chat`，不应出现「Live Chat 服务未连接」；若有访客会话可选中并收发消息。
+- 前台首页点右下角 Live 气泡，应能连接并显示 Online。
+
+**上线检查与故障对照**：见 [LIVE-CHAT-上线检查.md](./LIVE-CHAT-上线检查.md)。
+
 ## 8) 自检与交接建议
 
 你要点哪里：
@@ -186,3 +195,4 @@ powershell -ExecutionPolicy Bypass -File .\scripts\dev-sqlite.ps1
 - [ ] 前台 Claim 可 Preview + Confirm
 - [ ] Promotion Stats 有数据
 - [ ] Sheets 可导出 Excel
+- [ ] （可选）Live Chat：`/admin/chat` 无「服务未连接」、前台气泡可连；详见 [LIVE-CHAT-上线检查.md](./LIVE-CHAT-上线检查.md)
