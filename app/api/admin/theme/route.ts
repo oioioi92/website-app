@@ -3,6 +3,7 @@ import { getAdminUserFromRequest } from "@/lib/auth";
 import { canEditSiteTheme } from "@/lib/rbac";
 import { getThemeJsonCached } from "@/lib/theme/themeCache";
 import { invalidateThemeCache } from "@/lib/theme/themeCache";
+import { invalidateHomeCache } from "@/lib/public-home-cache";
 import { parseThemeJson, sanitizeThemeJsonForWrite } from "@/lib/public/theme";
 import { db } from "@/lib/db";
 
@@ -69,6 +70,7 @@ export async function PUT(req: NextRequest) {
       });
     }
     await invalidateThemeCache();
+    invalidateHomeCache();
     return NextResponse.json({ ok: true });
   } catch (e) {
     try {
@@ -78,6 +80,7 @@ export async function PUT(req: NextRequest) {
         update: { valueJson: sanitized as object }
       });
       await invalidateThemeCache();
+      invalidateHomeCache();
       return NextResponse.json({ ok: true });
     } catch (fallbackErr) {
       return NextResponse.json({ error: "THEME_SAVE_FAIL" }, { status: 500 });

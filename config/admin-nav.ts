@@ -28,7 +28,7 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "OPS",
     defaultOpen: true,
     items: [
-      { key: "chat", label: "Live Chat", tooltip: "客服聊天队列", href: "/admin/live-chat" },
+      { key: "chat", label: "Live Chat", tooltip: "客服聊天队列", href: "/admin/chat" },
       { key: "pending-depo", label: "Pending Depo", tooltip: "待审核入款", href: "/admin/deposits/pending" },
       { key: "pending-with", label: "Pending With", tooltip: "待处理提款", href: "/admin/withdraws/pending" },
       { key: "transfer-queue", label: "Transfer Queue", tooltip: "转分排队/卡单", href: "/admin/transfers" },

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { io, type Socket } from "socket.io-client";
 import { usePathname } from "next/navigation";
 import { FallbackImage } from "@/components/FallbackImage";
@@ -159,17 +160,22 @@ export function LiveChatFab({
     setInput("");
   }
 
-  return (
-    <div className={`fixed right-3 z-50 ${isChatPage ? "bottom-[208px] lg:bottom-[156px]" : "bottom-[108px] lg:bottom-[34px]"}`}>
-      {open ? (
-        <section className="mb-2 w-[320px] max-w-[calc(100vw-24px)] overflow-hidden rounded-2xl border border-white/15 bg-[#080808]/95 shadow-[0_18px_44px_rgba(0,0,0,0.6)]">
-          <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
+  const fullScreenPanel = open ? (
+    <section
+      className="fixed inset-0 z-[9999] flex flex-col bg-[#080808] lg:!hidden"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        minHeight: "100dvh"
+      }}
+    >
+          <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2.5">
             <div className="text-sm font-extrabold text-[color:var(--rb-gold2)]">{panelTitle}</div>
-            <button type="button" onClick={() => setOpen(false)} className="rounded border border-white/20 px-2 py-1 text-xs text-white/80">
-              X
+            <button type="button" onClick={() => setOpen(false)} className="rounded border border-white/20 px-3 py-1.5 text-sm text-white/80">
+              ✕
             </button>
           </div>
-          <div className="h-[300px] space-y-2 overflow-auto px-3 py-2">
+          <div className="min-h-0 flex-1 space-y-2 overflow-auto px-3 py-2 lg:h-[300px] lg:flex-none">
             {msgs.length === 0 ? (
               <p className="text-xs text-white/60">{t.livechatwelcometext ?? "欢迎来到在线客服，请输入你的问题。"}</p>
             ) : (
@@ -184,7 +190,7 @@ export function LiveChatFab({
               ))
             )}
           </div>
-          <div className="border-t border-white/10 p-2">
+          <div className="shrink-0 border-t border-white/10 p-2">
             <div className="mb-2 flex items-center gap-2 text-[10px] text-white/50">
               <span>{status === "online" ? (t.livechatonlinetext ?? "Online") : status === "connecting" ? "Connecting..." : "Offline"}</span>
               {wa ? (
@@ -218,8 +224,56 @@ export function LiveChatFab({
             </div>
           </div>
         </section>
-      ) : null}
-      <div className="mb-2 flex flex-col items-end gap-2">
+  ) : null;
+
+  return (
+    <>
+      {typeof document !== "undefined" && fullScreenPanel ? createPortal(fullScreenPanel, document.body) : null}
+      <div className={`fixed right-3 z-50 ${isChatPage ? "bottom-[208px] lg:bottom-[156px]" : "bottom-[108px] lg:bottom-[34px]"}`}>
+        {open ? (
+          <section
+            className="hidden flex-1 flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#080808]/98 shadow-[0_18px_44px_rgba(0,0,0,0.6)] lg:flex lg:mb-2 lg:w-[320px] lg:max-w-[calc(100vw-24px)]"
+            aria-hidden
+          >
+            <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2.5">
+              <div className="text-sm font-extrabold text-[color:var(--rb-gold2)]">{panelTitle}</div>
+              <button type="button" onClick={() => setOpen(false)} className="rounded border border-white/20 px-3 py-1.5 text-sm text-white/80">✕</button>
+            </div>
+            <div className="min-h-0 flex-1 space-y-2 overflow-auto px-3 py-2 lg:h-[300px] lg:flex-none">
+              {msgs.length === 0 ? (
+                <p className="text-xs text-white/60">{t.livechatwelcometext ?? "欢迎来到在线客服，请输入你的问题。"}</p>
+              ) : (
+                msgs.map((m) => (
+                  <div key={m.id} className="rounded-xl border border-white/10 bg-black/30 px-2 py-1.5">
+                    <div className="mb-0.5 flex items-center justify-between text-[10px] text-white/50">
+                      <span>{m.sender}</span>
+                      <span>{m.at}</span>
+                    </div>
+                    <p className="whitespace-pre-wrap text-xs text-white/90">{m.body}</p>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="shrink-0 border-t border-white/10 p-2">
+              <div className="mb-2 flex items-center gap-2 text-[10px] text-white/50">
+                <span>{status === "online" ? (t.livechatonlinetext ?? "Online") : status === "connecting" ? "Connecting..." : "Offline"}</span>
+                {wa ? <a href={wa} target="_blank" rel="noopener noreferrer" className="rounded border border-[color:var(--front-success)]/30 px-1.5 py-0.5 text-[color:var(--front-success-light)]">{waLabel}</a> : null}
+                {tg ? <a href={tg} target="_blank" rel="noopener noreferrer" className="rounded border border-sky-400/30 px-1.5 py-0.5 text-sky-200">{tgLabel}</a> : null}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") sendMsg(); }}
+                  placeholder={placeholder}
+                  className="min-w-0 flex-1 rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-xs text-white outline-none"
+                />
+                <button type="button" onClick={sendMsg} className="rounded-xl border border-[color:var(--front-success)]/35 bg-[color:var(--front-success)]/15 px-3 py-2 text-xs font-bold text-[color:var(--front-success-light)]">{sendText}</button>
+              </div>
+            </div>
+          </section>
+        ) : null}
+        <div className="mb-2 flex flex-col items-end gap-2">
         {wa ? (
           <a
             href={wa}
@@ -263,18 +317,13 @@ export function LiveChatFab({
       </button>
       <style jsx>{`
         @keyframes liveFabFloat {
-          0% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-6px);
-          }
-          100% {
-            transform: translateY(0px);
-          }
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+          100% { transform: translateY(0px); }
         }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
 

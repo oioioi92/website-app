@@ -256,9 +256,16 @@ export function EmbeddedChatClient({
       : "Error";
 
   return (
-    <main className="px-4 py-5">
-      <section className="mx-auto max-w-[980px] overflow-hidden rounded-2xl border border-white/15 bg-[#080808]/90 text-white antialiased">
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+    <main
+      className="fixed inset-0 z-[100] flex flex-col bg-[#080808] md:static md:z-auto md:block md:px-4 md:py-5"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        minHeight: "100dvh"
+      }}
+    >
+      <section className="mx-auto flex min-h-0 max-w-[980px] flex-1 flex-col overflow-hidden rounded-none border-0 bg-transparent text-white antialiased md:rounded-2xl md:border md:border-white/15 md:bg-[#080808]/90">
+        <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
           <h1 className="text-[20px] font-extrabold tracking-tight text-[color:var(--rb-gold2)] sm:text-[22px]">{title}</h1>
           <span className="rounded border border-white/20 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-white/75">{statusText}</span>
         </div>
@@ -329,7 +336,7 @@ export function EmbeddedChatClient({
           </div>
         ) : null}
 
-        <div ref={listRef} className="h-[56vh] min-h-[340px] space-y-2 overflow-auto px-4 py-3">
+        <div ref={listRef} className="min-h-0 flex-1 space-y-2 overflow-auto px-4 py-3 md:h-[56vh] md:min-h-[340px] md:flex-none">
           {msgs.map((m) => (
             <div key={m.id} className="rounded-xl border border-white/10 bg-black/30 px-3 py-2.5">
               <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium text-white/55">
@@ -345,7 +352,7 @@ export function EmbeddedChatClient({
           ))}
         </div>
 
-        <div className="border-t border-white/10 p-3">
+        <div className="shrink-0 border-t border-white/10 p-3">
           <div className="flex gap-2">
             <input
               value={input}

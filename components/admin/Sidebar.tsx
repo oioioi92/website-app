@@ -52,7 +52,16 @@ export function Sidebar({ collapsed }: SidebarProps) {
           ))}
         </nav>
 
-        <div className="admin-sidebar-footer border-t border-white/10 p-3 flex-shrink-0">
+        <div className="admin-sidebar-footer border-t border-white/10 p-3 flex-shrink-0 space-y-2">
+          <a
+            href={process.env.NEXT_PUBLIC_FRONTEND_URL ?? "/"}
+            target="_blank"
+            rel="noreferrer"
+            className="block w-full rounded-md border border-white/20 bg-white/5 px-3 py-2 text-center text-xs font-medium text-white/90 hover:bg-white/10"
+            title="在新标签页打开前台站点"
+          >
+            打开前台
+          </a>
           <AdminLogoutButton />
         </div>
       </div>

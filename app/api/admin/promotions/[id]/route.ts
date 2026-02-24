@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { invalidateHomeCache } from "@/lib/public-home-cache";
 
 export const dynamic = "force-dynamic";
 
@@ -88,5 +89,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
       ...(body.sortOrder !== undefined && { sortOrder: Number(body.sortOrder) || 0 })
     }
   });
+  invalidateHomeCache();
   return NextResponse.json({ ok: true });
 }

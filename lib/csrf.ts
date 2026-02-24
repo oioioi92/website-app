@@ -4,9 +4,12 @@ import { hmac, randomToken } from "@/lib/crypto";
 export const CSRF_COOKIE = "admin_csrf";
 
 function getCsrfSecret(): string {
-  const secret = process.env.CSRF_SECRET;
-  if (!secret) throw new Error("CSRF_SECRET is required");
-  return secret;
+  const secret = process.env.CSRF_SECRET?.trim();
+  if (secret) return secret;
+  if (process.env.NODE_ENV !== "production") {
+    return "dev-csrf-secret-change-in-production";
+  }
+  throw new Error("CSRF_SECRET is required");
 }
 
 export function generateCsrfToken(): string {

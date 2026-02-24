@@ -17,8 +17,8 @@ export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
 
-  const baseUrl = process.env.CHAT_SERVER_INTERNAL_URL ?? process.env.CHAT_SERVER_QUEUE_URL ?? "";
-  const secret = process.env.CHAT_INTERNAL_SECRET ?? "";
+  const baseUrl = process.env["CHAT_SERVER_INTERNAL_URL"] ?? process.env["CHAT_SERVER_QUEUE_URL"] ?? "";
+  const secret = process.env["CHAT_INTERNAL_SECRET"] ?? "";
 
   if (!baseUrl) {
     return NextResponse.json({

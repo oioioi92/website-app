@@ -4,8 +4,11 @@
 
 | 文档 | 说明 |
 |------|------|
+| [产品说明书-Live-Chat与用户注册登入.md](./产品说明书-Live-Chat与用户注册登入.md) | **说明书**：Live Chat 连接不上排查 + 用户注册/登入全流程 |
 | [ROBIN-MANUAL.md](./ROBIN-MANUAL.md) | Robin 操作手册（5 分钟验收流程） |
+| [Live-Chat-上线-admin1167.md](./Live-Chat-上线-admin1167.md) | **Live Chat** 真正上到 admin1167.com / admin1167.net（非 localhost） |
 | [LIVE-CHAT-上线检查.md](./LIVE-CHAT-上线检查.md) | **Live Chat** 上线检查、环境变量、Nginx 反代与故障对照 |
+| [LIVE-CHAT-试看使用.md](./LIVE-CHAT-试看使用.md) | **Live Chat** 本地试看（前台气泡 + 后台客服，双终端步骤） |
 | [CHAT-P0-DEPLOY.md](./CHAT-P0-DEPLOY.md) | Live Chat P0 完整部署（Ubuntu + Nginx + PM2） |
 | [deploy-更新上线.md](./deploy-更新上线.md) | 更新后部署到网站（拉代码、构建、重启、Live Chat 前提） |
 | [运行命令-前台后台.md](./运行命令-前台后台.md) | 每次运行前台/后台的启动命令 |

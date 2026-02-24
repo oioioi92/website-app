@@ -167,7 +167,7 @@ pm2 start npm --name website-phase2 -- start
 
 1) Nginx 反代到 `localhost:3000`
 
-**Live Chat 上线**：需单独部署 `services/chat-server` 并配置 Nginx 反代。详见 [docs/LIVE-CHAT-上线检查.md](docs/LIVE-CHAT-上线检查.md)。
+**Live Chat 要能用**：主站 + chat-server 都跑起来、两边 .env 配好、线上需 Nginx 反代。一键本地：`powershell -ExecutionPolicy Bypass -File .\scripts\dev-with-chat.ps1`。清单与上线： [docs/Live-Chat-做好清单.md](docs/Live-Chat-做好清单.md)、[docs/LIVE-CHAT-上线检查.md](docs/LIVE-CHAT-上线检查.md)。
 
 ## 5. 安全说明
 

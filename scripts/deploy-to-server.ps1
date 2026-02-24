@@ -5,8 +5,8 @@
 $sshHost = "root@68.183.227.172"
 $remotePath = "/root/website"
 
-$folders = @("app", "components", "lib", "public", "scripts", "prisma", "docs")
-$files = @("package.json", "package-lock.json", "next.config.ts", "next.config.mjs", "tailwind.config.ts", "tsconfig.json", "postcss.config.mjs", "postcss.config.js")
+$folders = @("app", "components", "lib", "public", "scripts", "prisma", "docs", "services")
+$files = @("package.json", "package-lock.json", "next.config.ts", "next.config.mjs", "tailwind.config.ts", "tsconfig.json", "postcss.config.mjs", "postcss.config.js", "middleware.ts", "proxy.ts")
 
 Write-Host "Uploading folders..." -ForegroundColor Cyan
 foreach ($f in $folders) {

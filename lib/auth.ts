@@ -7,9 +7,12 @@ export const SESSION_COOKIE = "admin_session";
 const SESSION_TTL_DAYS = 30;
 
 function getSessionSecret(): string {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret) throw new Error("SESSION_SECRET is required");
-  return secret;
+  const secret = process.env.SESSION_SECRET?.trim();
+  if (secret) return secret;
+  if (process.env.NODE_ENV !== "production") {
+    return "dev-session-secret-change-in-production";
+  }
+  throw new Error("SESSION_SECRET is required");
 }
 
 export async function createSession(userId: string, opts?: { totpOk?: boolean }) {

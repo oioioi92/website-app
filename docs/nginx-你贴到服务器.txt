@@ -1,0 +1,41 @@
+# 用法：在服务器 SSH 里执行 nano /etc/nginx/sites-available/admin1167.conf
+# 找到「listen 443 ssl」的 server { 里面，在 location / 的上面一行，粘贴下面「仅粘贴下面」整段。
+# admin1167.com 的 server 贴一次，admin1167.net 的 server 再贴一次。
+# -------- 仅粘贴下面 --------
+    # ----- Live Chat 反代到 chat-server 4000 -----
+    location /chat/ {
+      proxy_pass http://127.0.0.1:4000;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    location /ws-visitor/ {
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_pass http://127.0.0.1:4000;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_read_timeout 3600s;
+      proxy_send_timeout 3600s;
+      proxy_buffering off;
+      proxy_redirect off;
+    }
+    location /ws-admin/ {
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_pass http://127.0.0.1:4000;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_read_timeout 3600s;
+      proxy_send_timeout 3600s;
+      proxy_buffering off;
+      proxy_redirect off;
+    }
+# -------- 粘贴结束 --------

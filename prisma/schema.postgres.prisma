@@ -144,25 +144,27 @@ model ThemeHistory {
 }
 
 model Member {
-  id          String   @id @default(cuid())
-  userRef     String   @unique
-  displayName String?
-  isActive    Boolean  @default(true)
-  mobile      String?
-  bankName    String?
-  bankAccount String?
-  referralCode String?
-  referrerId  String?
-  referrer    Member?  @relation("MemberReferrer", fields: [referrerId], references: [id])
-  referrals   Member[] @relation("MemberReferrer")
-  agentId     String?
-  lastLoginAt DateTime?
-  lastLoginIp String?
-  depositCount Int     @default(0)
-  withdrawCount Int    @default(0)
-  lastDepositAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String    @id @default(cuid())
+  userRef          String    @unique
+  displayName      String?
+  isActive         Boolean   @default(true)
+  passwordHash     String?
+  mustChangePassword Boolean @default(false)
+  mobile           String?
+  bankName         String?
+  bankAccount      String?
+  referralCode     String?
+  referrerId       String?
+  referrer         Member?   @relation("MemberReferrer", fields: [referrerId], references: [id])
+  referrals        Member[]  @relation("MemberReferrer")
+  agentId          String?
+  lastLoginAt      DateTime?
+  lastLoginIp      String?
+  depositCount     Int       @default(0)
+  withdrawCount    Int       @default(0)
+  lastDepositAt    DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   walletTx    WalletTransaction[]
   providerTx  ProviderTransaction[]

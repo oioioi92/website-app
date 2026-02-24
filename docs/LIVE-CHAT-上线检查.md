@@ -128,7 +128,7 @@ location /ws-admin/ {
 2. **后台**：打开 `https://你的域名/admin/chat`：
    - 提示「CHAT_SERVER_INTERNAL_URL or CHAT_SERVER_QUEUE_URL not configured」→ 主站 .env 未配 `CHAT_SERVER_INTERNAL_URL`。
    - 提示「chat-server returned 5xx」→ 检查 chat-server 是否运行、`CHAT_SERVER_INTERNAL_URL` 是否指向正确（如 `http://127.0.0.1:4000`）。
-3. **同机**：`curl -s http://127.0.0.1:4000/chat/api/health` 应返回 200。
+3. **同机**：`curl -s http://127.0.0.1:4000/chat/health` 应返回 200。
 
 ---
 

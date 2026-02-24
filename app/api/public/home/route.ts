@@ -6,7 +6,7 @@ import { getPublicTheme } from "@/lib/theme/getPublicTheme";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/net/clientIp";
 
-const TTL_SECONDS = 45;
+const TTL_SECONDS = 20;
 
 export async function GET(req: NextRequest) {
   const rpm = Number(process.env.RATE_LIMIT_RPM ?? "120");

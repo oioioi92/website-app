@@ -13,9 +13,6 @@ const sessionSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  const gate = ensureInternalTestMode();
-  if (gate) return gate;
-
   const userRef = req.cookies.get(SESSION_COOKIE)?.value;
   if (!userRef) return NextResponse.json({ member: null });
 
