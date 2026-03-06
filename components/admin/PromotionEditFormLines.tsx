@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import { sanitizePromoHtml } from "@/lib/public/sanitizePromoHtml";
 import { PromoTableBuilder, parsePromoTableData, emptyPromoTableData, type PromoTableData } from "@/components/admin/PromoTableBuilder";
 import { NOT_ALLOWED_TO_OPTIONS } from "@/config/promotion-options";
@@ -219,6 +220,7 @@ export function PromotionEditFormLines({
   message: string | null;
   error: string | null;
 }) {
+  const { t } = useLocale();
   const [gameProviders, setGameProviders] = useState<GameProviderRow[]>([]);
   useEffect(() => {
     fetch("/api/admin/game-providers", { credentials: "include" })
@@ -270,9 +272,9 @@ export function PromotionEditFormLines({
     <div className="promo-admin-edit">
       <div className="flex flex-wrap items-center gap-3 pb-4 border-b border-[var(--admin-border)]">
         <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary">
-          {saving ? (isCreate ? "创建中…" : "保存中…") : isCreate ? "创建" : "保存"}
+          {saving ? (isCreate ? (t("admin.common.creating") ?? "创建中…") : (t("admin.common.saving") ?? "保存中…")) : isCreate ? (t("admin.common.create") ?? "创建") : (t("admin.common.save") ?? "保存")}
         </button>
-        <Link href="/admin/promotions" className="admin-compact-btn admin-compact-btn-ghost text-[13px]">{isCreate ? "取消" : "返回列表"}</Link>
+        <Link href="/admin/promotions" className="admin-compact-btn admin-compact-btn-ghost text-[13px]">{isCreate ? (t("admin.common.cancel") ?? "取消") : (t("admin.promotionsList.backToList") ?? "返回列表")}</Link>
         {message && <span className="promo-admin-toast success">{message}</span>}
         {error && <span className="promo-admin-toast error">{error}</span>}
       </div>

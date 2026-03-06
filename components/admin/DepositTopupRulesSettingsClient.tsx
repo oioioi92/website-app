@@ -68,20 +68,6 @@ export function DepositTopupRulesSettingsClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary">
-          {saving ? t("admin.settingsBank.saving") : t("admin.settingsBank.save")}
-        </button>
-        {messageKey && (
-          <span
-            className={`text-[13px] ${
-              messageKey === "saveError" || messageKey === "loadError" ? "text-[var(--compact-danger)]" : "text-[var(--compact-success)]"
-            }`}
-          >
-            {messageKey === "saveSuccess" ? t("admin.settingsBank.saveSuccess") : t(`admin.settingsBank.${messageKey}`)}
-          </span>
-        )}
-      </div>
       <div className="admin-card p-6 space-y-4">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">
           Deposit / Topup Rules

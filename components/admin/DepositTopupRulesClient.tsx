@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale } from "@/lib/i18n/context";
 import { useAdminApiContext } from "@/lib/admin-api-context";
 
 const inputClass =
@@ -10,6 +11,7 @@ const labelClass = "mb-1 block text-xs font-medium text-[var(--compact-muted)]";
 type Form = { enabled: boolean; maxBalanceForTopup: string };
 
 export function DepositTopupRulesClient() {
+  const { t } = useLocale();
   const { setForbidden } = useAdminApiContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -62,16 +64,16 @@ export function DepositTopupRulesClient() {
       .finally(() => setSaving(false));
   }
 
-  if (loading) return <div className="text-[13px] text-[var(--compact-muted)]">加载中…</div>;
+  if (loading) return <div className="text-[13px] text-[var(--compact-muted)]">{t("admin.common.loading") ?? "加载中…"}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary">
-          {saving ? "保存中…" : "保存"}
+          {saving ? (t("admin.common.saving") ?? "保存中…") : (t("admin.common.save") ?? "保存")}
         </button>
-        {message === "saved" && <span className="text-[13px] text-green-600">已保存</span>}
-        {message === "error" && <span className="text-[13px] text-[var(--compact-danger)]">加载或保存失败</span>}
+        {message === "saved" && <span className="text-[13px] text-green-600">{t("admin.site.saved") ?? "已保存"}</span>}
+        {message === "error" && <span className="text-[13px] text-[var(--compact-danger)]">{t("admin.common.saveError") ?? "加载或保存失败"}</span>}
       </div>
       <div className="admin-card max-w-xl p-6 space-y-4">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">

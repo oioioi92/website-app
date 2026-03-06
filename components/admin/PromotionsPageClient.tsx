@@ -63,6 +63,7 @@ function getClaimLimit(r: RuleJson | null): string {
 }
 
 export function PromotionsPageClient() {
+  const { t } = useLocale();
   const { setForbidden } = useAdminApiContext();
   const [data, setData] = useState<Response | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,7 +85,7 @@ export function PromotionsPageClient() {
       if (!res.ok) throw new Error("reorder failed");
       load();
     } catch {
-      setError("排序请求失败");
+      setError(t("admin.promotionsList.reorderFailed") ?? "排序请求失败");
     } finally {
       setMovingId(null);
     }
@@ -162,7 +163,7 @@ export function PromotionsPageClient() {
           disabled={loading}
           className="admin-compact-btn admin-compact-btn-ghost text-[13px]"
         >
-          {loading ? "加载中…" : "刷新"}
+          {loading ? (t("admin.promotionsList.loading") ?? "加载中…") : (t("admin.promotionsList.refresh") ?? "刷新")}
         </button>
         {data && (
           <span className="text-[12px] text-[var(--admin-muted)]">
@@ -178,11 +179,11 @@ export function PromotionsPageClient() {
             {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} 条</span>}
           </div>
           {loading ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">加载中…</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.loading") ?? "加载中…"}</div>
           ) : error ? (
             <div className="py-16 text-center text-[13px] text-[var(--admin-danger)]">{error}</div>
           ) : items.length === 0 ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">暂无优惠活动</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions") ?? "暂无优惠活动"}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="admin-table">
@@ -254,11 +255,11 @@ export function PromotionsPageClient() {
             {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} 条</span>}
           </div>
           {loading ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">加载中…</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.loading") ?? "加载中…"}</div>
           ) : error ? (
             <div className="py-16 text-center text-[13px] text-[var(--admin-danger)]">{error}</div>
           ) : items.length === 0 ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">暂无优惠活动</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions") ?? "暂无优惠活动"}</div>
           ) : (
             <div className="overflow-x-auto">
               {groups.map((groupKey) => {

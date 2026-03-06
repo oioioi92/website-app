@@ -74,7 +74,7 @@ export function SecurityPageClient() {
           Whitelist IP addresses that are allowed to access your backend system. Leave empty if you do not want to restrict any IP address.
         </p>
         {loading ? (
-          <p className="text-sm text-slate-500">Loading…</p>
+          <p className="text-sm text-slate-500">{t("admin.common.loading") ?? "Loading…"}</p>
         ) : (
           <>
             <textarea
@@ -91,10 +91,10 @@ export function SecurityPageClient() {
                 disabled={saving}
                 className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
               >
-                {saving ? "..." : "SAVE"}
+                {saving ? (t("admin.common.saving") ?? "...") : (t("admin.common.save") ?? "Save")}
               </button>
-              {saveMsg === "success" && <span className="text-sm text-emerald-600">Saved.</span>}
-              {saveMsg === "error" && <span className="text-sm text-red-600">Save failed.</span>}
+              {saveMsg === "success" && <span className="text-sm text-emerald-600">{t("admin.site.saved") ?? "Saved."}</span>}
+              {saveMsg === "error" && <span className="text-sm text-red-600">{t("admin.common.saveError") ?? "Save failed."}</span>}
             </div>
           </>
         )}
