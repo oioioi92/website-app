@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { WhatsAppStatusBadge } from "@/components/admin/WhatsAppStatusBadge";
 import { useLocale } from "@/lib/i18n/context";
 
@@ -15,42 +15,24 @@ const BANK_ITEMS_KEYS = [
 ] as const;
 
 export function AdminTopbarMenus() {
-  const router = useRouter();
   const pathname = usePathname();
   const { t } = useLocale();
   const [bankOpen, setBankOpen] = useState(false);
-  const [adminOpen, setAdminOpen] = useState(false);
-  const [user, setUser] = useState<{ email: string; role: string } | null>(null);
   const bankRef = useRef<HTMLDivElement>(null);
-  const adminRef = useRef<HTMLDivElement>(null);
   const isChatPage = pathname?.startsWith("/admin/chat") ?? false;
 
   useEffect(() => {
-    fetch("/api/admin/me", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => setUser(d.user ?? null))
-      .catch(() => setUser(null));
-  }, []);
-
-  useEffect(() => {
     function closeAll(e: MouseEvent) {
-      const t = e.target as Node;
-      if (bankRef.current && !bankRef.current.contains(t)) setBankOpen(false);
-      if (adminRef.current && !adminRef.current.contains(t)) setAdminOpen(false);
+      const target = e.target as Node;
+      if (bankRef.current && !bankRef.current.contains(target)) setBankOpen(false);
     }
     document.addEventListener("click", closeAll);
     return () => document.removeEventListener("click", closeAll);
   }, []);
 
-  async function logout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.replace("/admin/login");
-    router.refresh();
-  }
-
   return (
     <div className="admin-topbar-menus flex items-center gap-2 text-[var(--compact-muted)]">
-      <WhatsAppStatusBadge />
+      <span className="admin-topbar-hide-on-mobile"><WhatsAppStatusBadge /></span>
       {isChatPage && (
         <>
           <Link
@@ -67,7 +49,7 @@ export function AdminTopbarMenus() {
           </Link>
         </>
       )}
-      <div className="relative" ref={bankRef}>
+      <div className="relative admin-topbar-hide-on-mobile" ref={bankRef}>
         <button
           type="button"
           onClick={() => setBankOpen((v) => !v)}
@@ -92,46 +74,6 @@ export function AdminTopbarMenus() {
                 {t(`admin.topbar.${item.key}`)}
               </Link>
             ))}
-          </div>
-        )}
-      </div>
-      <div className="relative" ref={adminRef}>
-        <button
-          type="button"
-          onClick={() => setAdminOpen((v) => !v)}
-          className="flex items-center gap-1.5 rounded px-2.5 py-1.5 font-semibold text-[var(--compact-text)] hover:bg-black/5"
-          title={user?.email ?? t("admin.admin")}
-        >
-          <span className="text-[14px]">👤</span>
-          <span>{t("admin.admin")}</span>
-          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        {adminOpen && (
-          <div className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-lg border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] py-1 shadow-lg">
-            {user && (
-              <div className="border-b border-[var(--compact-card-border)] px-4 py-2 text-[12px] text-[var(--compact-muted)]">
-                {user.email}
-              </div>
-            )}
-            <Link
-              href="/admin/settings/profile"
-              onClick={() => setAdminOpen(false)}
-              className="block px-4 py-2 text-[13px] text-[var(--compact-text)] hover:bg-[var(--compact-sb-hover)]"
-            >
-              {t("admin.personalSettings")}
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                setAdminOpen(false);
-                void logout();
-              }}
-              className="w-full px-4 py-2 text-left text-[13px] text-[var(--compact-danger)] hover:bg-red-50"
-            >
-              {t("admin.logout")}
-            </button>
           </div>
         )}
       </div>
