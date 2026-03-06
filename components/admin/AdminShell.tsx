@@ -8,6 +8,7 @@ import { AdminTopbarMenus } from "@/components/admin/AdminTopbarMenus";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useLocale } from "@/lib/i18n/context";
 import { AdminUserProvider } from "@/lib/admin-user-context";
+import { AdminApiProvider, AdminForbiddenBanner } from "@/lib/admin-api-context";
 
 type AdminUser = { id: string; email: string; role: string };
 
@@ -16,7 +17,9 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
   const [collapsed, setCollapsed] = useState(true);
   return (
     <AdminUserProvider user={user}>
+    <AdminApiProvider>
     <div className={`admin-shell ${collapsed ? "admin-shell--collapsed" : ""}`} data-admin-theme="light">
+      <AdminForbiddenBanner />
       <div
         className="admin-sidebar-backdrop"
         role="button"
@@ -49,6 +52,7 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
       </header>
       <main className="admin-page">{children}</main>
     </div>
+    </AdminApiProvider>
     </AdminUserProvider>
   );
 }

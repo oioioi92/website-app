@@ -1,10 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canApproveDeposit } from "@/lib/rbac";
 import { db } from "@/lib/db";
 import type { ReportApiResponse, ReportColumn } from "@/lib/backoffice/report-api-types";
 
+/** 敏感报表（流水/对账等）需 approve 权限，viewer 仅可查非敏感报表 */
+const SENSITIVE_REPORT_KEYS = new Set([
+  "all-transactions",
+  "ledger-transactions",
+  "hourly-sales",
+  "reconciliation",
+  "gateway-search",
+]);
+
 export const dynamic = "force-dynamic";
+
+/** Escape CSV field (quote if contains comma, newline, or double quote) */
+function csvEscape(val: unknown): string {
+  const s = val == null ? "" : String(val);
+  if (/[,"\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function toCsv(body: ReportApiResponse): string {
+  const cols = body.columns as ReportColumn[];
+  const header = cols.map((c) => csvEscape(c.label)).join(",");
+  const rows = body.rows.map((row) => cols.map((c) => csvEscape(row[c.key])).join(","));
+  return [header, ...rows].join("\r\n");
+}
 
 const ALL_TRANSACTIONS_COLUMNS: ReportColumn[] = [
   { key: "created_at", label: "Time/Date", align: "left" },
@@ -251,8 +275,12 @@ const WINLOSS_BY_GAME_COLUMNS: ReportColumn[] = [
   { key: "bet_count", label: "Bet Count", align: "right" }
 ];
 
-async function getWinlossByGame(_sp: URLSearchParams): Promise<ReportApiResponse> {
-  // ReportDailyGameWinloss 在 SQLite schema 中未定义，先返回空数据
+async function getWinlossByGame(sp: URLSearchParams): Promise<ReportApiResponse> {
+  const from = sp.get("from") ?? sp.get("dateFrom");
+  const to = sp.get("to") ?? sp.get("dateTo");
+  const provider = sp.get("provider")?.trim();
+  const gameCode = sp.get("gameCode")?.trim();
+  // ReportDailyGameWinloss 在 SQLite schema 中未定义，先返回空数据；接入聚合表后可按 from/to/provider/gameCode 查询
   return {
     report: "winloss_by_game",
     columns: WINLOSS_BY_GAME_COLUMNS,
@@ -312,6 +340,10 @@ export async function GET(
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
 
   const { reportKey } = await params;
+  if (SENSITIVE_REPORT_KEYS.has(reportKey) && !canApproveDeposit(user)) {
+    return NextResponse.json({ error: "FORBIDDEN", message: "Insufficient permission for this report" }, { status: 403 });
+  }
+
   const sp = req.nextUrl.searchParams;
 
   if (reportKey === "all-transactions") {

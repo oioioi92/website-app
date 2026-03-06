@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 import type { BankItem } from "@/app/api/admin/settings/bank/route";
 
 const inputClass =
@@ -21,6 +22,7 @@ const emptyItem = (): BankItem => ({
 
 export function BankSettingsClient() {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [messageKey, setMessageKey] = useState<"loadError" | "saveError" | "saveSuccess" | null>(null);
@@ -30,11 +32,14 @@ export function BankSettingsClient() {
     setLoading(true);
     setMessageKey(null);
     fetch("/api/admin/settings/bank", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("loadError"))))
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.ok ? r.json() : Promise.reject(new Error("loadError"));
+      })
       .then((data: { items?: BankItem[] }) => setItems(Array.isArray(data.items) ? data.items : []))
       .catch(() => setMessageKey("loadError"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setForbidden]);
 
   useEffect(() => {
     load();

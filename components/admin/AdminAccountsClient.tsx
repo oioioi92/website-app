@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 
 type AdminItem = { id: string; email: string; role: string; createdAt: string };
 
@@ -17,6 +18,7 @@ const labelClass = "mb-1 block text-xs font-medium text-[var(--compact-muted)]";
 
 export function AdminAccountsClient() {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [items, setItems] = useState<AdminItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,14 +34,17 @@ export function AdminAccountsClient() {
     setError(null);
     fetch("/api/admin/admins", { credentials: "include" })
       .then((r) => {
-        if (r.status === 403) throw new Error("FORBIDDEN");
+        if (r.status === 403) {
+          setForbidden(true);
+          throw new Error("FORBIDDEN");
+        }
         if (!r.ok) throw new Error("FETCH_FAIL");
         return r.json();
       })
       .then((data: { items?: AdminItem[] }) => setItems(Array.isArray(data.items) ? data.items : []))
       .catch((e) => setError(e.message === "FORBIDDEN" ? t("admin.adminAccounts.forbidden") : t("admin.adminAccounts.loadFailed")))
       .finally(() => setLoading(false));
-  }, [t]);
+  }, [t, setForbidden]);
 
   useEffect(() => {
     load();
@@ -237,6 +242,57 @@ export function AdminAccountsClient() {
           </div>
         )}
       </section>
+
+      <section className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-panel)] p-6 mt-6">
+        <h2 className="text-base font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2 mb-4">
+          {t("admin.adminAccounts.roleChangeHistory") ?? "Role change history"}
+        </h2>
+        <RoleChangeHistory />
+      </section>
+    </div>
+  );
+}
+
+type RoleChangeRow = { id: string; at: string; actorEmail: string; targetEmail: string; fromRole: string; toRole: string };
+
+function RoleChangeHistory() {
+  const { t } = useLocale();
+  const [rows, setRows] = useState<RoleChangeRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/audit/role-changes?limit=20", { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((data: { rows?: RoleChangeRow[] }) => setRows(Array.isArray(data.rows) ? data.rows : []))
+      .catch(() => setRows([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.common.loading")}</p>;
+  if (rows.length === 0) return <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.adminAccounts.noRoleChanges") ?? "No role changes yet."}</p>;
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-[13px] text-left">
+        <thead>
+          <tr className="border-b border-[var(--admin-border)]">
+            <th className="py-2 pr-4 font-medium text-[var(--compact-text)]">Time</th>
+            <th className="py-2 pr-4 font-medium text-[var(--compact-text)]">By</th>
+            <th className="py-2 pr-4 font-medium text-[var(--compact-text)]">Account</th>
+            <th className="py-2 font-medium text-[var(--compact-text)]">Change</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.id} className="border-b border-[var(--admin-border)]/60">
+              <td className="py-2 pr-4 text-[var(--compact-muted)]">{new Date(r.at).toLocaleString()}</td>
+              <td className="py-2 pr-4 text-[var(--compact-text)]">{r.actorEmail}</td>
+              <td className="py-2 pr-4 text-[var(--compact-text)]">{r.targetEmail}</td>
+              <td className="py-2 text-[var(--compact-text)]">{r.fromRole} → {r.toRole}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

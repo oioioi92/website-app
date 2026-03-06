@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 import type { ReportApiResponse, ReportColumn } from "@/lib/backoffice/report-api-types";
 import { getReportFilterSchema, isRecordsReport } from "@/lib/backoffice/report-filters-schema";
 import { RECORDS_STATUS_OPTIONS, TX_TYPE_ALL_OPTIONS, TX_TYPE_LEDGER_OPTIONS } from "@/lib/backoffice/filter-options";
@@ -22,6 +23,7 @@ const SUPPORTED_KEYS = ["all-transactions", "ledger-transactions", "hourly-sales
 
 export function ReportTableFromApi({ reportKey, title, description, extraParams = {} }: ReportTableFromApiProps) {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [data, setData] = useState<ReportApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +79,7 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
     const sp = buildQueryParams(overrides);
     fetch(`/api/admin/reports/query/${reportKey}?${sp}`)
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) throw new Error(r.status === 404 ? t("admin.reports.reportNotFound") : t("admin.reports.requestFailed"));
         return r.json();
       })

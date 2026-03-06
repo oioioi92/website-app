@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
 import { canManageAdmins } from "@/lib/rbac";
+import { writeAuditLog } from "@/lib/audit";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -31,12 +32,25 @@ export async function PATCH(
     : null;
   if (!role) return NextResponse.json({ error: "ROLE_REQUIRED" }, { status: 400 });
 
-  const target = await db.adminUser.findUnique({ where: { id }, select: { id: true, role: true } });
+  const target = await db.adminUser.findUnique({ where: { id }, select: { id: true, role: true, email: true } });
   if (!target) return NextResponse.json({ error: "NOT_FOUND" }, { status: 404 });
+
+  const fromRole = target.role;
 
   await db.adminUser.update({
     where: { id },
     data: { role },
   });
+
+  await writeAuditLog({
+    actorId: user.id,
+    action: "admin.role.update",
+    entityType: "AdminUser",
+    entityId: id,
+    diffJson: { fromRole, toRole: role, targetEmail: target.email },
+    remark: `Role changed ${fromRole} → ${role}`,
+    req,
+  });
+
   return NextResponse.json({ ok: true, role });
 }
