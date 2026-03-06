@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Sidebar } from "@/components/admin/Sidebar";
 import { AdminQuickActionBar } from "@/components/admin/AdminQuickActionBar";
@@ -16,6 +16,11 @@ type AdminUser = { id: string; email: string; role: string };
 export function AdminShell({ children, user }: { children: React.ReactNode; user?: AdminUser }) {
   const { t } = useLocale();
   const [collapsed, setCollapsed] = useState(true);
+
+  useEffect(() => {
+    const m = typeof window !== "undefined" && window.matchMedia("(max-width: 768px)");
+    if (m?.matches) setCollapsed(false);
+  }, []);
   return (
     <AdminUserProvider user={user}>
     <AdminApiProvider>
@@ -46,7 +51,7 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
             </svg>
           </button>
           <Link href="/admin" className="admin-topbar-home font-semibold text-[var(--compact-text)] hover:underline" title={t("admin.home")}>{t("admin.home")}</Link>
-          <LocaleSwitcher variant="dropdown" className="admin-topbar-locale ml-2" />
+          <LocaleSwitcher variant="dropdown" className="admin-topbar-locale admin-topbar-hide-on-mobile ml-2" />
         </div>
         <AdminQuickActionBar />
         <AdminTopbarMenus />

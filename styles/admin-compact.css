@@ -48,6 +48,31 @@
   font-size: var(--admin-fs-base, 13px);
   background: var(--admin-bg, #eef1f7);
 }
+/* Live Chat 页：主区填满、不滚动，输入条固定底部可见（电话/桌面一致） */
+.admin-shell .admin-page:has(.admin-chat-full) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.admin-shell .admin-page .admin-chat-full {
+  flex: 1;
+  min-height: 0;
+}
+/* WhatsApp Inbox 页：主区填满，电话版布局完整 */
+.admin-shell .admin-page:has(.admin-wa-inbox-root) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.admin-shell .admin-page .admin-wa-inbox-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 @media (min-width: 1280px) {
   .admin-shell .admin-page {
     padding-left: 32px;
@@ -565,7 +590,7 @@
     padding-bottom: max(10px, env(safe-area-inset-bottom));
   }
 
-  /* 遮罩：仅在小屏且侧栏展开时显示 */
+  /* 遮罩：仅在小屏且侧栏展开时显示，可点击关闭 */
   .admin-sidebar-backdrop {
     display: none;
     position: fixed;
@@ -574,10 +599,21 @@
     z-index: 199;
     min-height: 100vh;
     min-height: 100dvh;
+    pointer-events: none;
   }
 
   .admin-shell:not(.admin-shell--collapsed) .admin-sidebar-backdrop {
     display: block;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  /* 电话版：汉堡按钮加大触控区域，避免误触或点不到 */
+  .admin-topbar .admin-topbar-toggle {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
   }
 
   /* 电话版：收起 = 抽屉滑出屏幕；展开 = 抽屉全宽 + 显示全部文字 */
@@ -609,6 +645,11 @@
   }
   .admin-shell:not(.admin-shell--collapsed) .admin-sidebar .admin-emergency-wrap button::after {
     display: none;
+  }
+
+  /* 电话版侧栏展开时，导航项触控区域至少 44px */
+  .admin-shell:not(.admin-shell--collapsed) .admin-sidebar .admin-nav-item {
+    min-height: 44px;
   }
 }
 
