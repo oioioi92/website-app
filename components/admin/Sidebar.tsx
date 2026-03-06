@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import type { JSX } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,6 +10,12 @@ import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 import { useLocale } from "@/lib/i18n/context";
 import { useAdminUser } from "@/lib/admin-user-context";
 import { can } from "@/lib/rbac-client";
+
+const ChevronDown = () => (
+  <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 shrink-0 transition-transform" aria-hidden>
+    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+  </svg>
+);
 
 const NAV_ICONS: Record<string, JSX.Element> = {
   chat: (
@@ -151,9 +158,15 @@ type SidebarProps = {
 export function Sidebar({ collapsed, onNavigate, user }: SidebarProps) {
   const pathname = usePathname();
   const { t } = useLocale();
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
   const adminUser = useAdminUser() ?? user;
   const role = adminUser?.role ?? "admin";
   const isInSettings = pathname.startsWith("/admin/settings");
+
+  useEffect(() => {
+    if (isInSettings) setSettingsExpanded(true);
+  }, [isInSettings]);
+
   const filteredSettingsNav = adminUser
     ? SETTINGS_NAV.map((group) => ({
         ...group,
@@ -188,19 +201,21 @@ export function Sidebar({ collapsed, onNavigate, user }: SidebarProps) {
                     if (out && !out.startsWith("admin.nav.")) return out;
                     return item.label;
                   })();
+                  const isExpanded = settingsExpanded;
                   return (
                     <div key={item.key} className="admin-nav-settings-wrap">
-                      <div onClick={() => onNavigate?.()}>
-                        <Link
-                          href="/admin/settings"
-                          className={`admin-nav-item ${settingsActive ? "active" : ""}`}
-                          title={t(`admin.navTooltip.${item.key}`) || label}
-                        >
-                          <NavIcon icon={item.icon} />
-                          <span className="admin-nav-label">{label}</span>
-                        </Link>
-                      </div>
-                      {isInSettings && (
+                      <button
+                        type="button"
+                        onClick={() => setSettingsExpanded(!settingsExpanded)}
+                        className={`admin-nav-item w-full text-left cursor-pointer border-0 bg-transparent ${settingsActive ? "active" : ""}`}
+                        title={t(`admin.navTooltip.${item.key}`) || label}
+                        aria-expanded={isExpanded}
+                      >
+                        <NavIcon icon={item.icon} />
+                        <span className="admin-nav-label flex-1">{label}</span>
+                        <span className={isExpanded ? "rotate-180" : ""}><ChevronDown /></span>
+                      </button>
+                      {isExpanded && (
                         <div className="admin-nav-settings-list" onClick={() => onNavigate?.()}>
                           {filteredSettingsNav.map((grp) => (
                             <div key={grp.key} className="admin-nav-settings-group">
