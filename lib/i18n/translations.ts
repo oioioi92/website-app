@@ -712,6 +712,10 @@ const ADMIN_ZH = {
     pinDeposit: "入款",
     pinWithdraw: "出款",
     pinGameBonus: "游戏奖金",
+    durationDay: "天",
+    durationHour: "时",
+    durationMin: "分",
+    durationSec: "秒",
   },
   settingsPaymentGateway: {
     breadcrumbSettings: "设置",
@@ -1757,6 +1761,10 @@ const ADMIN_EN = {
     pinDeposit: "Deposit",
     pinWithdraw: "Withdraw",
     pinGameBonus: "Game Bonus",
+    durationDay: "d",
+    durationHour: "h",
+    durationMin: "m",
+    durationSec: "s",
   },
   settingsPaymentGateway: {
     breadcrumbSettings: "Settings",
@@ -2792,6 +2800,10 @@ const ADMIN_MS = {
     pinDeposit: "Deposit",
     pinWithdraw: "Pengeluaran",
     pinGameBonus: "Bonus Permainan",
+    durationDay: "d",
+    durationHour: "j",
+    durationMin: "m",
+    durationSec: "s",
   },
   settingsPaymentGateway: {
     breadcrumbSettings: "Tetapan",

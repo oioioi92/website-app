@@ -381,19 +381,35 @@ export function AdminLiveChatClient() {
     return item.waitingSeconds + elapsed;
   };
 
+  // 将秒数格式化为可读时长（如 537675 → "6天5时21分15秒" / "6d 5h 21m 15s"）
+  const formatDurationSeconds = (totalSec: number): string => {
+    const sec = Math.round(Math.max(0, totalSec));
+    if (sec === 0) return `0${t("admin.chat.durationSec")}`;
+    const d = Math.floor(sec / 86400);
+    const h = Math.floor((sec % 86400) / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    const parts: string[] = [];
+    if (d > 0) parts.push(`${d}${t("admin.chat.durationDay")}`);
+    if (h > 0) parts.push(`${h}${t("admin.chat.durationHour")}`);
+    if (m > 0) parts.push(`${m}${t("admin.chat.durationMin")}`);
+    if (s > 0 || parts.length === 0) parts.push(`${s}${t("admin.chat.durationSec")}`);
+    return parts.join(" ");
+  };
+
   // 仅当存在「客户新消息且客服未回复」时才显示等待计时；无待回复消息时不计时
   const getTimeLabel = (item: QueueItem, liveSec: number) => {
     const hasPending = item.pendingCustomerMsgAt != null && item.firstReplyAt == null;
     if (!hasPending) {
       if (item.status === "closed") return { text: t("admin.chat.closedStatus"), isWaiting: false };
-      if (item.firstResponseTimeSec != null) return { text: `${t("admin.chat.firstReplyTimeLabel")} ${Math.round(item.firstResponseTimeSec)}s`, isWaiting: false };
+      if (item.firstResponseTimeSec != null) return { text: `${t("admin.chat.firstReplyTimeLabel")} ${formatDurationSeconds(item.firstResponseTimeSec)}`, isWaiting: false };
       return { text: t("admin.chat.receivedLabel"), isWaiting: false };
     }
     if (liveSec > 0) {
       const prefix = liveSec >= 180 ? t("admin.chat.urgentWaitPrefix") : liveSec >= 60 ? t("admin.chat.warnWaitPrefix") : "";
-      return { text: `${prefix}${t("admin.chat.waitSecLabel")} ${liveSec}s`, isWaiting: true };
+      return { text: `${prefix}${t("admin.chat.waitSecLabel")} ${formatDurationSeconds(liveSec)}`, isWaiting: true };
     }
-    return { text: `${t("admin.chat.waitSecLabel")} 0s`, isWaiting: true };
+    return { text: `${t("admin.chat.waitSecLabel")} 0${t("admin.chat.durationSec")}`, isWaiting: true };
   };
 
   // 选中会话变化时收起访客信息、位置与等待记录
