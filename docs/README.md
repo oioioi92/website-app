@@ -1,18 +1,14 @@
-# 项目文档索引
+# 文档索引（保留最新详细说明）
 
-常用文档入口，便于接入与维护系统。
+当前只保留以下文档，其余已清理。
 
 | 文档 | 说明 |
 |------|------|
-| [产品说明书-Live-Chat与用户注册登入.md](./产品说明书-Live-Chat与用户注册登入.md) | **说明书**：Live Chat 连接不上排查 + 用户注册/登入全流程 |
-| [ROBIN-MANUAL.md](./ROBIN-MANUAL.md) | Robin 操作手册（5 分钟验收流程） |
-| [Live-Chat-上线-admin1167.md](./Live-Chat-上线-admin1167.md) | **Live Chat** 真正上到 admin1167.com / admin1167.net（非 localhost） |
-| [LIVE-CHAT-上线检查.md](./LIVE-CHAT-上线检查.md) | **Live Chat** 上线检查、环境变量、Nginx 反代与故障对照 |
-| [LIVE-CHAT-试看使用.md](./LIVE-CHAT-试看使用.md) | **Live Chat** 本地试看（前台气泡 + 后台客服，双终端步骤） |
-| [CHAT-P0-DEPLOY.md](./CHAT-P0-DEPLOY.md) | Live Chat P0 完整部署（Ubuntu + Nginx + PM2） |
-| [deploy-更新上线.md](./deploy-更新上线.md) | 更新后部署到网站（拉代码、构建、重启、Live Chat 前提） |
-| [运行命令-前台后台.md](./运行命令-前台后台.md) | 每次运行前台/后台的启动命令 |
-| [DAILY_UPGRADE.md](./DAILY_UPGRADE.md) | 日常依赖与安全升级 |
-| [SYSTEM_FULL_SPEC_FOR_CHATGPT.md](./SYSTEM_FULL_SPEC_FOR_CHATGPT.md) | 系统完整说明（给 AI/新成员） |
+| [怎样运行-一步到位.md](./怎样运行-一步到位.md) | **运行**：本地 Windows 与服务器运行步骤（主站 + Live Chat 一步到位） |
+| [安全与加固建议.md](./安全与加固建议.md) | **安全**：环境变量、鉴权、限流、Webhook 验签与上线前检查清单 |
+| [按目录全扫-检查报告.md](./按目录全扫-检查报告.md) | **代码**：按目录全扫结果、已删死代码与建议人工确认项 |
+| [LIVE-CHAT-上线检查.md](./LIVE-CHAT-上线检查.md) | **Live Chat**：上线检查、环境变量、Nginx 反代与故障对照 |
+| [产品说明书-Live-Chat与用户注册登入.md](./产品说明书-Live-Chat与用户注册登入.md) | **产品**：Live Chat 连接排查 + 用户注册/登入全流程 |
 
-根目录 [../README.md](../README.md) 含 Quick Start、部署路线与 API 概览。
+根目录 [../README.md](../README.md) 含 Quick Start 与项目概览。  
+chat-server 说明见 [../services/chat-server/README.md](../services/chat-server/README.md) 与 [../services/chat-server/如何运行.md](../services/chat-server/如何运行.md)。

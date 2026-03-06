@@ -62,7 +62,12 @@ export function AdminManualDepositClient() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error || data.message || "创建失败，请稍后重试");
+        if (data.error === "BALANCE_TOO_HIGH_TO_TOPUP") {
+          const bal = data.currentBalance != null ? Number(data.currentBalance).toFixed(2) : "—";
+          setError(`该会员余额过高，不可充值。当前钱包余额：${bal}。请在「Settings → Deposit / Topup Rules」调整门槛或关闭规则。`);
+        } else {
+          setError(data.error || data.message || "创建失败，请稍后重试");
+        }
         return;
       }
       router.push("/admin/deposits/pending");

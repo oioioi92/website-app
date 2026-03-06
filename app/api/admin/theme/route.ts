@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { getAdminUserFromRequest } from "@/lib/auth";
 import { canEditSiteTheme } from "@/lib/rbac";
 import { getThemeJsonCached } from "@/lib/theme/themeCache";
@@ -6,6 +7,7 @@ import { invalidateThemeCache } from "@/lib/theme/themeCache";
 import { invalidateHomeCache } from "@/lib/public-home-cache";
 import { parseThemeJson, sanitizeThemeJsonForWrite } from "@/lib/public/theme";
 import { db } from "@/lib/db";
+import { writeAuditLog } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +73,15 @@ export async function PUT(req: NextRequest) {
     }
     await invalidateThemeCache();
     invalidateHomeCache();
+    revalidatePath("/", "layout");
+    await writeAuditLog({
+      actorId: user.id,
+      action: "THEME_SAVE",
+      entityType: "Theme",
+      entityId: existing?.id ?? "new",
+      diffJson: {},
+      req,
+    }).catch(() => undefined);
     return NextResponse.json({ ok: true });
   } catch (e) {
     try {
@@ -81,6 +92,7 @@ export async function PUT(req: NextRequest) {
       });
       await invalidateThemeCache();
       invalidateHomeCache();
+      revalidatePath("/", "layout");
       return NextResponse.json({ ok: true });
     } catch (fallbackErr) {
       return NextResponse.json({ error: "THEME_SAVE_FAIL" }, { status: 500 });

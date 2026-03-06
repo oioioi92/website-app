@@ -3,6 +3,34 @@
 > **文档版本**：v1.1 · 与主站 + chat-server（P0）配套使用  
 > **快速链接**：[主站 .env](#1-主站-env项目根目录) · [chat-server 部署](#2-chat-server-部署与运行) · [Nginx 反代](#4-nginx-反代到-chat-server) · [自检](#5-自检步骤) · [故障对照](#6-常见原因小结)
 
+---
+
+## 看到「Live Chat 服务未连接」时请先做
+
+1. **主站 .env（项目根目录）** 增加或确认：
+   ```bash
+   CHAT_SERVER_INTERNAL_URL="http://127.0.0.1:4000"
+   CHAT_ADMIN_JWT_SECRET="你的长随机字符串"
+   ```
+   （`CHAT_ADMIN_JWT_SECRET` 需与 `services/chat-server/.env` 里的一致。）
+
+2. **启动 chat-server**（与主站同机时；服务器项目根目录若为 `/root/website-new` 则先 `cd /root/website-new`）：
+   ```bash
+   cd /root/website-new/services/chat-server
+   npm ci && npm run prisma:generate && (npm run prisma:migrate 2>/dev/null || npm run migrate:sqlite 2>/dev/null || true)
+   pm2 start npm --name chat-server -- start
+   pm2 save
+   ```
+
+3. **重启主站** 使 .env 生效：
+   ```bash
+   pm2 restart website-phase2
+   ```
+
+仍不行时按下面全文逐项检查。
+
+---
+
 Live Chat 由 **主站 Next.js**、**独立 chat-server**、**Nginx 反代** 三部分组成，缺一不可。按下面顺序检查与部署即可接入系统。
 
 ---

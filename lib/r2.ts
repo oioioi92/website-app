@@ -8,6 +8,17 @@ function required(name: string): string {
   return value;
 }
 
+/** 检测 R2 是否已配置（全部变量存在且非空） */
+export function isR2Configured(): boolean {
+  return !!(
+    process.env.R2_ENDPOINT?.trim() &&
+    process.env.R2_ACCESS_KEY_ID?.trim() &&
+    process.env.R2_SECRET_ACCESS_KEY?.trim() &&
+    process.env.R2_BUCKET?.trim() &&
+    process.env.R2_PUBLIC_BASE_URL?.trim()
+  );
+}
+
 export function createR2Client() {
   return new S3Client({
     region: "auto",
@@ -33,9 +44,6 @@ export async function createSignedUpload(input: { filename: string; contentType:
   const bucket = required("R2_BUCKET");
   // If objectKey is provided, upload will overwrite the same key (Replace mode).
   const key = input.objectKey && input.objectKey.trim().length > 0 ? input.objectKey.trim() : buildObjectKey(input.filename);
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/c61c53b9-4e86-47a3-ab7a-2e00967a7a09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'sec-audit-pre',hypothesisId:'H3',location:'lib/r2.ts:37',message:'createSignedUpload issued',data:{hasObjectKey:!!input.objectKey,keyPrefix:String(key).split("/")[0]||"",mime:input.contentType},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
@@ -60,9 +68,6 @@ export async function uploadObjectToR2(input: { objectKey: string; contentType: 
   const client = createR2Client();
   const bucket = required("R2_BUCKET");
   const key = input.objectKey.trim();
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/c61c53b9-4e86-47a3-ab7a-2e00967a7a09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'sec-audit-pre',hypothesisId:'H3',location:'lib/r2.ts:63',message:'uploadObjectToR2 sending',data:{keyPrefix:String(key).split("/")[0]||"",bytes:input.body?.byteLength??0,mime:input.contentType},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: key,

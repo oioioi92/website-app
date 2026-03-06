@@ -1,13 +1,22 @@
 import { EmbeddedChatClient } from "@/components/public/EmbeddedChatClient";
 import { db } from "@/lib/db";
 import { getPublicTheme } from "@/lib/theme/getPublicTheme";
+import { getFeatureFlags } from "@/lib/public/featureFlags";
 import type { ThemeConfig } from "@/lib/public/theme";
 
 export const dynamic = "force-dynamic";
 
 export default async function PublicChatPage() {
   let dbSocial: Array<{ label: string; url: string }> = [];
+  let theme: ThemeConfig | null = null;
+  // 始终使用 Vivid Portal 版本（现代设计）
+  const useVivid = true;
   try {
+    const [, { theme: t }] = await Promise.all([
+      getFeatureFlags(),
+      getPublicTheme(),
+    ]);
+    theme = t;
     dbSocial = await db.socialLink.findMany({
       where: { isActive: true },
       orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
@@ -16,12 +25,6 @@ export default async function PublicChatPage() {
     });
   } catch {
     // 数据库不可用时仅渲染站内聊天
-  }
-  let theme: ThemeConfig | null = null;
-  try {
-    theme = (await getPublicTheme()).theme;
-  } catch {
-    theme = null;
   }
 
   const quickLinks: Array<{ href: string; label: string }> = [];
@@ -49,5 +52,14 @@ export default async function PublicChatPage() {
     return true;
   });
 
-  return <EmbeddedChatClient uiText={theme?.uiText ?? {}} quickLinks={deduped} />;
+  return (
+    <EmbeddedChatClient
+      uiText={theme?.uiText ?? {}}
+      quickLinks={deduped}
+      vivid={useVivid}
+      siteName={theme?.siteName ?? "KINGDOM888"}
+      loginUrl={theme?.loginUrl ?? "/login"}
+      registerUrl={theme?.registerUrl ?? "/register-wa"}
+    />
+  );
 }

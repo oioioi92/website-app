@@ -1,6 +1,9 @@
 import { BonusClient } from "@/components/public/BonusClient";
+import { PromoHubDesktop } from "@/components/public/PromoHubDesktop";
+import { VividPromoClient } from "@/components/vivid/VividPromoClient";
 import { getActiveGamesForUi, getActivePromotionsForUi } from "@/lib/public/public-data";
 import { getPublicTheme } from "@/lib/theme/getPublicTheme";
+import { getFeatureFlags } from "@/lib/public/featureFlags";
 
 export const dynamic = "force-dynamic";
 const MOCK_PROMO_COVERS = ["/assets/providers/promotion.png", "/assets/providers/918kiss.png", "/assets/providers/mega888.png"] as const;
@@ -56,28 +59,57 @@ function DbFallback({
   );
 }
 
+/** /bonus: Vivid Portal defaultTab=Bonus on desktop; BonusClient on mobile. */
 export default async function PublicBonusPage() {
   const now = new Date();
   try {
-    const [{ theme }, promotionsUi, gamesUi] = await Promise.all([
+    const [flags, { theme }, promotionsUi, gamesUi] = await Promise.all([
+      getFeatureFlags(),
       getPublicTheme(),
       getActivePromotionsForUi(50, now),
       getActiveGamesForUi(24)
     ]);
     return (
-      <BonusClient
-        promotions={promotionsUi}
-        games={gamesUi}
-        uiText={theme.uiText}
-        routeBonus={theme.routes.bonus}
-        promotionPattern={theme.promotionPattern}
-        promotionFontPreset={theme.promotionFontPreset}
-      />
+      <>
+        {flags.useVividPortal ? (
+          <VividPromoClient
+            promotions={promotionsUi}
+            siteName={theme.siteName ?? "KINGDOM888"}
+            defaultTab="Bonus"
+            loginUrl={theme.loginUrl ?? "/login"}
+            registerUrl={theme.registerUrl ?? "/register-wa"}
+            cardConfig={theme.vividPromoCardConfig}
+            routeBonus={theme.routes.bonus}
+            uiText={theme.uiText}
+          />
+        ) : (
+          <>
+            <div className="hidden lg:block">
+              <PromoHubDesktop
+                promotions={promotionsUi}
+                defaultTab="Bonus"
+                routeBonus={theme.routes.bonus}
+                uiText={theme.uiText}
+              />
+            </div>
+            <div className="lg:hidden">
+              <BonusClient
+                promotions={promotionsUi}
+                games={gamesUi}
+                uiText={theme.uiText}
+                routeBonus={theme.routes.bonus}
+                promotionPattern={theme.promotionPattern}
+                promotionFontPreset={theme.promotionFontPreset}
+              />
+            </div>
+          </>
+        )}
+      </>
     );
   } catch {
     try {
       const { theme } = await getPublicTheme();
-      return (
+      const fallback = (
         <DbFallback
           uiText={theme.uiText}
           routeBonus={theme.routes.bonus}
@@ -85,8 +117,23 @@ export default async function PublicBonusPage() {
           promotionFontPreset={theme.promotionFontPreset}
         />
       );
+      return (
+        <>
+          <div className="hidden lg:block">
+            <PromoHubDesktop promotions={[]} defaultTab="Bonus" routeBonus={theme.routes.bonus} uiText={theme.uiText} />
+          </div>
+          <div className="lg:hidden">{fallback}</div>
+        </>
+      );
     } catch {
-      return <DbFallback />;
+      return (
+        <>
+          <div className="hidden lg:block">
+            <PromoHubDesktop promotions={[]} defaultTab="Bonus" routeBonus="/bonus" />
+          </div>
+          <div className="lg:hidden"><DbFallback /></div>
+        </>
+      );
     }
   }
 }

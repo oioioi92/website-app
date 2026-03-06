@@ -1,0 +1,1013 @@
+/* ============================================================
+   Vivid Portal — 黑底 + 紫色 + 白字
+   ============================================================ */
+
+/* ---- 当 Vivid Portal 激活时，隐藏 MobileShell 的冲突元素 ---- */
+body:has(.vp-shell) [data-frontedit="header"]       { display: none !important; }
+body:has(.vp-shell) [data-frontedit="marquee"]      { display: none !important; }
+body:has(.vp-shell) [data-mobile-shell-nav]         { display: none !important; }
+/* 移除 MobileShell children 的底部 padding（为 MobileBottomNav 留的）*/
+body:has(.vp-shell) [data-mobile-shell-content]     { padding-bottom: 0 !important; }
+/* 当 layout 统一渲染 Vivid 底部 bar 时，内容区需留出底部空间，避免被 bar 遮挡 */
+body:has(.vp-shell) .vivid-nav-spacer {
+  padding-bottom: max(5rem, calc(5rem + env(safe-area-inset-bottom))) !important;
+}
+/* 覆盖 MobileShell 外层背景为黑色；若后台设置了页面背景色/图则保留（不覆盖） */
+body:has(.vp-shell) .min-h-screen:not([data-page-bg="custom"]) { background: #080810 !important; }
+
+/* ---- Tokens（主色/强调色可由后台 Theme 设置，通过 --theme-primary / --theme-accent 注入）---- */
+.vp-shell {
+  /* 背景：纯黑 */
+  --vp-bg:        #080810;
+  --vp-bg2:       #0e0e1c;
+  /* 卡片：深黑紫 */
+  --vp-card:      #13132a;
+  --vp-card2:     #1c1c38;
+  /* 主色 / 强调色：优先用后台配置 */
+  --vp-accent:    var(--theme-primary, #b060ff);
+  --vp-accent2:   var(--theme-accent, #7c6cfc);
+  /* 边框 / 光晕：基于主色 */
+  --vp-border:    rgba(150, 80, 255, 0.30);
+  --vp-glow:      rgba(168, 85, 247, 0.65);
+  /* 文字：纯白 */
+  --vp-text:      #ffffff;
+  --vp-muted:     #b8aee8;
+  --vp-green:     #22c55e;
+  --vp-red:       #ef4444;
+  --vp-gold:      #f59e0b;
+
+  --vp-r-card:    16px;
+  --vp-r-btn:     12px;
+  --vp-r-pill:    999px;
+  --vp-gap:       24px;
+  --vp-w:         1100px;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* 纯黑底 + 右上角紫色光晕 */
+  background:
+    radial-gradient(ellipse 70% 50% at 80% -10%, rgba(140, 60, 255, 0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 20% 90%, rgba(100, 80, 255, 0.12) 0%, transparent 60%),
+    #080810;
+  color: var(--vp-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ---- Container ---- */
+.vp-shell .vp-w {
+  width: 100%;
+  max-width: var(--vp-w);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ---- Topbar ---- */
+.vp-shell .vp-bar {
+  background: rgba(8, 8, 18, 0.96);
+  border-bottom: 1px solid rgba(150, 80, 255, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.vp-shell .vp-bar-inner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.vp-shell .vp-logo {
+  font-size: 20px;
+  font-weight: 900;
+  background: linear-gradient(90deg, #cc80ff, #9060ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+
+.vp-shell .vp-nav {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.vp-shell .vp-nav::-webkit-scrollbar { display: none; }
+
+.vp-shell .vp-nav a {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--vp-r-btn);
+  white-space: nowrap;
+  transition: color .15s, background .15s;
+  text-decoration: none;
+}
+
+.vp-shell .vp-nav a:hover,
+.vp-shell .vp-nav a[data-active] {
+  color: #fff;
+  background: rgba(176, 96, 255, 0.18);
+}
+
+.vp-shell .vp-bar-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ---- Buttons ---- */
+.vp-shell .vp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  height: 38px;
+  border-radius: var(--vp-r-btn);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+  border: none;
+  white-space: nowrap;
+  color: #fff;
+}
+
+.vp-shell .vp-btn-primary {
+  background: linear-gradient(135deg, #b060ff, #7c6cfc);
+  color: #fff;
+  box-shadow: 0 0 18px rgba(176, 96, 255, 0.55);
+}
+.vp-shell .vp-btn-primary:hover {
+  opacity: .9;
+  box-shadow: 0 0 28px rgba(176, 96, 255, 0.7);
+  color: #fff;
+}
+
+.vp-shell .vp-btn-outline {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(176, 96, 255, 0.4);
+  color: #fff;
+}
+.vp-shell .vp-btn-outline:hover {
+  border-color: var(--vp-accent);
+  background: rgba(176, 96, 255, 0.15);
+  color: #fff;
+}
+
+.vp-shell .vp-btn-green {
+  background: var(--vp-green);
+  color: #fff;
+}
+.vp-shell .vp-btn-green:hover { opacity: .88; }
+
+.vp-shell .vp-btn-red {
+  background: var(--vp-red);
+  color: #fff;
+}
+.vp-shell .vp-btn-red:hover { opacity: .88; }
+
+/* ---- Cards ---- */
+.vp-shell .vp-card {
+  background: var(--vp-card);
+  border: 1px solid rgba(176, 96, 255, 0.22);
+  border-radius: var(--vp-r-card);
+  padding: var(--vp-gap);
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+}
+
+.vp-shell .vp-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(176, 96, 255, 0.08) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.vp-shell .vp-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vp-shell .vp-card-title::before {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, #b060ff, #7c6cfc);
+}
+
+/* ---- Hero Gradient Banner ---- */
+.vp-shell .vp-hero {
+  border-radius: 20px;
+  min-height: 260px;
+  background:
+    radial-gradient(ellipse 80% 70% at 90% 20%, rgba(140, 40, 255, 0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 10% 90%, rgba(90, 60, 255, 0.25) 0%, transparent 60%),
+    linear-gradient(135deg, #110820 0%, #1c0d3a 50%, #0d0820 100%);
+  border: 1px solid rgba(176, 96, 255, 0.35);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 32px;
+  overflow: hidden;
+  position: relative;
+}
+
+.vp-shell .vp-hero::after {
+  content: "";
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: rgba(176, 96, 255, 0.15);
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+.vp-shell .vp-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(176, 96, 255, 0.25);
+  border: 1px solid rgba(176, 96, 255, 0.5);
+  border-radius: var(--vp-r-pill);
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #d4a0ff;
+  width: fit-content;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.vp-shell .vp-hero h1 {
+  font-size: clamp(22px, 3.5vw, 38px);
+  font-weight: 900;
+  line-height: 1.2;
+  margin: 0 0 16px;
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  text-shadow: 0 2px 20px rgba(176, 96, 255, 0.4);
+}
+
+.vp-shell .vp-hero-actions {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- Quick Action Icons ---- */
+.vp-shell .vp-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.vp-shell .vp-action-item {
+  background: var(--vp-card);
+  border: 1px solid var(--vp-border);
+  border-radius: var(--vp-r-card);
+  padding: 20px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: border-color .15s, background .15s, transform .1s;
+  cursor: pointer;
+}
+
+.vp-shell .vp-action-item:hover {
+  border-color: var(--vp-accent);
+  background: var(--vp-card2);
+  transform: translateY(-2px);
+}
+
+.vp-shell .vp-action-item .icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.vp-shell .vp-action-item span:last-child {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-text);
+  text-align: center;
+}
+
+/* ---- Section Title ---- */
+.vp-shell .vp-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.vp-shell .vp-section-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vp-shell .vp-section-title .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b060ff, #7c6cfc);
+  box-shadow: 0 0 10px rgba(176, 96, 255, 0.7);
+}
+
+.vp-shell .vp-section-link {
+  font-size: 13px;
+  color: var(--vp-accent);
+  text-decoration: none;
+}
+.vp-shell .vp-section-link:hover { text-decoration: underline; }
+
+/* ---- Game / Provider Tiles ---- */
+.vp-shell .vp-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 14px;
+}
+
+.vp-shell .vp-tile {
+  border-radius: var(--vp-r-card);
+  overflow: hidden;
+  border: 1px solid var(--vp-border);
+  background: var(--vp-card);
+  cursor: pointer;
+  transition: transform .12s, border-color .15s, box-shadow .15s;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.vp-shell .vp-tile:hover {
+  transform: translateY(-3px);
+  border-color: var(--vp-accent);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.3);
+}
+
+.vp-shell .vp-tile .thumb {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vp-card2);
+  font-size: 32px;
+}
+
+.vp-shell .vp-tile .label {
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ---- Live TX ---- */
+.vp-shell .vp-tx-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--vp-card2);
+  border: 1px solid var(--vp-border);
+  transition: border-color .1s;
+}
+.vp-shell .vp-tx-row:hover { border-color: rgba(168,85,247,.45); }
+
+/* ---- Promo Cards ---- */
+/* 列表布局：一张照片一行，照片在左、右侧几行重要内容 */
+.vp-shell .vp-promo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---- Promo page 2-column tile grid (desktop 2 col, mobile 1 col) ---- */
+.vp-shell .vp-promo-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* Tile card */
+.vp-shell .vp-promo-tile-card {
+  background: var(--vp-card);
+  border: 1px solid var(--vp-border);
+  border-radius: var(--vp-r-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .12s, border-color .15s;
+}
+.vp-shell .vp-promo-tile-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--vp-accent);
+  box-shadow: 0 8px 28px rgba(176, 96, 255, 0.2);
+}
+
+/* 照片区：桌面版图片在上，固定高度 */
+.vp-shell .vp-promo-tile-img {
+  display: block;
+  width: 100%;
+  height: 210px;
+  padding: 0;
+  border: none;
+  background: var(--vp-card2);
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* 内容区 */
+.vp-shell .vp-promo-tile-body {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  justify-content: space-between;
+}
+.vp-shell .vp-promo-tile-body .vp-promo-card-subtitle {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(200, 185, 240, 0.8);
+}
+
+.vp-shell .vp-promo-card {
+  background: var(--vp-card);
+  border: 1px solid var(--vp-border);
+  border-radius: var(--vp-r-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .12s, border-color .15s;
+}
+.vp-shell .vp-promo-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--vp-accent);
+}
+
+/* 一行一图：左侧照片 + 右侧内容，固定卡片高度避免图片被拉伸 */
+.vp-shell .vp-promo-card-row {
+  flex-direction: row;
+  align-items: stretch;
+  height: 160px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.vp-shell .vp-promo-card-row:hover {
+  box-shadow: 0 8px 28px rgba(176, 96, 255, 0.2);
+}
+
+.vp-shell .vp-promo-row-img {
+  flex-shrink: 0;
+  width: 200px;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: var(--vp-card2);
+  cursor: pointer;
+  overflow: hidden;
+  display: block;
+}
+.vp-shell .vp-promo-row-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+}
+.vp-shell .vp-promo-row-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.vp-shell .vp-promo-row-left {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 200px;
+  height: 100%;
+}
+
+.vp-shell .vp-promo-row-caption {
+  display: none !important; /* 照片下方说明文字全面隐藏 */
+  padding: 6px 10px 10px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(200, 185, 240, 0.85);
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  background: var(--vp-card2);
+  border-top: 1px solid rgba(176, 96, 255, 0.12);
+  flex: 1;
+  min-height: 50px;
+}
+
+.vp-shell .vp-promo-card-body-row {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: space-between;
+}
+/* 一行一图布局：标题/副标题完整显示不裁切，按钮与照片底边对齐 */
+.vp-shell .vp-promo-card-body-row .vp-promo-card-title-btn {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  font-size: 14px;
+  white-space: normal;
+  word-break: break-word;
+}
+.vp-shell .vp-promo-card-body-row .vp-promo-card-subtitle {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+}
+.vp-shell .vp-promo-card-body-row .vp-promo-card-actions {
+  margin-top: 0;
+  padding-top: 8px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.vp-shell .vp-promo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.vp-shell .vp-promo-card-tile {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.vp-shell .vp-promo-card-tile:hover {
+  box-shadow: 0 8px 28px rgba(176, 96, 255, 0.2);
+}
+/* 卡片标题按钮 */
+.vp-shell .vp-promo-card-title-btn {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #fff;
+  letter-spacing: -0.01em;
+  transition: color .15s;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vp-shell .vp-promo-card-title-btn:hover {
+  color: #e4c4ff;
+}
+
+/* 卡片副标题 */
+.vp-shell .vp-promo-card-subtitle {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: rgba(200, 185, 240, 0.75);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.vp-shell .vp-promo-card-actions {
+  margin-top: auto;
+  padding-top: 14px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 10px;
+}
+.vp-shell .vp-promo-claim-btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 32px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #b060ff, #7c6cfc) !important;
+  color: #fff !important;
+  border: none;
+  box-shadow: 0 0 12px rgba(176, 96, 255, 0.4);
+}
+.vp-shell .vp-promo-claim-btn:hover {
+  opacity: 0.95;
+  box-shadow: 0 0 18px rgba(176, 96, 255, 0.55);
+}
+.vp-shell .vp-promo-tnc-btn {
+  flex-shrink: 0;
+  min-height: 26px;
+  min-width: 100px;
+  padding: 0 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  background: rgba(245, 158, 11, 0.25) !important;
+  color: #fcd34d !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.6);
+}
+.vp-shell .vp-promo-tnc-btn:hover {
+  background: rgba(245, 158, 11, 0.35) !important;
+  border-color: #f59e0b;
+}
+.vp-shell .vp-promo-card-body-tile {
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  /* 底部细分隔（卡片内容 / 按钮之间自然留白） */
+  border-top: 1px solid rgba(176, 96, 255, 0.12);
+}
+
+.vp-shell .vp-promo-img {
+  height: 160px;
+  background: linear-gradient(135deg, #1e1040, #2d1060);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  flex-shrink: 0;
+}
+
+.vp-shell .vp-promo-body {
+  padding: 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vp-shell .vp-promo-highlight {
+  font-size: 26px;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--vp-gold), var(--vp-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ---- Badge ---- */
+.vp-shell .vp-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: var(--vp-r-pill);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+.vp-shell .vp-badge-green {
+  background: rgba(34,197,94,.15);
+  border: 1px solid rgba(34,197,94,.30);
+  color: #4ade80;
+}
+.vp-shell .vp-badge-purple {
+  background: rgba(168,85,247,.18);
+  border: 1px solid rgba(168,85,247,.35);
+  color: #d8b4fe;
+}
+.vp-shell .vp-badge-gold {
+  background: rgba(245,158,11,.18);
+  border: 1px solid rgba(245,158,11,.35);
+  color: #fcd34d;
+  text-shadow: 0 0 8px rgba(245,158,11,.4);
+}
+/* PROMO 标签 — purple */
+.vp-shell .vp-badge-promo {
+  background: rgba(176,96,255,.2);
+  border: 1px solid rgba(176,96,255,.40);
+  color: #e4c4ff;
+}
+
+/* ---- Category Sidebar (Games page) ---- */
+.vp-shell .vp-sidebar {
+  background: var(--vp-card);
+  border: 1px solid var(--vp-border);
+  border-radius: var(--vp-r-card);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vp-shell .vp-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+  text-decoration: none;
+}
+.vp-shell .vp-sidebar-item:hover { background: var(--vp-card2); color: #fff; }
+.vp-shell .vp-sidebar-item[data-active] {
+  background: linear-gradient(135deg, rgba(176, 96, 255, 0.28), rgba(124, 108, 252, 0.22));
+  color: #d4a0ff;
+  border: 1px solid rgba(176, 96, 255, 0.4);
+}
+
+/* ---- Footer ---- */
+.vp-shell .vp-footer {
+  border-top: 1px solid rgba(176, 96, 255, 0.2);
+  padding: 24px 0;
+  margin-top: 40px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+}
+.vp-shell .vp-footer a { color: rgba(255, 255, 255, 0.45); text-decoration: none; }
+.vp-shell .vp-footer a:hover { color: #fff; }
+
+/* ---- Glow Divider ---- */
+.vp-shell .vp-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--vp-border), transparent);
+  margin: 4px 0;
+}
+
+/* ---- Tabs ---- */
+.vp-shell .vp-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--vp-border);
+  padding-bottom: 0;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.vp-shell .vp-tabs::-webkit-scrollbar { display: none; }
+
+.vp-shell .vp-tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  transition: color .15s, border-color .15s, background .15s;
+  white-space: nowrap;
+}
+.vp-shell .vp-tab:hover { color: rgba(255, 255, 255, 0.9); }
+.vp-shell .vp-tab[data-active] {
+  color: #e4c4ff;
+  border-bottom-color: var(--vp-accent);
+}
+
+/* ---- Page main ---- */
+.vp-shell .vp-main {
+  padding: 28px 0 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ---- Announcement strip ---- */
+.vp-shell .vp-announce {
+  background: linear-gradient(90deg, rgba(176, 96, 255, 0.18), rgba(124, 108, 252, 0.15));
+  border: 1px solid rgba(176, 96, 255, 0.35);
+  border-radius: 10px;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: rgba(255, 255, 255, 0.85);
+}
+.vp-shell .vp-announce-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vp-green);
+  box-shadow: 0 0 8px var(--vp-green);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Mobile (≤ 1024px) overrides — Vivid Portal
+   ============================================================ */
+@media (max-width: 1023px) {
+  /* Topbar compact */
+  .vp-shell .vp-bar-inner {
+    height: 52px;
+    gap: 12px;
+    padding: 0 14px;
+  }
+  .vp-shell .vp-logo {
+    font-size: 16px;
+  }
+  /* Hide desktop nav on mobile; topbar shows logo + actions only */
+  .vp-shell .vp-nav {
+    display: none;
+  }
+  .vp-shell .vp-bar-actions {
+    gap: 6px;
+    margin-left: auto;
+  }
+  .vp-shell .vp-btn {
+    height: 34px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  /* Container padding */
+  .vp-shell .vp-w {
+    padding: 0 14px;
+  }
+
+  /* Main spacing */
+  .vp-shell .vp-main {
+    padding-top: 16px;
+    padding-bottom: 80px; /* room for bottom nav */
+    gap: 14px;
+  }
+
+  /* Hero smaller on mobile */
+  .vp-shell .vp-hero {
+    min-height: 180px;
+    padding: 22px 18px;
+    border-radius: 16px;
+  }
+  .vp-shell .vp-hero h1 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  .vp-shell .vp-hero-actions {
+    gap: 10px;
+  }
+
+  /* Promo grid: 1 column on mobile */
+  .vp-shell .vp-promo-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* 一行一图：手机端统一行高，按钮与照片底部对齐 */
+  .vp-shell .vp-promo-list {
+    gap: 12px;
+  }
+  /* 整张卡固定高度，左右两侧通过 align-items:stretch 自动等高 */
+  .vp-shell .vp-promo-card-row {
+    height: 130px;
+  }
+  .vp-shell .vp-promo-row-left {
+    width: 140px;
+    height: 100%;
+    flex-shrink: 0;
+  }
+  .vp-shell .vp-promo-row-img {
+    width: 140px;
+    height: 100%;
+    object-position: left center; /* 从左边显示，避免裁掉重要内容 */
+  }
+  .vp-shell .vp-promo-row-img img {
+    object-position: left center;
+  }
+  .vp-shell .vp-promo-row-caption {
+    display: none; /* 照片下方说明在手机窄卡中隐藏，避免撑高 */
+  }
+  .vp-shell .vp-promo-card-body-row {
+    height: 100%;
+    min-height: unset;
+    padding: 10px 12px;
+  }
+
+  /* Tile grid: 手机版竖排 1 列（照片在上，内容在下） */
+  .vp-shell .vp-promo-2col {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .vp-shell .vp-promo-tile-card {
+    flex-direction: column;
+    height: auto;
+  }
+  .vp-shell .vp-promo-tile-img {
+    width: 100%;
+    height: 150px;
+    flex-shrink: 0;
+  }
+  .vp-shell .vp-promo-tile-body {
+    padding: 12px 14px 16px;
+  }
+  .vp-shell .vp-promo-tile-body .vp-promo-card-subtitle {
+    -webkit-line-clamp: 3;
+    font-size: 11.5px;
+  }
+
+  /* Actions: 4 cols stay same */
+  .vp-shell .vp-actions-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .vp-shell .vp-action-item {
+    padding: 14px 6px 12px;
+  }
+  .vp-shell .vp-action-item .icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+  .vp-shell .vp-action-item span:last-child {
+    font-size: 10px;
+  }
+
+  /* Card padding smaller */
+  .vp-shell .vp-card {
+    padding: 16px;
+  }
+
+  /* Games sidebar hide on mobile */
+  .vp-shell aside.hidden {
+    display: none !important;
+  }
+
+  /* Footer compact */
+  .vp-shell .vp-footer {
+    padding: 20px 14px;
+    padding-bottom: calc(80px + 20px); /* above bottom nav */
+  }
+}

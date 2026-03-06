@@ -11,7 +11,7 @@ export function MobileBottomNav({ chatUrl, theme }: { chatUrl: string; theme: Th
   const items = theme.bottomNav.slice(0, 5);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)]/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
+    <nav data-mobile-shell-nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)]/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
       <div className="mx-auto grid max-w-[520px] grid-cols-5 gap-1.5">
         {items.map((item) => {
           const labelLower = item.label.toLowerCase();

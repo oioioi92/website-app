@@ -9,8 +9,21 @@ type QueueItem = {
   status: string;
   assignedStaff: string | null;
   lastMessageTime: string | null;
+  lastMessageText?: string | null;
   waitingSeconds: number;
   firstResponseTimeSec: number | null;
+  pendingCustomerMsgAt?: string | null;
+  firstReplyAt?: string | null;
+  lastWaitMs?: number | null;
+  openedAt?: string | null;
+  openedByAgentId?: string | null;
+  visitorName?: string | null;
+  visitorEmail?: string | null;
+  visitorPhone?: string | null;
+  visitorIp?: string | null;
+  visitorUa?: string | null;
+  entryUrl?: string | null;
+  referrer?: string | null;
 };
 
 export async function GET(req: NextRequest) {

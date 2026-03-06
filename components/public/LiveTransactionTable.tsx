@@ -9,6 +9,7 @@ type TxItem = {
   id: string;
   userRefMasked: string;
   amountDisplay: string;
+  amountValue?: number;
   happenedAt: string;
   provider?: string;
   kind: "deposit" | "withdraw";
@@ -102,11 +103,11 @@ export function LiveTransactionTable({
           </div>
         ) : (
           (() => {
-            // User request: make the header band "sky blue"
-            const SKY_BLUE = "#38BDF8";
-            const REAL_GOLD = "#F5C518";
-            const depositBg = depositColor ?? SKY_BLUE;
-            const withdrawBg = withdrawColor ?? REAL_GOLD;
+            /* 效仿参考：DEPOSIT 深蓝、WITHDRAW 亮黄，标题文字白色 */
+            const DEPOSIT_BLUE = "#1e3a5f";
+            const WITHDRAW_YELLOW = "#e6b800";
+            const depositBg = depositColor ?? DEPOSIT_BLUE;
+            const withdrawBg = withdrawColor ?? WITHDRAW_YELLOW;
             const deposits = items.filter((t) => t.kind === "deposit").slice(0, VISIBLE_ROWS_V3);
             const withdraws = items.filter((t) => t.kind === "withdraw").slice(0, VISIBLE_ROWS_V3);
             const rows = Array.from({ length: VISIBLE_ROWS_V3 }).map((_, i) => ({
@@ -128,9 +129,9 @@ export function LiveTransactionTable({
                     ["--ui-livetx-head-bg" as string]: "rgba(0,0,0,0.25)",
                     ["--ui-livetx-table-border" as string]: "rgba(255,255,255,0.28)",
                     ["--ui-livetx-cell-text" as string]: "rgba(255,255,255,0.88)",
-                    // Header text colors on sky blue
-                    ["--ui-livetx-head-text" as string]: "#07263A",
-                    ["--ui-livetx-withdraw-text" as string]: "#07263A"
+                    /* 标题栏文字白色 */
+                    ["--ui-livetx-head-text" as string]: "#fff",
+                    ["--ui-livetx-withdraw-text" as string]: "#fff"
                   } as CSSProperties
                 }
               >
@@ -139,7 +140,7 @@ export function LiveTransactionTable({
                     <tr>
                       <th colSpan={5} className="ui-livetx-th-title">
                         <div className="flex items-center justify-between gap-3">
-                          <span className="font-extrabold">{titleText}</span>
+                          <span className="font-extrabold text-white">{titleText}</span>
                           <span className="inline-flex items-center gap-2">
                             {data.demo ? (
                               <span className="rounded bg-[color:var(--front-accent)]/20 px-2 py-0.5 text-[10px] font-bold text-[color:var(--front-accent-light)]">
@@ -147,7 +148,7 @@ export function LiveTransactionTable({
                               </span>
                             ) : null}
                             <span className="livetx-live-badge-blink inline-flex items-center gap-1 rounded bg-red-600 px-2 py-0.5 text-[10px] font-extrabold text-white">
-                              {liveLabelResolved}
+{liveLabelResolved}
                               <span className="relative ml-1 inline-flex h-2 w-2 items-center justify-center">
                                 <span className="absolute inline-flex h-full w-full rounded-full bg-white/70 opacity-75 animate-ping" />
                                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
@@ -169,11 +170,11 @@ export function LiveTransactionTable({
                   <tbody>
                     {rows.map(({ d, w }, idx) => (
                       <tr key={idx}>
-                        <td className="ui-livetx-td">{d?.userRefMasked ?? "—"}</td>
+                        <td className="ui-livetx-td ui-livetx-phone-deposit">{d?.userRefMasked ?? "—"}</td>
                         <td className="ui-livetx-td ui-livetx-amt tabular-nums">{d?.amountDisplay ?? "—"}</td>
-                        <td className="ui-livetx-td">{w?.userRefMasked ?? "—"}</td>
+                        <td className="ui-livetx-td ui-livetx-phone-withdraw">{w?.userRefMasked ?? "—"}</td>
                         <td className="ui-livetx-td ui-livetx-amt tabular-nums">{w?.amountDisplay ?? "—"}</td>
-                        <td className="ui-livetx-td">{w?.provider ?? "—"}</td>
+                        <td className="ui-livetx-td ui-livetx-provider">{w?.provider ?? "—"}</td>
                       </tr>
                     ))}
                   </tbody>

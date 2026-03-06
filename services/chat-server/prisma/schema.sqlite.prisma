@@ -15,19 +15,46 @@ model Conversation {
   visitorUa       String?
   entryUrl        String?
   referrer        String?
+  visitorName     String?
+  visitorEmail    String?
+  visitorPhone    String?
   assignedAdminId String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   closedAt        DateTime?
 
-  messages         Message[]
-  tags             ConversationTag[]
-  notes            Note[]
-  riskScores       RiskScore[]
+  openedAt             DateTime?
+  openedByAgentId      String?
+  pendingCustomerMsgAt DateTime?
+  firstReplyAt         DateTime?
+  lastAgentMsgAt       DateTime?
+  deletedAt            DateTime?
+  lastWaitMs           Int?
+
+  messages            Message[]
+  tags                ConversationTag[]
+  notes               Note[]
+  riskScores          RiskScore[]
+  waitLogs            ConversationWaitLog[]
 
   @@index([status, updatedAt])
   @@index([visitorSessionId, status])
   @@index([assignedAdminId, status])
+  @@index([deletedAt])
+}
+
+model ConversationWaitLog {
+  id             String   @id @default(cuid())
+  conversationId String
+  customerMsgAt  DateTime
+  agentReplyAt   DateTime
+  waitMs         Int
+  agentId        String
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
 }
 
 model ConversationTag {
@@ -61,6 +88,7 @@ model Message {
   senderType     String
   adminId        String?
   bodyText       String
+  metadataJson   Json?
   ip             String?
   sessionId      String?
   createdAt      DateTime @default(now())

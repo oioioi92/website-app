@@ -1,5 +1,9 @@
 import "server-only";
 
+/**
+ * TOTP 密钥等敏感数据的 AES-256-GCM 加解密，依赖环境变量 TOTP_ENC_KEY。
+ * 若未使用 TOTP 加密存储功能，本模块可保留以备后用或移除。
+ */
 import crypto from "node:crypto";
 
 function keyBytes(): Buffer {

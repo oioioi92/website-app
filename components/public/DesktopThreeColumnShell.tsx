@@ -7,7 +7,6 @@ import { LiveTransactionTable } from "@/components/public/LiveTransactionTable";
 import { QuickActionsGrid } from "@/components/public/QuickActionsGrid";
 import { SocialButtons } from "@/components/public/SocialButtons";
 import { TrustFooter } from "@/components/public/TrustFooter";
-import { GoldButton } from "@/components/public/ui/GoldButton";
 import { GoldFrame } from "@/components/public/ui/GoldFrame";
 import { SectionBar } from "@/components/public/ui/SectionBar";
 import type { ThemeConfig } from "@/lib/public/theme";
@@ -118,30 +117,48 @@ export function DesktopThreeColumnShell({
               <SectionBar title={t.accountpaneltitle ?? "ACCOUNT PANEL"} />
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <GoldButton type="button">{t.logintext ?? "Login"}</GoldButton>
-              <GoldButton type="button" className="border-white/20 bg-white/10 text-white/90 shadow-none">
+              <a
+                href={theme.loginUrl ?? "/login"}
+                className="flex w-full items-center justify-center rounded-xl border border-[color:var(--front-gold)]/70 bg-gradient-to-b from-[color:var(--front-gold)]/30 to-[color:var(--front-gold)]/25 px-3 py-2 text-sm font-bold text-[color:var(--front-gold-light)] shadow-[0_0_18px_rgba(245,158,11,0.25)] transition hover:brightness-110"
+              >
+                {t.logintext ?? "Login"}
+              </a>
+              <a
+                href={theme.registerUrl ?? "/register-wa"}
+                className="flex w-full items-center justify-center rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-sm font-bold text-white/90 shadow-none transition hover:brightness-110"
+              >
                 {t.registertext ?? "Register"}
-              </GoldButton>
+              </a>
             </div>
+            <a
+              href={theme.chatDefaultUrl ?? "/chat"}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 flex w-full items-center justify-center rounded-xl border border-white/20 bg-white/10 px-2 py-2 text-[11px] font-bold text-white shadow-none transition hover:brightness-110"
+            >
+              {t.supportlabel ?? "Support"}
+            </a>
             <div className="mt-3 rounded-lg border border-white/15 bg-black/35 p-3">
               <p className="text-[11px] text-white/70">{t.balancetext ?? "Balance"}</p>
-              <p className="mt-1 text-lg font-extrabold text-[color:var(--front-gold-light)]">{internalTestMode ? "DEMO 0.00" : "--"}</p>
+              <p className="mt-1 text-lg font-extrabold text-[color:var(--front-gold-light)]">{internalTestMode ? "DEMO 0.00" : "—"}</p>
+              <p className="text-[10px] text-white/50 mt-0.5">{t.balancehint ?? "Login to view"}</p>
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <a href={theme.depositUrl ?? "#"} target="_blank" rel="noreferrer">
-                <GoldButton variant="success" className="w-full px-2 py-2 text-[11px]">
-                  {t.deposittext ?? "Deposit"}
-                </GoldButton>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <a
+                href={theme.depositUrl ?? "/deposit"}
+                target="_blank"
+                rel="noreferrer"
+                className="flex w-full items-center justify-center rounded-xl border border-[color:var(--front-success)]/60 bg-gradient-to-b from-[color:var(--front-success)]/30 to-[color:var(--front-success)]/20 px-2 py-2 text-[11px] font-bold text-[color:var(--front-success-light)] shadow-[0_0_14px_rgba(16,185,129,0.18)] transition hover:brightness-110"
+              >
+                {t.deposittext ?? "Deposit"}
               </a>
-              <a href={theme.withdrawUrl ?? "#"} target="_blank" rel="noreferrer">
-                <GoldButton className="w-full border-sky-400/40 bg-sky-500/15 px-2 py-2 text-[11px] text-sky-100 shadow-none">
-                  {t.withdrawtext ?? "Withdraw"}
-                </GoldButton>
-              </a>
-              <a href={theme.chatDefaultUrl ?? "#"} target="_blank" rel="noreferrer">
-                <GoldButton className="w-full border-white/20 bg-white/10 px-2 py-2 text-[11px] text-white shadow-none">
-                  {t.refreshtext ?? "Refresh"}
-                </GoldButton>
+              <a
+                href={theme.withdrawUrl ?? "/withdraw"}
+                target="_blank"
+                rel="noreferrer"
+                className="flex w-full items-center justify-center rounded-xl border border-sky-400/40 bg-sky-500/15 px-2 py-2 text-[11px] font-bold text-sky-100 shadow-none transition hover:brightness-110"
+              >
+                {t.withdrawtext ?? "Withdraw"}
               </a>
             </div>
           </GoldFrame>

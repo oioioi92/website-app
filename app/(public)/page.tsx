@@ -1,8 +1,6 @@
 import { db } from "@/lib/db";
-import { HomeClient } from "@/components/HomeClient";
-import { HomeCoverClient } from "@/components/home/HomeCoverClient";
-import { MobileHomeV2 } from "@/components/home/mobile/MobileHomeV2";
-import { MobileHomeV3 } from "@/components/home/mobile/MobileHomeV3";
+import { VividHomeClient } from "@/components/vivid/VividHomeClient";
+import { VividMobileHome } from "@/components/vivid/VividMobileHome";
 import { parseThemeJson } from "@/lib/public/theme";
 import { getActiveGamesForUi, getActivePromotionsForUi } from "@/lib/public/public-data";
 import { getProviderLogoFallback } from "@/lib/public/namedAssets";
@@ -18,128 +16,96 @@ export default async function PublicHomePage() {
   const internalTestMode = flags.internalTestMode;
   const now = new Date();
   try {
-    const [{ theme }, promotionsUi, gamesUi, social] = await Promise.all([
+    const [{ theme }, promotionsUi, gamesUi] = await Promise.all([
       getPublicTheme(),
       getActivePromotionsForUi(12, now),
-      // Mobile wants "all games" at bottom; pull more and let UI chunk it.
-      getActiveGamesForUi(120),
-      db.socialLink.findMany({
-        where: { isActive: true },
-        orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
-        select: { id: true, label: true, url: true, iconUrl: true },
-        take: 5
-      })
+      getActiveGamesForUi(120)
     ]);
 
-    const showNewHome = true;
-    // 默认开启 V3（避免线上忘记配 env 导致“怎么部署都没变化”）
-    const useHomeV3 = flags.useHomeV3;
-
-    if (showNewHome) {
-      return (
-        <>
-          <HomeCoverClient
-            logoUrl={theme.logoUrl}
-            siteName={theme.siteName}
-            legalLinks={theme.legalLinks}
-            uiText={theme.uiText}
-            routes={theme.routes}
-            announcementMarqueeText={theme.announcementMarqueeText}
-            marqueeMessages={theme.marqueeMessages}
-            centerSlotImageUrl={theme.centerSlotImageUrl}
-            loginUrl={theme.loginUrl}
-            registerUrl={theme.registerUrl}
-            depositUrl={theme.depositUrl}
-            withdrawUrl={theme.withdrawUrl}
-            actionBarDepositColor={theme.actionBarDepositColor}
-            actionBarWithdrawColor={theme.actionBarWithdrawColor}
-            actionBarButtonImages={theme.actionBarButtonImages}
-            actionBarLimits={theme.actionBarLimits}
-            liveTxBgImageUrl={theme.liveTxBgImageUrl}
+    return (
+      <>
+        <div className="hidden lg:block">
+          <VividHomeClient
+            siteName={theme.siteName ?? "KINGDOM888"}
             promotions={promotionsUi}
             games={gamesUi}
-            social={social}
-            partnershipBadgeUrl={theme.partnershipBadgeUrl}
+            loginUrl={theme.loginUrl ?? "/login"}
+            registerUrl={theme.registerUrl ?? "/register-wa"}
+            depositUrl={theme.depositUrl ?? "/deposit"}
             internalTestMode={internalTestMode}
-            useV3Layout={useHomeV3}
           />
-          <div className="lg:hidden">
-            {useHomeV3 ? (
-              <MobileHomeV3 theme={theme} promotions={promotionsUi} games={gamesUi} internalTestMode={internalTestMode} />
-            ) : (
-              <MobileHomeV2 theme={theme} promotions={promotionsUi} games={gamesUi} internalTestMode={internalTestMode} />
-            )}
-          </div>
-        </>
-      );
-    }
-
-    return <HomeClient promotions={promotionsUi} games={gamesUi} social={social} internalTestMode={internalTestMode} theme={theme} />;
+        </div>
+        <div className="lg:hidden">
+          <VividMobileHome theme={theme} promotions={promotionsUi} games={gamesUi} internalTestMode={internalTestMode} />
+        </div>
+      </>
+    );
   } catch {
+    const mockTheme = parseThemeJson(null);
+    const mockPromotions = [
+      {
+        id: "mock-1",
+        title: "Welcome Bonus 50%",
+        subtitle: null,
+        coverUrl: MOCK_PROMO_COVERS[0],
+        detailJson: { blocks: [{ type: "p", text: "Mock detail content." }] },
+        ruleJson: {},
+        percentText: "50%",
+        statusLabel: "ACTIVE" as const,
+        limitTag: "Mock Rule",
+        grantTag: "Mock Grant",
+        groupLabel: "GENERAL"
+      },
+      {
+        id: "mock-2",
+        title: "New Member Gift",
+        subtitle: null,
+        coverUrl: MOCK_PROMO_COVERS[1],
+        detailJson: { blocks: [{ type: "p", text: "Mock detail content." }] },
+        ruleJson: {},
+        percentText: "30%",
+        statusLabel: "ACTIVE" as const,
+        limitTag: "Mock Rule",
+        grantTag: "Mock Grant",
+        groupLabel: "GENERAL"
+      },
+      {
+        id: "mock-3",
+        title: "Weekly Cashback",
+        subtitle: null,
+        coverUrl: MOCK_PROMO_COVERS[2],
+        detailJson: { blocks: [{ type: "p", text: "Mock detail content." }] },
+        ruleJson: {},
+        percentText: "20%",
+        statusLabel: "SCHEDULED" as const,
+        limitTag: "Mock Rule",
+        grantTag: "Mock Grant",
+        groupLabel: "GENERAL"
+      }
+    ];
+    const mockGames = Array.from({ length: 18 }).map((_, idx) => ({
+      id: `mock-game-${idx + 1}`,
+      name: `Provider ${idx + 1}`,
+      logoUrl: getProviderLogoFallback(idx),
+      code: `P${idx + 1}`
+    }));
+
     if (!flags.useLegacyHome) {
-      // 占位数据：无后台活动时前台展示用，正式环境请配置后台活动
-      const mockPromotions = [
-        {
-          id: "mock-1",
-          title: "Welcome Bonus 50%",
-          subtitle: "Desktop mock",
-          coverUrl: MOCK_PROMO_COVERS[0],
-          detailJson: { blocks: [{ type: "p", text: "Mock detail content." }] },
-          ruleJson: {},
-          percentText: "50%",
-          statusLabel: "ACTIVE" as const,
-          limitTag: "Mock Rule",
-          grantTag: "Mock Grant",
-          groupLabel: "GENERAL"
-        },
-        {
-          id: "mock-2",
-          title: "New Member Gift",
-          subtitle: "Desktop mock",
-          coverUrl: MOCK_PROMO_COVERS[1],
-          detailJson: { blocks: [{ type: "p", text: "Mock detail content." }] },
-          ruleJson: {},
-          percentText: "30%",
-          statusLabel: "ACTIVE" as const,
-          limitTag: "Mock Rule",
-          grantTag: "Mock Grant",
-          groupLabel: "GENERAL"
-        },
-        {
-          id: "mock-3",
-          title: "Weekly Cashback",
-          subtitle: "Desktop mock",
-          coverUrl: MOCK_PROMO_COVERS[2],
-          detailJson: { blocks: [{ type: "p", text: "Mock detail content." }] },
-          ruleJson: {},
-          percentText: "20%",
-          statusLabel: "SCHEDULED" as const,
-          limitTag: "Mock Rule",
-          grantTag: "Mock Grant",
-          groupLabel: "GENERAL"
-        }
-      ];
-      const mockGames = Array.from({ length: 18 }).map((_, idx) => ({
-        id: `mock-game-${idx + 1}`,
-        name: `Provider ${idx + 1}`,
-        logoUrl: getProviderLogoFallback(idx),
-        code: `P${idx + 1}`
-      }));
-      const mockTheme = parseThemeJson(null);
       return (
         <>
-          <HomeCoverClient
-            logoUrl={null}
-            siteName="Site"
-            announcementMarqueeText={mockTheme.announcementMarqueeText}
-            routes={mockTheme.routes}
-            promotions={mockPromotions}
-            games={mockGames}
-            social={[]}
-            internalTestMode={internalTestMode}
-          />
+          <div className="hidden lg:block">
+            <VividHomeClient
+              siteName={mockTheme.siteName ?? "Site"}
+              promotions={mockPromotions}
+              games={mockGames}
+              loginUrl={mockTheme.loginUrl ?? "/login"}
+              registerUrl={mockTheme.registerUrl ?? "/register-wa"}
+              depositUrl={mockTheme.depositUrl ?? "/deposit"}
+              internalTestMode={internalTestMode}
+            />
+          </div>
           <div className="lg:hidden">
-            <MobileHomeV2 theme={mockTheme} promotions={mockPromotions} games={mockGames} internalTestMode={internalTestMode} />
+            <VividMobileHome theme={mockTheme} promotions={mockPromotions} games={mockGames} internalTestMode={internalTestMode} />
           </div>
         </>
       );

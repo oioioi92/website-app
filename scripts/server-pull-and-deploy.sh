@@ -1,7 +1,7 @@
 #!/bin/bash
 # 在服务器上执行：拉代码、构建主站、重启主站与 chat-server
 # 用法：在服务器项目根目录执行 bash scripts/server-pull-and-deploy.sh
-# 或：cd /root/website && bash scripts/server-pull-and-deploy.sh
+# 或：cd /root/website-new && bash scripts/server-pull-and-deploy.sh
 
 set -e
 cd "$(dirname "$0")/.."

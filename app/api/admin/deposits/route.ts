@@ -4,6 +4,7 @@ import { getAdminUserFromRequest } from "@/lib/auth";
 import { canManualCreateDeposit } from "@/lib/rbac";
 import { db } from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit";
+import { checkCanTopup } from "@/lib/deposit-topup-rules";
 import { parsePagination, parseSort } from "@/lib/backoffice/pagination";
 import { generateTxId } from "@/lib/backoffice/ids";
 
@@ -96,6 +97,18 @@ export async function POST(req: NextRequest) {
 
   const member = await db.member.findUnique({ where: { userRef: userId } });
   if (!member) return NextResponse.json({ error: "MEMBER_NOT_FOUND" }, { status: 404 });
+
+  const topupCheck = await checkCanTopup(member.id);
+  if (!topupCheck.allowed) {
+    return NextResponse.json(
+      {
+        error: topupCheck.reason,
+        message: "Member balance too high to topup; must be below configured threshold.",
+        currentBalance: topupCheck.currentBalance,
+      },
+      { status: 400 }
+    );
+  }
 
   const referenceNo = typeof body?.referenceNo === "string" ? body.referenceNo.trim() || null : null;
   const createdAt = body?.createdAt ? new Date(body.createdAt) : new Date();

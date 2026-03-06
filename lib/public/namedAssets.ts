@@ -213,10 +213,14 @@ const PROVIDER_KEYWORDS: Array<{ keywords: string[]; path: string }> = [
 ];
 
 const UI_ASSET_ALIASES: Array<{ keys: string[]; path: string }> = [
+  { keys: ["telegram", "tg"], path: "/assets/providers/telegram.png" },
+  { keys: ["whatsapp", "wa"], path: "/assets/providers/whatsapp.png" },
   { keys: ["home", "homepage"], path: "/assets/providers/home-button.png" },
   { keys: ["history", "record"], path: "/assets/providers/history.png" },
   { keys: ["promotion", "bonus", "freebonus"], path: "/assets/providers/promotion.png" },
-  { keys: ["chat", "livechat", "support"], path: "/assets/providers/livechat.png" },
+  { keys: ["customer-service", "customerservice", "customer_service"], path: "/assets/providers/customer-service.png" },
+  { keys: ["support", "livechat", "chat"], path: "/assets/providers/support.png" },
+  { keys: ["live"], path: "/assets/providers/livechat.png" },
   { keys: ["setting", "settings"], path: "/assets/providers/setting.png" }
 ];
 

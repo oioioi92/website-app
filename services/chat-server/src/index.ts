@@ -29,6 +29,7 @@ type BotRule = {
   id: string;
   keyword: string;
   reply: string;
+  quickReplies: string[]; // 顾客可点击的选项，如 ["存款", "提款", "账号问题"]
   enabled: boolean;
   priority: number;
   matchMode: "contains" | "equals";
@@ -48,6 +49,7 @@ type BotConfig = {
   whitelistKeywords: string[];
   blacklistKeywords: string[];
   welcomeReply: string;
+  welcomeQuickReplies: string[]; // 欢迎语下方的选项
   offlineReply: string;
   schedules: BotSchedule[];
   rules: BotRule[];
@@ -64,6 +66,7 @@ const botConfigSchema = z.object({
   whitelistKeywords: z.array(z.string().max(80)).max(100).optional(),
   blacklistKeywords: z.array(z.string().max(80)).max(100).optional(),
   welcomeReply: z.string().max(500).optional(),
+  welcomeQuickReplies: z.array(z.string().max(80)).max(10).optional(),
   offlineReply: z.string().max(500).optional(),
   schedules: z
     .array(
@@ -89,7 +92,8 @@ const botConfigSchema = z.object({
         group: z.string().max(40).optional(),
         cooldownSec: z.number().int().min(0).max(3600).optional(),
         autoTag: z.string().max(40).optional(),
-        createTicket: z.boolean().optional()
+        createTicket: z.boolean().optional(),
+        quickReplies: z.array(z.string().max(80)).max(10).optional()
       })
     )
     .max(100)
@@ -161,10 +165,16 @@ function normalizeBotConfig(raw: unknown): BotConfig {
       const reply = sanitizePlainText(typeof r.reply === "string" ? r.reply : "", 500);
       if (!keyword || !reply) return null;
       const idRaw = sanitizePlainText(typeof r.id === "string" ? r.id : "", 64);
+      const rawQuick = Array.isArray(r.quickReplies) ? r.quickReplies : [];
+      const quickReplies = rawQuick
+        .map((x) => sanitizePlainText(typeof x === "string" ? x : "", 80))
+        .filter(Boolean)
+        .slice(0, 10);
       return {
         id: idRaw || `rule_${idx + 1}`,
         keyword,
         reply,
+        quickReplies,
         enabled: r.enabled !== false,
         priority: Number.isFinite(r.priority) ? Math.max(0, Math.min(999, Number(r.priority))) : 100,
         matchMode: r.matchMode === "equals" ? "equals" : "contains",
@@ -187,6 +197,10 @@ function normalizeBotConfig(raw: unknown): BotConfig {
     whitelistKeywords: normalizeKeywordList(obj.whitelistKeywords),
     blacklistKeywords: normalizeKeywordList(obj.blacklistKeywords),
     welcomeReply: sanitizePlainText(typeof obj.welcomeReply === "string" ? obj.welcomeReply : "您好，客服在线，请直接输入问题。", 500),
+    welcomeQuickReplies: (Array.isArray(obj.welcomeQuickReplies) ? obj.welcomeQuickReplies : [])
+      .map((x) => sanitizePlainText(typeof x === "string" ? x : "", 80))
+      .filter(Boolean)
+      .slice(0, 10),
     offlineReply: sanitizePlainText(typeof obj.offlineReply === "string" ? obj.offlineReply : "客服暂时忙碌中，我们已收到你的消息，会尽快回复。", 500),
     schedules,
     rules
@@ -606,6 +620,92 @@ async function main() {
     })
   );
 
+  const statusPatchSchema = z.object({ status: z.enum(["open", "closed"]) });
+  app.patch(
+    "/chat/api/admin/conversations/:id/status",
+    asyncHandler(async (req, res) => {
+      const admin = requireAdmin(req, res);
+      if (!admin) return;
+      const conversationId = sanitizePlainText(req.params.id, 64);
+      const parsed = statusPatchSchema.safeParse(req.body);
+      if (!conversationId || !parsed.success) return res.status(400).json({ error: "INVALID_INPUT" });
+      const c = await chatDb.conversation.findUnique({ where: { id: conversationId } });
+      if (!c || c.deletedAt) return res.status(404).json({ error: "NOT_FOUND" });
+      const data: { status: string; closedAt?: Date; openedAt?: Date; openedByAgentId?: string } = {
+        status: parsed.data.status
+      };
+      if (parsed.data.status === "closed") {
+        data.closedAt = new Date();
+      } else if (parsed.data.status === "open") {
+        data.openedAt = new Date();
+        data.openedByAgentId = admin.adminId;
+      }
+      const next = await chatDb.conversation.update({ where: { id: conversationId }, data });
+      void auditEvent({
+        actorType: "admin",
+        actorId: admin.adminId,
+        action: "CONVERSATION_STATUS",
+        ip: getIpFromHeaders(req.headers as HeaderRecord),
+        conversationId,
+        detailJson: { status: next.status }
+      });
+      res.json({ ok: true, conversationId, status: next.status });
+    })
+  );
+
+  app.delete(
+    "/chat/api/admin/conversations/:id",
+    asyncHandler(async (req, res) => {
+      const admin = requireAdmin(req, res);
+      if (!admin) return;
+      const conversationId = sanitizePlainText(req.params.id, 64);
+      if (!conversationId) return res.status(400).json({ error: "INVALID_INPUT" });
+      const c = await chatDb.conversation.findUnique({ where: { id: conversationId } });
+      if (!c) return res.status(404).json({ error: "NOT_FOUND" });
+      if (c.deletedAt) return res.json({ ok: true, conversationId, deleted: true });
+      await chatDb.conversation.update({
+        where: { id: conversationId },
+        data: { deletedAt: new Date() }
+      });
+      void auditEvent({
+        actorType: "admin",
+        actorId: admin.adminId,
+        action: "CONVERSATION_DELETE",
+        ip: getIpFromHeaders(req.headers as HeaderRecord),
+        conversationId,
+        detailJson: { soft: true }
+      });
+      res.json({ ok: true, conversationId, deleted: true });
+    })
+  );
+
+  app.get(
+    "/chat/api/admin/conversations/:id/wait-logs",
+    asyncHandler(async (req, res) => {
+      const admin = requireAdmin(req, res);
+      if (!admin) return;
+      const conversationId = sanitizePlainText(req.params.id, 64);
+      if (!conversationId) return res.status(400).json({ error: "INVALID_INPUT" });
+      const rows = await chatDb.conversationWaitLog.findMany({
+        where: { conversationId },
+        orderBy: { createdAt: "desc" },
+        take: 100
+      });
+      res.json({
+        ok: true,
+        conversationId,
+        logs: rows.map((r) => ({
+          id: r.id,
+          customerMsgAt: r.customerMsgAt.toISOString(),
+          agentReplyAt: r.agentReplyAt.toISOString(),
+          waitMs: r.waitMs,
+          agentId: r.agentId,
+          createdAt: r.createdAt.toISOString()
+        }))
+      });
+    })
+  );
+
   const ticketCreateSchema = z.object({
     session_id: z.string().min(1).max(128),
     contact: z.string().max(120).optional().nullable(),
@@ -686,17 +786,43 @@ async function main() {
         return res.status(401).json({ error: "UNAUTHORIZED" });
       }
       const convs = await chatDb.conversation.findMany({
-        where: { status: { in: ["open", "assigned"] } },
+        where: {
+          status: { in: ["open", "assigned", "closed"] },
+          deletedAt: null
+        },
         orderBy: { updatedAt: "desc" },
         take: 100,
-        select: { id: true, visitorSessionId: true, status: true, assignedAdminId: true, updatedAt: true }
+        select: {
+          id: true,
+          visitorSessionId: true,
+          status: true,
+          assignedAdminId: true,
+          updatedAt: true,
+          visitorName: true,
+          visitorEmail: true,
+          visitorPhone: true,
+          visitorIp: true,
+          visitorUa: true,
+          entryUrl: true,
+          referrer: true,
+          pendingCustomerMsgAt: true,
+          firstReplyAt: true,
+          lastWaitMs: true,
+          openedAt: true,
+          openedByAgentId: true
+        }
       });
       const now = Date.now();
       const items = await Promise.all(
         convs.map(async (c) => {
-          const [lastVisitor, firstAdmin, firstVisitor] = await Promise.all([
+          const [lastVisitor, lastMessage, firstAdmin, firstVisitor] = await Promise.all([
             chatDb.message.findFirst({
               where: { conversationId: c.id, senderType: "visitor" },
+              orderBy: { createdAt: "desc" },
+              select: { bodyText: true, createdAt: true }
+            }),
+            chatDb.message.findFirst({
+              where: { conversationId: c.id },
               orderBy: { createdAt: "desc" },
               select: { createdAt: true }
             }),
@@ -711,23 +837,39 @@ async function main() {
               select: { createdAt: true }
             })
           ]);
-          const lastVisitorAt = lastVisitor?.createdAt?.getTime() ?? null;
-          const firstAdminAt = firstAdmin?.createdAt?.getTime() ?? null;
-          const firstVisitorAt = firstVisitor?.createdAt?.getTime() ?? null;
+          const pendingAt = c.pendingCustomerMsgAt?.getTime() ?? null;
+          const firstReplyAt = c.firstReplyAt?.getTime() ?? null;
           let waitingSeconds = 0;
-          if (lastVisitorAt && (!firstAdminAt || firstAdminAt < lastVisitorAt)) {
-            waitingSeconds = Math.floor((now - lastVisitorAt) / 1000);
+          if (pendingAt != null && firstReplyAt == null) {
+            waitingSeconds = Math.floor((now - pendingAt) / 1000);
           }
           const firstResponseTimeSec =
-            firstAdminAt != null && firstVisitorAt != null ? (firstAdminAt - firstVisitorAt) / 1000 : null;
+            c.lastWaitMs != null
+              ? c.lastWaitMs / 1000
+              : firstAdmin?.createdAt != null && firstVisitor?.createdAt != null
+                ? (firstAdmin.createdAt.getTime() - firstVisitor.createdAt.getTime()) / 1000
+                : null;
           return {
             id: c.id,
             visitorSessionId: c.visitorSessionId,
             status: c.status,
             assignedStaff: c.assignedAdminId,
-            lastMessageTime: lastVisitor?.createdAt?.toISOString() ?? null,
+            lastMessageTime: lastMessage?.createdAt?.toISOString() ?? lastVisitor?.createdAt?.toISOString() ?? null,
+            lastMessageText: lastVisitor?.bodyText ?? null,
             waitingSeconds,
-            firstResponseTimeSec
+            firstResponseTimeSec,
+            pendingCustomerMsgAt: c.pendingCustomerMsgAt?.toISOString() ?? null,
+            firstReplyAt: c.firstReplyAt?.toISOString() ?? null,
+            lastWaitMs: c.lastWaitMs ?? null,
+            openedAt: c.openedAt?.toISOString() ?? null,
+            openedByAgentId: c.openedByAgentId ?? null,
+            visitorName: c.visitorName ?? null,
+            visitorEmail: c.visitorEmail ?? null,
+            visitorPhone: c.visitorPhone ?? null,
+            visitorIp: c.visitorIp ?? null,
+            visitorUa: c.visitorUa ?? null,
+            entryUrl: c.entryUrl ?? null,
+            referrer: c.referrer ?? null
           };
         })
       );
@@ -977,7 +1119,11 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
 }
 
   ioVisitor.on("connection", (socket) => {
-  const ip = getIpFromHeaders(socket.handshake.headers as Record<string, string | string[] | undefined>);
+  let ip = getIpFromHeaders(socket.handshake.headers as Record<string, string | string[] | undefined>);
+  if (ip === "0.0.0.0" && socket.conn?.remoteAddress) {
+    const a = String(socket.conn.remoteAddress);
+    ip = a.replace(/^::ffff:/, "");
+  }
   const ua = typeof socket.handshake.headers["user-agent"] === "string" ? socket.handshake.headers["user-agent"] : null;
 
   void (async () => {
@@ -1009,13 +1155,16 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
     if (!sessionId) return socket.emit("error", { error: "INVALID_INPUT" });
     const entryUrl = sanitizePlainText(p.entryUrl ?? "", 2048) || null;
     const referrer = sanitizePlainText(p.referrer ?? "", 2048) || null;
+    const visitorName = sanitizePlainText(p.visitorName ?? "", 200) || null;
+    const visitorEmail = sanitizePlainText(p.visitorEmail ?? "", 320) || null;
+    const visitorPhone = sanitizePlainText(p.visitorPhone ?? "", 64) || null;
 
     void (async () => {
       const existing = await chatDb.conversation.findFirst({
         where: { visitorSessionId: sessionId, status: { in: ["open", "assigned"] } },
         orderBy: { updatedAt: "desc" }
       });
-      const c =
+      let c =
         existing ??
         (await chatDb.conversation.create({
           data: {
@@ -1024,9 +1173,22 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
             visitorIp: ip,
             visitorUa: ua,
             entryUrl,
-            referrer
+            referrer,
+            visitorName,
+            visitorEmail,
+            visitorPhone
           }
         }));
+      if (existing && (visitorName || visitorEmail || visitorPhone)) {
+        c = await chatDb.conversation.update({
+          where: { id: c.id },
+          data: {
+            ...(visitorName != null && { visitorName }),
+            ...(visitorEmail != null && { visitorEmail }),
+            ...(visitorPhone != null && { visitorPhone })
+          }
+        });
+      }
 
       socket.join(`visitor:${c.id}`);
       socket.emit("conversation_open", { conversationId: c.id, status: c.status });
@@ -1043,11 +1205,16 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
       const nowMs = Date.now();
       const botActive = botCfg.enabled && isNowInSchedule(botCfg, nowMs);
       if (botActive && botCfg.welcomeEnabled && botCfg.welcomeReply && history.length === 0) {
+        const metadataJson =
+          botCfg.welcomeQuickReplies.length > 0
+            ? ({ quickReplies: botCfg.welcomeQuickReplies } as object)
+            : undefined;
         const botRow = await chatDb.message.create({
           data: {
             conversationId: c.id,
             senderType: "system",
             bodyText: botCfg.welcomeReply,
+            metadataJson: metadataJson ?? undefined,
             ip,
             sessionId: c.visitorSessionId
           }
@@ -1088,6 +1255,17 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
           sessionId: c.visitorSessionId
         }
       });
+      try {
+        await chatDb.conversation.update({
+          where: { id: c.id },
+          data: {
+            pendingCustomerMsgAt: row.createdAt,
+            firstReplyAt: null
+          }
+        });
+      } catch {
+        // conversation update failed; ignore
+      }
       const msg = { ...row, createdAt: row.createdAt.toISOString() };
       ioVisitor.to(`visitor:${c.id}`).emit("message_new", msg);
       ioAdmin.to(`admin:${c.id}`).emit("message_new", msg);
@@ -1125,11 +1303,16 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
           });
           const tooSoon = lastBot && lastBot.bodyText === autoReply && Date.now() - lastBot.createdAt.getTime() < 20_000;
           if (!tooSoon && !cooldownBlocked) {
+            const metadataJson =
+              matchedRule?.quickReplies?.length > 0
+                ? ({ quickReplies: matchedRule.quickReplies } as object)
+                : undefined;
             const botRow = await chatDb.message.create({
               data: {
                 conversationId: c.id,
                 senderType: "system",
                 bodyText: autoReply,
+                metadataJson: metadataJson ?? undefined,
                 ip,
                 sessionId: c.visitorSessionId
               }
@@ -1269,6 +1452,10 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
     const bodyText = sanitizePlainText(p.bodyText, 2000);
     if (!bodyText) return;
     const convId = sanitizePlainText(p.conversationId, 64);
+    const quickReplies = Array.isArray(p.quickReplies)
+      ? (p.quickReplies as string[]).map((x) => sanitizePlainText(String(x), 80)).filter(Boolean).slice(0, 10)
+      : [];
+    const metadataJson = quickReplies.length > 0 ? ({ quickReplies } as object) : undefined;
     void (async () => {
       const c = await chatDb.conversation.findUnique({ where: { id: convId } });
       if (!c || c.status === "closed") return socket.emit("error", { error: "CONVERSATION_NOT_FOUND" });
@@ -1278,9 +1465,42 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
           senderType: "admin",
           adminId,
           bodyText,
+          metadataJson: metadataJson ?? undefined,
           ip
         }
       });
+      const pendingAt = c.pendingCustomerMsgAt;
+      const firstReplyAtWasNull = c.firstReplyAt == null;
+      const updateData: { lastAgentMsgAt: Date; firstReplyAt?: Date; pendingCustomerMsgAt?: null; lastWaitMs?: number } = {
+        lastAgentMsgAt: row.createdAt
+      };
+      if (pendingAt != null && firstReplyAtWasNull) {
+        const waitMs = row.createdAt.getTime() - pendingAt.getTime();
+        try {
+          await chatDb.conversationWaitLog.create({
+            data: {
+              conversationId: convId,
+              customerMsgAt: pendingAt,
+              agentReplyAt: row.createdAt,
+              waitMs,
+              agentId: adminId
+            }
+          });
+        } catch {
+          // wait log create failed; ignore
+        }
+        updateData.firstReplyAt = row.createdAt;
+        updateData.pendingCustomerMsgAt = null;
+        updateData.lastWaitMs = waitMs;
+      }
+      try {
+        await chatDb.conversation.update({
+          where: { id: convId },
+          data: updateData
+        });
+      } catch {
+        // conversation update failed; ignore
+      }
       const msg = { ...row, createdAt: row.createdAt.toISOString() };
       ioAdmin.to(`admin:${convId}`).emit("message_new", msg);
       ioVisitor.to(`visitor:${convId}`).emit("message_new", msg);

@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 function parseDateRange(dateFrom?: string | null, dateTo?: string | null) {
   const from = dateFrom ? new Date(dateFrom) : null;
-  let to: Date | null = dateTo ? new Date(dateTo) : null;
+  const to: Date | null = dateTo ? new Date(dateTo) : null;
   if (to) to.setHours(23, 59, 59, 999);
   return { from, to };
 }

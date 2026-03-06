@@ -1,21 +1,37 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Sidebar } from "@/components/admin/Sidebar";
+import { AdminQuickActionBar } from "@/components/admin/AdminQuickActionBar";
+import { AdminTopbarMenus } from "@/components/admin/AdminTopbarMenus";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { useLocale } from "@/lib/i18n/context";
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
+type AdminUser = { id: string; email: string; role: string };
+
+export function AdminShell({ children, user }: { children: React.ReactNode; user?: AdminUser }) {
+  const { t } = useLocale();
+  const [collapsed, setCollapsed] = useState(true);
   return (
     <div className={`admin-shell ${collapsed ? "admin-shell--collapsed" : ""}`} data-admin-theme="light">
-      <Sidebar collapsed={collapsed} />
+      <div
+        className="admin-sidebar-backdrop"
+        role="button"
+        tabIndex={0}
+        aria-label={t("admin.collapseMenu")}
+        onClick={() => setCollapsed(true)}
+        onKeyDown={(e) => e.key === "Enter" && setCollapsed(true)}
+      />
+      <Sidebar collapsed={collapsed} onNavigate={() => setCollapsed(true)} user={user} />
       <header className="admin-topbar">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             type="button"
             className="admin-topbar-toggle"
             onClick={() => setCollapsed((c) => !c)}
-            title={collapsed ? "展开菜单" : "收起菜单"}
-            aria-label={collapsed ? "展开菜单" : "收起菜单"}
+            title={collapsed ? t("admin.expandMenu") : t("admin.collapseMenu")}
+            aria-label={collapsed ? t("admin.expandMenu") : t("admin.collapseMenu")}
           >
             <svg className="admin-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <line x1="4" y1="6" x2="20" y2="6" />
@@ -23,12 +39,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <line x1="4" y1="18" x2="20" y2="18" />
             </svg>
           </button>
-          <span className="font-semibold text-[13px] text-[var(--compact-text)]">Admin</span>
+          <Link href="/admin" className="admin-topbar-home font-semibold text-[var(--compact-text)] hover:underline" title={t("admin.home")}>{t("admin.home")}</Link>
+          <LocaleSwitcher variant="dropdown" className="admin-topbar-locale ml-2" />
         </div>
-        <div className="flex items-center gap-3 text-[13px] text-[var(--compact-muted)]">
-          <span className="text-red-600 font-bold text-xs uppercase tracking-wide">BANK MAINTENANCE</span>
-          <span>👤 Admin</span>
-        </div>
+        <AdminQuickActionBar />
+        <AdminTopbarMenus />
       </header>
       <main className="admin-page">{children}</main>
     </div>

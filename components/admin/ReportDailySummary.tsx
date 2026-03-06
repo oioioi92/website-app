@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 
 type DayRow = {
   date: string;
@@ -23,6 +24,7 @@ const INPUT_CLASS = "rounded-lg border border-slate-200 bg-white px-3 py-2 text-
 const LABEL_CLASS = "mb-1 block text-xs font-medium text-slate-500";
 
 export function ReportDailySummary() {
+  const { t } = useLocale();
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [rows, setRows] = useState<DayRow[]>([]);
@@ -74,9 +76,9 @@ export function ReportDailySummary() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">加载中…</td></tr>
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">{t("admin.common.loading")}</td></tr>
             ) : rows.length === 0 ? (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">无数据</td></tr>
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-500">{t("admin.common.noRecords")}</td></tr>
             ) : (
               rows.map((r) => (
                 <tr key={r.date} className="border-b border-slate-100 hover:bg-slate-50/50">

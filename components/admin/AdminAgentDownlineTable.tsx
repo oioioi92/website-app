@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 
 type Row = {
   id: string;
@@ -28,6 +29,7 @@ export function AdminAgentDownlineTable({
   title: string;
   rows: Row[];
 }) {
+  const { t } = useLocale();
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const paginatedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -58,10 +60,10 @@ export function AdminAgentDownlineTable({
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">
                       <Link href={`/admin/players/${r.id}/wallet`} className="font-mono text-sky-600 hover:underline">{maskUserRef(r.userRef)}</Link>
-                      <button type="button" className="rounded p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-600" title="编辑" aria-label="编辑">
+                      <button type="button" className="rounded p-0.5 text-slate-400 hover:bg-slate-200 hover:text-slate-600" title={t("admin.common.edit")} aria-label={t("admin.common.edit")}>
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                       </button>
-                      <button type="button" className="rounded p-0.5 text-red-400 hover:bg-red-50 hover:text-red-600" title="移除" aria-label="移除">
+                      <button type="button" className="rounded p-0.5 text-red-400 hover:bg-red-50 hover:text-red-600" title={t("admin.common.remove")} aria-label={t("admin.common.remove")}>
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                       </button>
                     </div>

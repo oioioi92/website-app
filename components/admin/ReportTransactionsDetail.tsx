@@ -1,34 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const TYPE_OPTIONS = [
-  { value: "", label: "全部" },
-  { value: "DEPOSIT", label: "DEPOSIT" },
-  { value: "STAFF DEPOSIT", label: "STAFF DEPOSIT" },
-  { value: "STAFF MANUAL DEPOSIT", label: "STAFF MANUAL DEPOSIT" },
-  { value: "AUTOPAY DEPOSIT", label: "AUTOPAY DEPOSIT" },
-  { value: "WITHDRAW", label: "WITHDRAW" },
-  { value: "STAFF WITHDRAW", label: "STAFF WITHDRAW" },
-  { value: "AUTOPAY WITHDRAW", label: "AUTOPAY WITHDRAW" },
-  { value: "BONUS", label: "BONUS" },
-  { value: "MANUAL", label: "MANUAL" },
-  { value: "ANGPAO", label: "ANGPAO" },
-  { value: "REBATE", label: "REBATE" },
-  { value: "FORFEITED", label: "FORFEITED" },
-  { value: "COMMISSION", label: "COMMISSION" },
-  { value: "LOSSCREDIT", label: "LOSSCREDIT" },
-  { value: "DEPOSIT FEE", label: "DEPOSIT FEE" },
-  { value: "TIP", label: "TIP" }
-];
-
-const STATUS_OPTIONS = [
-  { value: "ANY", label: "任意" },
-  { value: "CREATED", label: "CREATED" },
-  { value: "PROCESSED", label: "PROCESSED" },
-  { value: "APPROVED", label: "APPROVED" },
-  { value: "REJECTED", label: "REJECTED" }
-];
+import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
+import { TX_TYPE_ALL_OPTIONS, RECORDS_STATUS_OPTIONS } from "@/lib/backoffice/filter-options";
 
 type TxRow = {
   id: string;
@@ -101,14 +76,15 @@ const inputClass =
 const labelClass = "mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500";
 
 export function ReportTransactionsDetail() {
+  const { t } = useLocale();
   const [txId, setTxId] = useState("");
   const [customer, setCustomer] = useState("");
-  const [type, setType] = useState("");
+  const [type, setType] = useState("ALL");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [amountMin, setAmountMin] = useState("");
   const [amountMax, setAmountMax] = useState("");
-  const [status, setStatus] = useState("ANY");
+  const [status, setStatus] = useState("ALL");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [items, setItems] = useState<TxRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -129,9 +105,13 @@ export function ReportTransactionsDetail() {
 
   return (
     <div className="mt-6 space-y-6">
+      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        {t("admin.transactions.detailDemoBeforeLink")}{" "}
+        <Link href="/admin/transactions?preset=all" className="ml-1 font-medium underline hover:text-amber-900">{t("admin.transactions.detailDemoLinkText")}</Link>.
+      </div>
       {/* 筛选区 - 企业级：白底、灰边框、统一间距 */}
       <section className="rounded-lg border border-slate-200 bg-white px-6 py-5 shadow-sm">
-        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500">筛选条件</h2>
+        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500">{t("admin.common.filterConditions")}</h2>
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           <div className="sm:col-span-2">
             <label className={labelClass}>Transaction ID</label>
@@ -156,15 +136,15 @@ export function ReportTransactionsDetail() {
           <div>
             <label className={labelClass}>Type</label>
             <select value={type} onChange={(e) => setType(e.target.value)} className={inputClass}>
-              {TYPE_OPTIONS.map((o) => (
-                <option key={o.value || "all"} value={o.value}>{o.label}</option>
+              {TX_TYPE_ALL_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </div>
           <div>
             <label className={labelClass}>Status</label>
             <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass}>
-              {STATUS_OPTIONS.map((o) => (
+              {RECORDS_STATUS_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
@@ -203,7 +183,7 @@ export function ReportTransactionsDetail() {
             onClick={() => setShowAdvanced((v) => !v)}
             className="text-xs font-medium text-slate-500 hover:text-slate-700 focus:outline-none"
           >
-            {showAdvanced ? "收起高级" : "ADVANCED →"}
+            {showAdvanced ? t("admin.transactions.collapseAdvanced") : t("admin.transactions.expandAdvanced")}
           </button>
         </div>
       </section>
@@ -220,12 +200,12 @@ export function ReportTransactionsDetail() {
       <section className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3">
           <span className="text-sm font-semibold text-slate-700">Transaction</span>
-          <span className="text-xs text-slate-500">共 {items.length} 笔</span>
+          <span className="text-xs text-slate-500">{t("admin.common.totalCount").replace("{n}", String(items.length))}</span>
         </div>
         {loading ? (
-          <div className="py-16 text-center text-sm text-slate-500">加载中…</div>
+          <div className="py-16 text-center text-sm text-slate-500">{t("admin.common.loading")}</div>
         ) : items.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-500">无记录，请调整筛选条件后 SEARCH</div>
+          <div className="py-16 text-center text-sm text-slate-500">{t("admin.common.noRecordsAdjustFilter")}</div>
         ) : (
           <ul className="divide-y divide-slate-100">
             {items.map((tx) => (

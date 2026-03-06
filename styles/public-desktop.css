@@ -1,0 +1,370 @@
+/* ============================================================
+   Desktop UI — V3 + Perodua44-style Portal
+   V3: 1560px / 12栅格 / 固定高度
+   P44: 1280px 门户 / Banner 300px / Module 260px / Tile 140x140 / gap 24
+   ============================================================ */
+
+.public-desktop-shell {
+  --desk-bg: #0E1014;
+  --desk-header-bg: #14161C;
+  --desk-panel: #232630;
+  --desk-panel-alt: #1E212A;
+  --desk-border: #3D4150;
+  --desk-text: #E6E9EE;
+  --desk-text-muted: #B8BDC7;
+  --desk-accent: #E8C85A;
+  --desk-accent-hover: #C8AC47;
+  --desk-header-h: 78px;
+  --desk-footer-h: 84px;
+  --desk-container: 1560px;
+  --desk-px: 24px;
+  --desk-gap: 24px;
+  --desk-gap-sm: 12px;
+  --desk-radius-card: 22px;
+  --desk-radius-btn: 18px;
+  /* P44 Portal: 门户站窄一点，固定模块高度 */
+  --desk-container-p44: 1280px;
+  --desk-banner-h: 300px;
+  --desk-module-h: 260px;
+  --desk-tile-size: 140px;
+  --desk-title: 22px;
+  --desk-body: 16px;
+  --desk-meta: 13px;
+  /* 兼容旧名 */
+  --desk-text-primary: #E6E9EE;
+  --desk-panel-hover: rgba(255, 255, 255, 0.06);
+}
+
+.public-desktop-shell {
+  min-height: 100vh;
+  background: var(--desk-bg);
+  color: var(--desk-text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* Page: 统一页面容器 */
+.public-desktop-shell .desk-page {
+  width: 100%;
+  max-width: var(--desk-container);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--desk-px);
+  padding-right: var(--desk-px);
+  padding-bottom: 40px;
+}
+
+/* Grid12: 12 栅格 gap-24px */
+.public-desktop-shell .desk-grid12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--desk-gap);
+}
+
+/* 兼容旧 class */
+.public-desktop-shell .desk-container {
+  width: 100%;
+  max-width: var(--desk-container);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--desk-px);
+  padding-right: var(--desk-px);
+}
+
+/* ========== Header / Footer 固定高度 ========== */
+.public-desktop-shell [data-desktop-header] {
+  height: var(--desk-header-h);
+  border-bottom: 2px solid var(--desk-border);
+  background: var(--desk-header-bg);
+}
+
+.public-desktop-shell [data-desktop-header] .desk-container,
+.public-desktop-shell [data-desktop-header] .desk-page {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.public-desktop-shell [data-desktop-header] a,
+.public-desktop-shell [data-desktop-header] button {
+  color: var(--desk-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.public-desktop-shell [data-desktop-header] a:hover,
+.public-desktop-shell [data-desktop-header] button:hover {
+  color: #fff;
+}
+
+.public-desktop-shell [data-desktop-footer] {
+  height: var(--desk-footer-h);
+  min-height: var(--desk-footer-h);
+  border-top: 2px solid var(--desk-border);
+  background: var(--desk-header-bg);
+  font-size: 13px;
+  color: var(--desk-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.public-desktop-shell [data-desktop-footer] a {
+  color: var(--desk-text-muted);
+}
+
+.public-desktop-shell [data-desktop-footer] a:hover {
+  color: var(--desk-text);
+}
+
+.public-desktop-shell [data-desktop-footer] .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--desk-gap-sm) var(--desk-gap);
+}
+
+/* ========== Card 固定（所有卡片同一套）========== */
+.public-desktop-shell .desk-card {
+  border-radius: var(--desk-radius-card);
+  border: 2px solid var(--desk-border);
+  background: var(--desk-panel);
+  padding: var(--desk-gap);
+}
+
+/* CardHead: 标题行高度统一 56px */
+.public-desktop-shell .desk-card-head {
+  height: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  margin: calc(-1 * var(--desk-gap)) calc(-1 * var(--desk-gap)) var(--desk-gap);
+  margin-bottom: var(--desk-gap);
+  padding-left: var(--desk-gap);
+  padding-right: var(--desk-gap);
+  border-bottom: 1px solid var(--desk-border);
+  background: transparent;
+}
+
+.public-desktop-shell .desk-card-head:first-child {
+  margin-top: calc(-1 * var(--desk-gap));
+}
+
+/* CardBody: flex-col gap-3（12px）*/
+.public-desktop-shell .desk-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--desk-gap-sm);
+  flex: 1;
+  min-height: 0;
+}
+
+/* CardFoot: 按钮区贴底 mt-auto */
+.public-desktop-shell .desk-card-foot {
+  margin-top: auto;
+  display: flex;
+  gap: var(--desk-gap-sm);
+  padding-top: var(--desk-gap);
+}
+
+/* ========== Button 固定 48px 高 radius 18px ========== */
+.public-desktop-shell .desk-btn-primary,
+.public-desktop-shell .desk-btn-primary-BtnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: var(--desk-radius-btn);
+  border: none;
+  background: var(--desk-accent);
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.public-desktop-shell .desk-btn-primary:hover,
+.public-desktop-shell .desk-btn-primary-BtnPrimary:hover {
+  background: var(--desk-accent-hover);
+}
+
+.public-desktop-shell .desk-btn-secondary,
+.public-desktop-shell .desk-btn-secondary-BtnSecond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: var(--desk-radius-btn);
+  border: 2px solid var(--desk-border);
+  background: var(--desk-header-bg);
+  color: var(--desk-text);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.public-desktop-shell .desk-btn-secondary:hover,
+.public-desktop-shell .desk-btn-secondary-BtnSecond:hover {
+  background: var(--desk-panel-hover);
+  border-color: var(--desk-accent);
+}
+
+/* Input 固定 */
+.public-desktop-shell .desk-input {
+  height: 48px;
+  min-height: 48px;
+  border-radius: var(--desk-radius-btn);
+  border: 2px solid var(--desk-border);
+  background: var(--desk-header-bg);
+  color: var(--desk-text);
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+/* ListRow 固定 72px */
+.public-desktop-shell .desk-list-row {
+  height: 72px;
+  min-height: 72px;
+  border-radius: var(--desk-radius-btn);
+  border: 2px solid var(--desk-border);
+  background: var(--desk-header-bg);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: var(--desk-gap);
+}
+
+/* 区块标题 */
+.public-desktop-shell .desk-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--desk-text);
+  margin: 0;
+}
+
+.public-desktop-shell .desk-section-desc {
+  font-size: 13px;
+  color: var(--desk-text-muted);
+  margin: 0;
+}
+
+/* ========== P44 Portal: 中灰外围 + 金属舞台 + 金属卡片 ========== */
+.public-desktop-shell.p44-shell,
+.public-desktop-shell[data-p44-dock] {
+  background: #8f8f8f;
+  padding-bottom: 80px;
+}
+
+/* P44 顶栏保持深色 */
+.public-desktop-shell[data-p44-dock] [data-desktop-header] {
+  background: var(--desk-header-bg);
+}
+
+.public-desktop-shell .desk-page-p44 {
+  max-width: var(--desk-container-p44);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--desk-px);
+  padding-right: var(--desk-px);
+  padding-bottom: 24px;
+}
+
+/* P44 中栏舞台：金属内阴影、小圆角 */
+.public-desktop-shell[data-p44-dock] .desk-center-stage.p44-stage {
+  min-height: 480px;
+  background: #e2e4e8;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -3px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* P44 卡片：浅灰金属面板感（双层边框 + inset 高光） */
+.public-desktop-shell[data-p44-dock] .desk-card {
+  border-radius: 12px;
+  background: linear-gradient(#ededed, #d6d6d6);
+  color: #111;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.public-desktop-shell[data-p44-dock] .desk-card h2,
+.public-desktop-shell[data-p44-dock] .desk-card h3,
+.public-desktop-shell[data-p44-dock] .desk-card .desk-card-head,
+.public-desktop-shell[data-p44-dock] .desk-card [class*="text-[var(--desk-"] {
+  color: #1a1a1a;
+}
+
+.public-desktop-shell .desk-section-gap > * + * {
+  margin-top: var(--desk-gap);
+}
+
+/* BannerCard: Hero 等，固定 300px */
+.public-desktop-shell .desk-banner-card {
+  height: var(--desk-banner-h);
+  min-height: var(--desk-banner-h);
+  border-radius: var(--desk-radius-card);
+  border: 2px solid var(--desk-border);
+  background: var(--desk-panel);
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* ModuleCard: LiveTx/Wallet 等，固定 260px */
+.public-desktop-shell .desk-module-card {
+  height: var(--desk-module-h);
+  min-height: var(--desk-module-h);
+  border-radius: var(--desk-radius-card);
+  border: 2px solid var(--desk-border);
+  background: var(--desk-panel);
+  padding: var(--desk-gap);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* Tile 140x140：双圈 + 阴影 + hover 抬升 */
+.public-desktop-shell .desk-tile {
+  width: var(--desk-tile-size);
+  height: var(--desk-tile-size);
+  min-width: var(--desk-tile-size);
+  min-height: var(--desk-tile-size);
+  border-radius: 18px;
+  border: 2px solid var(--desk-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  background: var(--desk-panel-alt);
+}
+
+.public-desktop-shell .desk-tile:hover {
+  border-color: var(--desk-accent);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+
+/* 非 P44 时的 center stage（保留原有） */
+.public-desktop-shell .desk-center-stage {
+  min-height: 480px;
+  border-radius: 12px;
+  padding: var(--desk-gap);
+}
+
+.public-desktop-shell:not([data-p44-dock]) .desk-center-stage {
+  background: #e2e4e8;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.public-desktop-shell .desk-center-stage .desk-card,
+.public-desktop-shell .desk-center-stage [class*="border-"] {
+  border-color: #3d4150;
+}

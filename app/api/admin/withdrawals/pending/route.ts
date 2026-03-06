@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   const [items, total] = await Promise.all([
     db.withdrawalRequest.findMany({
       where,
-      include: { member: { select: { id: true, userRef: true, displayName: true } } },
+      include: { member: { select: { id: true, userRef: true, displayName: true, mobile: true } } },
       orderBy: { [sortBy]: sortOrder },
       skip,
       take: pageSize
@@ -33,6 +33,8 @@ export async function GET(req: NextRequest) {
       wdId: w.wdId,
       userId: w.member.userRef,
       memberId: w.memberId,
+      displayName: w.member.displayName ?? null,
+      mobile: w.member.mobile ?? null,
       amount: Number(w.amount),
       walletSnapshot: w.walletSnapshot != null ? Number(w.walletSnapshot) : null,
       bankName: w.bankName,

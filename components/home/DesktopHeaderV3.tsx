@@ -1,65 +1,69 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { FallbackImage } from "@/components/FallbackImage";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { useLocale } from "@/lib/i18n/context";
 
-const LANG_OPTIONS = [
-  { value: "en", label: "EN" },
-  { value: "zh", label: "中文" }
+/** Desktop KINGDOM888-style nav: Home, Games, Promo, Bonus, Support (DESKTOP-UI-DESIGN-SPEC) */
+const NAV_KEYS = [
+  { key: "public.nav.home", href: "/" },
+  { key: "public.nav.game", href: "/games" },
+  { key: "promo", href: "/promotion" },
+  { key: "public.nav.bonus", href: "/bonus" },
+  { key: "public.nav.support", href: "/chat" },
 ];
+
+const NAV_LABELS: Record<string, string> = {
+  "public.nav.home": "Home",
+  "public.nav.game": "Games",
+  "promo": "Promo",
+  "public.nav.bonus": "Bonus",
+  "public.nav.support": "Support",
+};
 
 export function DesktopHeaderV3({
   logoUrl,
-  siteName = "Site"
+  siteName = "Site",
+  loginUrl,
+  registerUrl
 }: {
   logoUrl: string | null;
   siteName?: string;
+  loginUrl?: string | null;
+  registerUrl?: string | null;
 }) {
-  const [lang, setLang] = useState<"en" | "zh">("en");
+  const { t } = useLocale();
 
   return (
-    <header className="sticky top-0 z-40 hidden border-b border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)] backdrop-blur lg:flex lg:flex-col" data-testid="header-v3">
-      <div className="mx-auto flex h-16 w-full max-w-[1320px] items-center justify-between px-6">
-        <button type="button" className="flex h-9 w-9 items-center justify-center rounded-lg text-[color:var(--p44-text-dark)]" aria-label="菜单">
-          <span className="text-xl leading-none">☰</span>
-        </button>
-        <Link href="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-40 hidden lg:block" data-desktop-header data-testid="header-v3">
+      <div className="desk-container">
+        <Link href="/" className="flex shrink-0 items-center gap-3">
           {logoUrl ? (
             <FallbackImage
               src={logoUrl}
-              alt="Logo"
-              className="ui-asset-img ui-desktop-logo rounded-lg object-cover ring-1 ring-[color:var(--p44-green)]/40"
+              alt=""
+              className="h-8 w-8 rounded-[18px] object-cover ring-1 ring-white/10"
             />
-          ) : (
-            <div className="ui-desktop-logo rounded-lg bg-[color:var(--p44-green)]/20 ring-1 ring-[color:var(--p44-green)]/40" />
-          )}
-          <span className="text-lg font-black tracking-tight text-[color:var(--p44-text-dark)]">{siteName || "PERODUA"}</span>
-          <span className="text-lg font-black text-[color:var(--p44-red)]">44</span>
+          ) : null}
+          <span className="text-base font-semibold text-[var(--desk-text)]">{siteName || "Site"}</span>
         </Link>
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded bg-[color:var(--p44-red)] text-xs font-bold text-white">4</span>
-          <span className="flex h-8 w-8 items-center justify-center rounded bg-[color:var(--p44-grey-panel)] text-xs font-bold text-white">4</span>
-          <div className="flex items-center gap-1 rounded-lg border border-[color:var(--p44-grey-light)]/50 bg-white/80 p-0.5" role="group" aria-label="Language">
-            {LANG_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setLang(opt.value as "en" | "zh")}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                  lang === opt.value
-                    ? "bg-[color:var(--p44-green)]/30 text-[color:var(--p44-green-dark)]"
-                    : "text-[color:var(--p44-text-dark)]/70 hover:bg-white"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+        <nav className="flex items-center gap-1" aria-label={t("public.menu.aria")}>
+          {NAV_KEYS.map((item) => (
+            <Link key={item.href + item.key} href={item.href} className="nav-link">
+              {NAV_LABELS[item.key] ?? t(item.key)}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex shrink-0 items-center gap-3">
+          <LocaleSwitcher variant="compact" dark />
+          <Link href={registerUrl || "/register-wa"} className="desk-btn-secondary">
+            {t("public.actions.register")}
+          </Link>
+          <Link href={loginUrl || "/login"} className="desk-btn-primary">
+            {t("public.actions.login")}
+          </Link>
         </div>
-      </div>
-      <div className="hidden lg:block border-t border-[color:var(--p44-green-dark)] bg-[color:var(--p44-bar-green)] px-4 py-1.5 text-center text-[12px] font-semibold text-white">
-        Welcome! Fair and trusted platform — No Risk. Play with confidence.
       </div>
     </header>
   );

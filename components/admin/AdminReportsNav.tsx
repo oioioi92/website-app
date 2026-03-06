@@ -2,19 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import { REPORT_GROUPS, LEGACY_REPORTS } from "@/lib/backoffice/report-center-config";
 
 export function AdminReportsNav() {
+  const { t } = useLocale();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const o: Record<string, boolean> = {};
     REPORT_GROUPS.forEach((g, i) => {
-      o[g.title] = i === 0;
+      o[g.key] = i === 0;
     });
     return o;
   });
 
-  const toggle = (title: string) => {
-    setOpenGroups((prev) => ({ ...prev, [title]: !prev[title] }));
+  const toggle = (key: string) => {
+    setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
@@ -26,34 +28,34 @@ export function AdminReportsNav() {
         Report Center
       </div>
       <nav className="py-1">
-        <div className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">常用</div>
+        <div className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{t("admin.reportGroup.frequent")}</div>
         <ul className="space-y-0.5">
           {LEGACY_REPORTS.map((item) => (
             <li key={item.slug}>
               <Link href={`/admin/reports/${item.slug}`} className="block rounded-lg py-2 pl-3 pr-2 text-[13px] font-medium text-sky-800 transition hover:bg-sky-200/50 hover:text-sky-900">
-                {item.label}
+                {t(`admin.reportTitle.${item.slug}` as "admin.reportTitle.transactions-detail") || item.label}
               </Link>
             </li>
           ))}
         </ul>
         {REPORT_GROUPS.map((group) => (
-          <div key={group.title} className="mt-1">
+          <div key={group.key} className="mt-1">
             <button
               type="button"
-              onClick={() => toggle(group.title)}
+              onClick={() => toggle(group.key)}
               className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-[12px] font-semibold uppercase tracking-wide text-sky-800 hover:bg-sky-200/50"
             >
-              {group.title}
-              <svg className={`h-3.5 w-3.5 shrink-0 text-sky-600 transition-transform ${openGroups[group.title] ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {t(`admin.reportGroup.${group.key}` as "admin.reportGroup.funds")}
+              <svg className={`h-3.5 w-3.5 shrink-0 text-sky-600 transition-transform ${openGroups[group.key] ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            {openGroups[group.title] && (
+            {openGroups[group.key] && (
               <ul className="space-y-0.5 border-l border-sky-200/80 ml-3 pl-2 py-1">
                 {group.items.map((item) => (
                   <li key={item.slug}>
                     <Link href={`/admin/reports/${item.slug}`} className="block py-1.5 pl-1 pr-2 text-[13px] font-medium text-sky-800 transition hover:bg-sky-200/50 hover:text-sky-900">
-                      {item.label}
+                      {(t as (k: string) => string)(`admin.reportTitle.${item.slug}`) || item.label}
                     </Link>
                   </li>
                 ))}

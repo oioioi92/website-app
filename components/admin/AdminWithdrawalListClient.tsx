@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 
 type Row = {
   id: string;
@@ -17,6 +18,7 @@ type Row = {
 };
 
 export function AdminWithdrawalListClient() {
+  const { t } = useLocale();
   const [items, setItems] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -88,9 +90,9 @@ export function AdminWithdrawalListClient() {
         </div>
       </div>
       {loading ? (
-        <p className="text-slate-500">加载中…</p>
+        <p className="text-slate-500">{t("admin.common.loading")}</p>
       ) : items.length === 0 ? (
-        <p className="text-slate-500">无记录</p>
+        <p className="text-slate-500">{t("admin.common.noRecords")}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-sm">

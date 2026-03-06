@@ -5,6 +5,12 @@ type WidgetRuntimeConfig = {
   mountSelector?: string;
   /** override button label */
   buttonText?: string;
+  /** 访客姓名，展示在后台会话列表 */
+  visitorName?: string;
+  /** 访客邮箱 */
+  visitorEmail?: string;
+  /** 访客电话/WhatsApp 等 */
+  visitorPhone?: string;
 };
 
 function jsString(value: unknown) {
@@ -22,7 +28,10 @@ export function getWidgetScript() {
   var DEFAULTS = ${jsString({
     serverBaseUrl: "",
     mountSelector: "",
-    buttonText: "Chat"
+    buttonText: "Chat",
+    visitorName: "",
+    visitorEmail: "",
+    visitorPhone: ""
   } satisfies WidgetRuntimeConfig)};
 
   function getConfig(){
@@ -96,7 +105,8 @@ export function getWidgetScript() {
       + '.cw_msgs{padding:10px 12px;height:calc(100% - 98px);overflow:auto}'
       + '.cw_msg{margin-bottom:8px;padding:8px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.25)}'
       + '.cw_meta{display:flex;justify-content:space-between;font-size:10px;opacity:.65;margin-bottom:4px}'
-      + '.cw_body{white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.35}'
+      + '.cw_body{white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.35;max-height:100px;overflow-y:auto}'
+      + '@media(max-width:420px){.cw_body{font-size:12px;max-height:80px}.cw_panel{width:calc(100vw - 24px);max-height:calc(100vh - 100px)}.cw_msgs{padding:8px 10px}.cw_bar{padding:8px 10px}.cw_meta{font-size:9px}.cw_opts{max-height:60px;overflow-y:auto}}'
       + '.cw_bar{display:flex;gap:8px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.25)}'
       + '.cw_in{flex:1;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;padding:8px 10px;font-size:13px;outline:none}'
       + '.cw_send{border-radius:10px;border:1px solid rgba(16,185,129,.45);background:rgba(16,185,129,.18);color:#d1fae5;font-weight:800;padding:8px 10px;cursor:pointer}'
@@ -223,7 +233,7 @@ export function getWidgetScript() {
       });
     });
 
-    function addMessage(sender, body){
+    function addMessage(sender, body, options){
       var wrap = el('div','cw_msg');
       var meta = el('div','cw_meta');
       var left = el('span','');
@@ -236,6 +246,22 @@ export function getWidgetScript() {
       text(bodyEl, body);
       wrap.appendChild(meta);
       wrap.appendChild(bodyEl);
+      if (options && options.length > 0) {
+        var optsWrap = el('div','cw_opts');
+        optsWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;';
+        for (var i = 0; i < options.length; i++) {
+          (function(optText){
+            var btn = el('button','cw_opt_btn');
+            btn.style.cssText = 'padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-size:12px;cursor:pointer;';
+            text(btn, optText);
+            btn.addEventListener('click', function(){
+              if (socket && socket.connected && conversationId) socket.emit('visitor_message', { conversationId: conversationId, bodyText: optText });
+            });
+            optsWrap.appendChild(btn);
+          })(options[i]);
+        }
+        wrap.appendChild(optsWrap);
+      }
       msgs.appendChild(wrap);
       msgs.scrollTop = msgs.scrollHeight;
     }
@@ -247,14 +273,20 @@ export function getWidgetScript() {
       }
       socket = window.io(baseUrl(), { path:'/ws-visitor', transports:['websocket'] });
       socket.on('connect', function(){
-        socket.emit('visitor_hello', { sessionId: sessionId, entryUrl: location.href, referrer: document.referrer || null });
+        var cfg = getConfig();
+        var payload = { sessionId: sessionId, entryUrl: location.href, referrer: document.referrer || null };
+        if (cfg.visitorName != null && String(cfg.visitorName).trim()) payload.visitorName = String(cfg.visitorName).trim();
+        if (cfg.visitorEmail != null && String(cfg.visitorEmail).trim()) payload.visitorEmail = String(cfg.visitorEmail).trim();
+        if (cfg.visitorPhone != null && String(cfg.visitorPhone).trim()) payload.visitorPhone = String(cfg.visitorPhone).trim();
+        socket.emit('visitor_hello', payload);
       });
       socket.on('conversation_open', function(p){
         conversationId = p && p.conversationId || null;
       });
       socket.on('message_new', function(m){
         if (!m) return;
-        addMessage(m.senderType || 'unknown', m.bodyText || '');
+        var opts = m.metadataJson && Array.isArray(m.metadataJson.quickReplies) ? m.metadataJson.quickReplies : null;
+        addMessage(m.senderType || 'unknown', m.bodyText || '', opts);
       });
       socket.on('error', function(e){
         var msg = e && (e.error || e.message) ? (e.error || e.message) : 'error';
@@ -262,16 +294,24 @@ export function getWidgetScript() {
       });
     }
 
+    var sendLock = false;
     function send(){
+      if (sendLock) return;
       var v = (input.value || '').trim();
       if (!v) return;
+      sendLock = true;
       input.value = '';
-      if (!socket || !socket.connected) return addMessage('system', 'not connected');
-      if (!conversationId) return addMessage('system', 'no conversation');
+      if (!socket || !socket.connected) { sendLock = false; return addMessage('system', 'not connected'); }
+      if (!conversationId) { sendLock = false; return addMessage('system', 'no conversation'); }
       socket.emit('visitor_message', { conversationId: conversationId, bodyText: v });
+      setTimeout(function(){ sendLock = false; }, 400);
     }
     sendBtn.addEventListener('click', send);
-    input.addEventListener('keydown', function(e){ if (e.key === 'Enter') send(); });
+    input.addEventListener('keydown', function(e){
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      send();
+    });
 
     connect();
     renderMode('chat');

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 
 type Row = {
   id: string;
@@ -18,6 +19,7 @@ type Row = {
 };
 
 export function AdminPendingWithdrawalsClient() {
+  const { t } = useLocale();
   const [tab, setTab] = useState<"PENDING" | "PROCESSING">("PENDING");
   const [items, setItems] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
@@ -106,32 +108,32 @@ export function AdminPendingWithdrawalsClient() {
           onClick={() => { setTab("PENDING"); setPage(1); }}
           className={`rounded px-3 py-1.5 text-sm ${tab === "PENDING" ? "bg-sky-600 text-white" : "bg-slate-200 text-slate-700"}`}
         >
-          Queue (未分配)
+          Queue ({t("admin.pendingWith.queueUnassigned")})
         </button>
         <button
           type="button"
           onClick={() => { setTab("PROCESSING"); setPage(1); }}
           className={`rounded px-3 py-1.5 text-sm ${tab === "PROCESSING" ? "bg-sky-600 text-white" : "bg-slate-200 text-slate-700"}`}
         >
-          Processing (处理中)
+          Processing ({t("admin.pendingWith.processing")})
         </button>
       </div>
       {loading ? (
-        <p className="text-slate-500">加载中…</p>
+        <p className="text-slate-500">{t("admin.common.loading")}</p>
       ) : items.length === 0 ? (
-        <p className="text-slate-500">暂无待处理提款</p>
+        <p className="text-slate-500">{t("admin.pendingWith.noPending")}</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-100/90">
-                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">时间</th>
+                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">{t("admin.common.time")}</th>
                 <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">Wd ID</th>
                 <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">User ID</th>
                 <th className="px-4 py-3.5 text-right text-[13px] font-semibold uppercase tracking-wide text-slate-800">Amount (RM)</th>
-                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">银行/账户</th>
-                <th className="px-4 py-3.5 text-right text-[13px] font-semibold uppercase tracking-wide text-slate-800">等待(秒)</th>
-                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">操作</th>
+                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">{t("admin.common.bankAccount")}</th>
+                <th className="px-4 py-3.5 text-right text-[13px] font-semibold uppercase tracking-wide text-slate-800">{t("admin.common.waitSeconds")}</th>
+                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">{t("admin.common.action")}</th>
               </tr>
             </thead>
             <tbody>
@@ -144,34 +146,34 @@ export function AdminPendingWithdrawalsClient() {
                   <td className="px-4 py-3 text-[15px] font-medium text-slate-900">{[r.bankName, r.bankAccount].filter(Boolean).join(" / ") || "-"}</td>
                   <td className="px-4 py-3 text-right text-[15px] font-medium text-slate-900">{r.elapsedSec}</td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/withdrawals/${r.id}`} className="mr-2 text-sky-600 hover:underline">详情</Link>
+                    <Link href={`/admin/withdrawals/${r.id}`} className="mr-2 text-sky-600 hover:underline">{t("admin.common.detail")}</Link>
                     {r.status === "PENDING" && (
                       <button type="button" onClick={() => assign(r.id)} className="mr-2 text-slate-600 hover:underline">Assign</button>
                     )}
                     <button type="button" onClick={() => approve(r.id)} className="mr-2 text-green-600 hover:underline">Approve</button>
                     {rejectId === r.id ? (
                       <span className="inline-flex items-center gap-1">
-                        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="必填原因" className="w-28 rounded border px-2 py-0.5 text-xs" />
-                        <button type="button" onClick={() => reject(r.id)} className="text-red-600 hover:underline">确认</button>
-                        <button type="button" onClick={() => { setRejectId(null); setReason(""); }}>取消</button>
+                        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t("admin.common.requiredReason")} className="w-28 rounded border px-2 py-0.5 text-xs" />
+                        <button type="button" onClick={() => reject(r.id)} className="text-red-600 hover:underline">{t("admin.common.confirm")}</button>
+                        <button type="button" onClick={() => { setRejectId(null); setReason(""); }}>{t("admin.common.cancel")}</button>
                       </span>
                     ) : (
                       <button type="button" onClick={() => { setRejectId(r.id); setBurnId(null); setReason(""); }} className="mr-2 text-red-600 hover:underline">Reject</button>
                     )}
                     {burnId === r.id ? (
                       <span className="inline-flex items-center gap-1">
-                        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="必填原因" className="w-28 rounded border px-2 py-0.5 text-xs" />
-                        <button type="button" onClick={() => burn(r.id)} className="text-orange-600 hover:underline">确认</button>
-                        <button type="button" onClick={() => { setBurnId(null); setRejectId(null); setReason(""); }}>取消</button>
+                        <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder={t("admin.common.requiredReason")} className="w-28 rounded border px-2 py-0.5 text-xs" />
+                        <button type="button" onClick={() => burn(r.id)} className="text-orange-600 hover:underline">{t("admin.common.confirm")}</button>
+                        <button type="button" onClick={() => { setBurnId(null); setRejectId(null); setReason(""); }}>{t("admin.common.cancel")}</button>
                       </span>
                     ) : (
                       <button type="button" onClick={() => { setBurnId(r.id); setRejectId(null); setReason(""); }} className="mr-2 text-orange-600 hover:underline">Burn</button>
                     )}
                     {paidId === r.id ? (
                       <span className="inline-flex items-center gap-1">
-                        <input value={paymentRef} onChange={(e) => setPaymentRef(e.target.value)} placeholder="银行参考号" className="w-28 rounded border px-2 py-0.5 text-xs" />
-                        <button type="button" onClick={() => markPaid(r.id)} className="text-sky-600 hover:underline">确认</button>
-                        <button type="button" onClick={() => { setPaidId(null); setPaymentRef(""); }}>取消</button>
+                        <input value={paymentRef} onChange={(e) => setPaymentRef(e.target.value)} placeholder={t("admin.common.bankRefPlaceholder")} className="w-28 rounded border px-2 py-0.5 text-xs" />
+                        <button type="button" onClick={() => markPaid(r.id)} className="text-sky-600 hover:underline">{t("admin.common.confirm")}</button>
+                        <button type="button" onClick={() => { setPaidId(null); setPaymentRef(""); }}>{t("admin.common.cancel")}</button>
                       </span>
                     ) : (
                       <button type="button" onClick={() => { setPaidId(r.id); setPaymentRef(""); }} className="text-sky-600 hover:underline">Mark Paid</button>
@@ -185,9 +187,9 @@ export function AdminPendingWithdrawalsClient() {
       )}
       {total > 20 && (
         <div className="mt-2 flex justify-end gap-2">
-          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded border px-2 py-1 text-sm disabled:opacity-50">上一页</button>
-          <span className="py-1 text-sm">第 {page} 页</span>
-          <button type="button" disabled={page >= Math.ceil(total / 20)} onClick={() => setPage((p) => p + 1)} className="rounded border px-2 py-1 text-sm disabled:opacity-50">下一页</button>
+          <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded border px-2 py-1 text-sm disabled:opacity-50">{t("admin.common.prevPage")}</button>
+          <span className="py-1 text-sm">{t("admin.common.pageOf").replace("{n}", String(page))}</span>
+          <button type="button" disabled={page >= Math.ceil(total / 20)} onClick={() => setPage((p) => p + 1)} className="rounded border px-2 py-1 text-sm disabled:opacity-50">{t("admin.common.nextPage")}</button>
         </div>
       )}
     </div>

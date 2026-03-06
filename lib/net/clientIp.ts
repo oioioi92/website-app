@@ -19,17 +19,9 @@ export function getClientIp(headers: Headers): string {
       .map((s) => s.trim())
       .filter(Boolean);
     const last = parts[parts.length - 1];
-    if (last) {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/c61c53b9-4e86-47a3-ab7a-2e00967a7a09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'sec-audit-pre',hypothesisId:'H2',location:'lib/net/clientIp.ts:23',message:'getClientIp used x-forwarded-for',data:{trustCf,hasXRealIp:false,xffHops:parts.length},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-      return last;
-    }
+    if (last) return last;
   }
 
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/c61c53b9-4e86-47a3-ab7a-2e00967a7a09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'sec-audit-pre',hypothesisId:'H2',location:'lib/net/clientIp.ts:33',message:'getClientIp fell back to local',data:{trustCf,hasXRealIp:!!real,hasXff:!!xff},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
   return "local";
 }
 

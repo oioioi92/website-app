@@ -44,3 +44,13 @@ export function canEnterPlayerWallet(user: AdminUser): boolean {
 export function canAssignWithdrawal(user: AdminUser): boolean {
   return hasRole(user, BACKOFFICE_ROLES);
 }
+
+/** 仅查看：报表、流水、玩家等（不包含编辑、审批、管理管理员） */
+export function canViewOnly(user: AdminUser): boolean {
+  return hasRole(user, ["viewer"]);
+}
+
+/** Security 敏感接口：IP 白名单、登录历史、活动日志等，仅 admin 可访问 */
+export function canAccessSecuritySettings(user: AdminUser): boolean {
+  return hasRole(user, ["admin"]);
+}

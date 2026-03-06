@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useLocale } from "@/lib/i18n/context";
 import { AdminPlayerDetailPanel } from "./AdminPlayerDetailPanel";
 
 type Row = {
@@ -21,12 +23,24 @@ type Row = {
 };
 
 export function AdminPlayerListClient() {
+  const { t } = useLocale();
+  const searchParams = useSearchParams();
   const [items, setItems] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [detailMember, setDetailMember] = useState<{ id: string; userRef: string; displayName: string | null } | null>(null);
+
+  const initialSearch = searchParams.get("search") ?? "";
+  const appliedInitialSearch = useRef(false);
+  useEffect(() => {
+    if (initialSearch.trim() && !appliedInitialSearch.current) {
+      appliedInitialSearch.current = true;
+      setSearch(initialSearch.trim());
+      setPage(1);
+    }
+  }, [initialSearch]);
 
   function load() {
     setLoading(true);
@@ -45,7 +59,7 @@ export function AdminPlayerListClient() {
 
   useEffect(() => {
     load();
-  }, [page]);
+  }, [page, search]);
 
   return (
     <div className="mt-6">
@@ -56,7 +70,7 @@ export function AdminPlayerListClient() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && (setPage(1), load())}
-            placeholder="User ID / 名称 / 手机号"
+            placeholder={t("admin.players.searchPlaceholder")}
             className="min-w-[220px] rounded-lg border border-slate-300 bg-slate-50/80 px-4 py-2.5 text-[15px] text-slate-800 placeholder-slate-500 focus:border-sky-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20"
           />
           <button
@@ -64,13 +78,13 @@ export function AdminPlayerListClient() {
             onClick={() => { setPage(1); load(); }}
             className="rounded-lg bg-sky-600 px-5 py-2.5 text-[15px] font-semibold text-white hover:bg-sky-700"
           >
-            搜索
+            {t("admin.players.searchBtn")}
           </button>
         </div>
       </div>
       <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         {loading ? (
-          <div className="py-12 text-center text-slate-500">加载中…</div>
+          <div className="py-12 text-center text-slate-500">{t("admin.common.loading")}</div>
         ) : items.length === 0 ? (
           <div className="py-16 text-center text-slate-500">No data available in table</div>
         ) : (
@@ -88,7 +102,7 @@ export function AdminPlayerListClient() {
                 <th className="px-4 py-3.5 text-right text-[13px] font-semibold uppercase tracking-wide text-slate-800">Deposit</th>
                 <th className="px-4 py-3.5 text-right text-[13px] font-semibold uppercase tracking-wide text-slate-800">Withdraw</th>
                 <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">Last Login</th>
-                <th className="px-4 py-3.5 text-left text-[13px] font-semibold tracking-wide text-slate-800">操作</th>
+                <th className="px-4 py-3.5 text-left text-[13px] font-semibold tracking-wide text-slate-800">{t("admin.common.action")}</th>
               </tr>
             </thead>
             <tbody>
@@ -116,7 +130,7 @@ export function AdminPlayerListClient() {
                         href={"/chat?user=" + encodeURIComponent(r.userRef)}
                         target="_blank"
                         rel="noreferrer"
-                        title="直接和该顾客聊天、发信息"
+                        title={t("admin.players.chatTitle")}
                         className="rounded-lg bg-sky-500 px-3 py-1.5 text-sm font-bold text-white hover:bg-sky-600"
                       >
                         Chat
@@ -124,7 +138,7 @@ export function AdminPlayerListClient() {
                       <span className="text-slate-300">|</span>
                       <Link
                         href={"/admin/players/" + r.id + "/wallet"}
-                        title="进入该顾客前台，查看并代操作钱包"
+                        title={t("admin.players.walletTitle")}
                         className="rounded-lg bg-sky-500 px-3 py-1.5 text-sm font-bold text-white hover:bg-sky-600"
                       >
                         Wallet
@@ -140,9 +154,9 @@ export function AdminPlayerListClient() {
         )}
         {total > 20 && (
           <div className="border-t border-slate-200 px-4 py-3 flex items-center justify-end gap-2">
-            <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 disabled:opacity-50 hover:bg-slate-50">上一页</button>
+            <button type="button" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 disabled:opacity-50 hover:bg-slate-50">{t("admin.agents.prevPage")}</button>
             <span className="rounded-lg bg-sky-100 px-3 py-1.5 text-sm font-bold text-sky-900">{page}</span>
-            <button type="button" disabled={page >= Math.ceil(total / 20)} onClick={() => setPage((p) => p + 1)} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 disabled:opacity-50 hover:bg-slate-50">下一页</button>
+            <button type="button" disabled={page >= Math.ceil(total / 20)} onClick={() => setPage((p) => p + 1)} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 disabled:opacity-50 hover:bg-slate-50">{t("admin.agents.nextPage")}</button>
           </div>
         )}
       </div>

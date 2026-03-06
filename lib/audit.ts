@@ -26,10 +26,15 @@ export async function writeAuditLog(input: {
   diffJson: unknown;
   remark?: string;
   req?: NextRequest;
+  /** 若传入则优先使用（如 getClientIp），否则从 req 头取 */
+  ip?: string | null;
+  userAgent?: string | null;
 }) {
   const raw = typeof input.diffJson === "object" && input.diffJson !== null ? input.diffJson as Record<string, unknown> : {};
   const withRemark = input.remark != null ? { ...raw, remark: input.remark } : raw;
   const normalized = JSON.parse(JSON.stringify(withRemark)) as Prisma.InputJsonValue;
+  const ip = input.ip !== undefined ? input.ip : (input.req?.headers.get("x-forwarded-for") ?? null);
+  const userAgent = input.userAgent !== undefined ? input.userAgent : (input.req?.headers.get("user-agent") ?? null);
   await db.auditLog.create({
     data: {
       actorId: input.actorId,
@@ -37,8 +42,8 @@ export async function writeAuditLog(input: {
       entityType: input.entityType,
       entityId: input.entityId,
       diffJson: normalized,
-      ip: input.req?.headers.get("x-forwarded-for") ?? null,
-      userAgent: input.req?.headers.get("user-agent") ?? null
+      ip: ip ?? null,
+      userAgent: userAgent ?? null
     }
   });
 }

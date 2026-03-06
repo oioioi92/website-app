@@ -47,7 +47,9 @@ export async function getAdminSessionFromRequest(req: NextRequest) {
 
 export async function getAdminUserFromRequest(req: NextRequest) {
   const s = await getAdminSessionFromRequest(req);
-  return s?.user ?? null;
+  if (!s) return null;
+  if (!s.session.totpOk && s.user.totpEnabled) return null;
+  return s.user;
 }
 
 export async function getAdminSessionFromCookieStore() {
@@ -66,7 +68,9 @@ export async function getAdminSessionFromCookieStore() {
 
 export async function getAdminUserFromCookieStore() {
   const s = await getAdminSessionFromCookieStore();
-  return s?.user ?? null;
+  if (!s) return null;
+  if (!s.session.totpOk && s.user.totpEnabled) return null;
+  return s.user;
 }
 
 export async function clearSessionByToken(rawToken: string | undefined) {

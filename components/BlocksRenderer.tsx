@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * 可选组件：根据后台配置的 blocks 数据渲染富文本（标题、段落、列表、按钮、图片等）。
+ * 若无「区块配置 + 统一渲染」需求，可删除本文件及 components/blocks.ts。
+ */
 import { Block } from "@/components/blocks";
 
 export function BlocksRenderer({ blocks }: { blocks: Block[] }) {

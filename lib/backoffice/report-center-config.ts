@@ -5,16 +5,19 @@
 
 export type ReportItem = { label: string; slug: string };
 
-export const REPORT_GROUPS: { title: string; items: ReportItem[] }[] = [
+export const REPORT_GROUPS: { key: string; title: string; items: ReportItem[] }[] = [
   {
+    key: "funds",
     title: "Funds（资金进出）",
     items: [
+      { label: "Transaction Report（进出来源汇总）", slug: "transaction-report" },
       { label: "All Transactions（总流水查询）", slug: "all-transactions" },
       { label: "Deposit Report（入款）", slug: "deposit-report" },
       { label: "Withdraw Report（出款）", slug: "withdraw-report" }
     ]
   },
   {
+    key: "game",
     title: "Game（游戏业绩）",
     items: [
       { label: "Win/Loss by Game（按游戏输赢）", slug: "winloss-by-game" },
@@ -23,6 +26,7 @@ export const REPORT_GROUPS: { title: string; items: ReportItem[] }[] = [
     ]
   },
   {
+    key: "bonus",
     title: "Bonus（红利/赠送）",
     items: [
       { label: "Bonus Transactions（红利交易）", slug: "bonus-transactions" },
@@ -30,10 +34,12 @@ export const REPORT_GROUPS: { title: string; items: ReportItem[] }[] = [
     ]
   },
   {
+    key: "wallet",
     title: "Wallet / Transfer（转分）",
     items: [{ label: "Transfer Report（转分记录）", slug: "transfer-report" }]
   },
   {
+    key: "gateway",
     title: "Payment Gateway（渠道对账）",
     items: [
       { label: "Gateway Transaction Search（网关搜索）", slug: "gateway-search" },
@@ -54,19 +60,52 @@ export const SLUG_TO_TITLE: Record<string, string> = (() => {
   for (const i of LEGACY_REPORTS) map[i.slug] = i.label;
   Object.assign(map, {
     "hourly-sales": "Daily Sales",
+    "bonus": "Bonus",
     "bonus-cost": "Bonus Cost Summary",
-    "user-kpi": "User KPI Daily"
+    "bank": "Bank / Reconciliation",
+    "user-kpi": "User KPI Daily",
+    "transaction-report": "Transaction Report",
+    transaction: "Transaction Report",
+    customer: "Customer Report",
+    "promotion-report": "Promotion Report",
+    commission: "Commission Report",
+    "rebate-angpao": "Rebate / Angpao Report",
+    manual: "Manual Report",
+    staff: "Staff Report",
+    "activity-log": "Activity Log",
+    feedback: "Feedback Report",
+    leaderboard: "Leaderboard",
+    "top-referrer": "Top Referrer Report",
+    "referrer-click": "Referrer Click Report",
+    "lucky-number": "Lucky Number Report",
+    "lucky-draw-4d": "Lucky Draw 4D Report",
   });
   return map;
 })();
 
 /** 前端 slug 到 API reportKey 的映射（不一致时使用） */
 export const SLUG_TO_REPORT_KEY: Record<string, string> = {
+  "bonus": "bonus-cost",
   "bonus-cost-summary": "bonus-cost",
+  "bank": "reconciliation",
   "deposit-report": "ledger-transactions",
   "withdraw-report": "ledger-transactions",
   "bonus-transactions": "ledger-transactions",
-  "transfer-report": "ledger-transactions"
+  "transfer-report": "ledger-transactions",
+  "transaction-report": "transaction-report",
+  "customer": "user-kpi",
+  "top-referrer": "top-referrer",
+  "promotion-report": "promotion-report",
+  commission: "commission",
+  staff: "staff",
+  "activity-log": "activity-log",
+  "rebate-angpao": "rebate-angpao",
+  manual: "manual",
+  feedback: "feedback",
+  leaderboard: "leaderboard",
+  "referrer-click": "referrer-click",
+  "lucky-number": "lucky-number",
+  "lucky-draw-4d": "lucky-draw-4d",
 };
 
 /** 部分 slug 使用 ledger-transactions 时的默认筛选参数 */

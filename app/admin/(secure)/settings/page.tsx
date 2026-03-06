@@ -1,24 +1,44 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 
-export const dynamic = "force-dynamic";
-
-const SECTIONS = [
-  { key: "frontend", title: "Frontend", subtitle: "前台整站设置（站点名、链接、跑马灯等）", href: "/admin/site" },
-  { key: "bank", title: "Bank", subtitle: "银行/出款账户配置", href: "/admin/settings/bank" },
-  { key: "game-api", title: "Game API", subtitle: "插件游戏 API 配置", href: "/admin/settings/game-api" },
-  { key: "payment-gateway", title: "Payment Gateway", subtitle: "支付网关 / 入款渠道配置", href: "/admin/settings/payment-gateway" }
+const SECTIONS_CONFIG = [
+  { key: "theme", titleKey: null, titleLiteral: "THEME", subtitleKey: "admin.settingsSection.themeSubtitle", href: "/admin/settings/theme" },
+  { key: "promotion-center", titleKey: null, titleLiteral: "Promotion Center", subtitleKey: "admin.settingsSection.promotionSubtitle", href: "/admin/settings/promotions/list" },
+  { key: "promotion", titleKey: null, titleLiteral: "Promotion / 优惠设置", subtitleKey: "admin.settingsSection.promotionSubtitle", href: "/admin/settings/promotion" },
+  { key: "referral", titleKey: null, titleLiteral: "Referral / 推荐设置", subtitleKey: "admin.settingsSection.referralSubtitle", href: "/admin/settings/referral" },
+  { key: "bank", titleKey: null, titleLiteral: "Bank", subtitleKey: "admin.settingsSection.bankSubtitle", href: "/admin/settings/bank" },
+  { key: "deposit-topup-rules", titleKey: null, titleLiteral: "Deposit / Topup Rules", subtitleKey: "admin.settingsSection.depositTopupRulesSubtitle", href: "/admin/settings/deposit-topup-rules" },
+  { key: "games", titleKey: null, titleLiteral: "游戏管理 / Games", subtitleKey: "admin.settingsSection.gamesSubtitle", href: "/admin/settings/games" },
+  { key: "payment-gateway", titleKey: null, titleLiteral: "Payment Gateway", subtitleKey: "admin.settingsSection.paymentGatewaySubtitle", href: "/admin/settings/payment-gateway" },
+  { key: "whatsapp", titleKey: null, titleLiteral: "WhatsApp", subtitleKey: "admin.settingsSection.whatsappSubtitle", href: "/admin/settings/whatsapp" },
+  { key: "profile", titleKey: null, titleLiteral: "Personal Detail", subtitleKey: "admin.settingsSection.profileSubtitle", href: "/admin/settings/profile" }
 ];
 
 export default function AdminSettingsPage() {
+  const { t } = useLocale();
+  const sections = SECTIONS_CONFIG.map((s) => ({
+    key: s.key,
+    href: s.href,
+    title: s.titleKey ? t(s.titleKey) : s.titleLiteral!,
+    subtitle: t(s.subtitleKey),
+  }));
   return (
-    <div>
-      <h1 className="text-lg font-semibold text-[var(--compact-text)]">Settings</h1>
-      <p className="mt-0.5 text-[13px] text-[var(--compact-muted)]">银行 · 游戏 API · 支付网关</p>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {SECTIONS.map((s) => (
-          <Link key={s.key} href={s.href} className="admin-card flex flex-col gap-1 p-5 transition hover:border-[var(--compact-primary)] hover:shadow-md">
-            <span className="font-medium text-[var(--compact-text)]">{s.title}</span>
-            <span className="text-[13px] text-[var(--compact-muted)]">{s.subtitle}</span>
+    <div className="admin-page-content">
+      <header className="admin-page-title">
+        <h1>{t("admin.settingsSection.pageTitle")}</h1>
+        <p>{t("admin.settingsSection.pageSubtitle")}</p>
+      </header>
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {sections.map((s) => (
+          <Link
+            key={s.key}
+            href={s.href}
+            className="admin-card flex flex-col gap-2 p-6 rounded-xl transition-all duration-200 hover:border-[var(--compact-primary)] hover:shadow-lg hover:-translate-y-0.5"
+          >
+            <span className="font-semibold text-[15px] text-[var(--compact-text)]">{s.title}</span>
+            <span className="text-[13px] leading-relaxed text-[var(--compact-muted)]">{s.subtitle}</span>
           </Link>
         ))}
       </div>

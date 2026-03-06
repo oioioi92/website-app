@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
+import { DEPOSIT_STATUS_OPTIONS } from "@/lib/backoffice/filter-options";
 
 type Row = {
   id: string;
@@ -19,6 +21,7 @@ type Row = {
 };
 
 export function AdminDepositListClient() {
+  const { t } = useLocale();
   const [items, setItems] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -59,11 +62,9 @@ export function AdminDepositListClient() {
               onChange={(e) => setStatus(e.target.value)}
               className="min-w-[120px] rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-[15px] font-medium text-slate-800 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
             >
-              <option value="ALL">全部</option>
-              <option value="APPROVED">APPROVED</option>
-              <option value="REJECTED">REJECTED</option>
-              <option value="BURNED">BURNED</option>
-              <option value="PENDING">PENDING</option>
+              {DEPOSIT_STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
             </select>
           </div>
           <div>
@@ -84,11 +85,11 @@ export function AdminDepositListClient() {
               className="rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-[15px] font-medium text-slate-800 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 [color-scheme:light]"
             />
           </div>
-          <button type="button" onClick={() => load()} className="rounded-lg bg-sky-500 px-5 py-2.5 text-[15px] font-semibold text-white shadow-sm transition hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500/30">筛选</button>
+          <button type="button" onClick={() => load()} className="rounded-lg bg-sky-500 px-5 py-2.5 text-[15px] font-semibold text-white shadow-sm transition hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500/30">{t("admin.common.filter")}</button>
         </div>
       </div>
       {loading ? (
-        <p className="text-slate-500">加载中…</p>
+        <p className="text-slate-500">{t("admin.common.loading")}</p>
       ) : items.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white py-16 text-center text-slate-500">No data available in table</div>
       ) : (
@@ -96,14 +97,14 @@ export function AdminDepositListClient() {
           <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-100/90">
-                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">时间</th>
+                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">{t("admin.common.time")}</th>
                 <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">Tx ID</th>
                 <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">User ID</th>
                 <th className="px-4 py-3.5 text-right text-[13px] font-semibold uppercase tracking-wide text-slate-800">Amount (RM)</th>
-                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">渠道</th>
-                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">状态</th>
-                <th className="px-4 py-3.5 text-right text-[13px] font-semibold uppercase tracking-wide text-slate-800">处理时长(秒)</th>
-                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">操作</th>
+                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">{t("admin.common.channel")}</th>
+                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">{t("admin.depositDetail.status")}</th>
+                <th className="px-4 py-3.5 text-right text-[13px] font-semibold uppercase tracking-wide text-slate-800">{t("admin.common.processSeconds")}</th>
+                <th className="px-4 py-3.5 text-left text-[13px] font-semibold uppercase tracking-wide text-slate-800">{t("admin.common.action")}</th>
               </tr>
             </thead>
             <tbody>
@@ -117,7 +118,7 @@ export function AdminDepositListClient() {
                   <td className="px-4 py-3 text-[15px] font-medium text-slate-900">{r.status}</td>
                   <td className="px-4 py-3 text-right text-[15px] font-medium text-slate-900">{r.processingDurationSec ?? "-"}</td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/deposits/${r.id}`} className="text-sky-600 hover:underline">详情</Link>
+                    <Link href={`/admin/deposits/${r.id}`} className="text-sky-600 hover:underline">{t("admin.common.detail")}</Link>
                   </td>
                 </tr>
               ))}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 
 type WalletTx = {
   id: string;
@@ -63,9 +64,12 @@ export function AdminPlayerDetailPanel({
   initialRow: { userRef: string; displayName: string | null };
   onClose: () => void;
 }) {
+  const { t } = useLocale();
   const [detail, setDetail] = useState<MemberDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("transaction");
+  const [resetPasswordMessage, setResetPasswordMessage] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -77,6 +81,24 @@ export function AdminPlayerDetailPanel({
       })
       .finally(() => setLoading(false));
   }, [memberId]);
+
+  const handleResetPassword = () => {
+    setResetting(true);
+    setResetPasswordMessage(null);
+    fetch("/api/admin/players/" + encodeURIComponent(memberId) + "/reset-password", { method: "POST" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) setResetPasswordMessage(t("admin.players.operationFailed"));
+        else setResetPasswordMessage(d.messageText ?? "");
+      })
+      .finally(() => setResetting(false));
+  };
+
+  const copyMessage = () => {
+    if (resetPasswordMessage) {
+      navigator.clipboard.writeText(resetPasswordMessage);
+    }
+  };
 
   const displayName = detail?.displayName ?? initialRow.displayName ?? "—";
   const userRef = detail?.userRef ?? initialRow.userRef;
@@ -123,9 +145,9 @@ export function AdminPlayerDetailPanel({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4">
           {loading ? (
-            <div className="py-8 text-center text-slate-500">加载中…</div>
+            <div className="py-8 text-center text-slate-500">{t("admin.players.loading")}</div>
           ) : !detail ? (
-            <div className="py-8 text-center text-slate-500">无法加载该顾客数据</div>
+            <div className="py-8 text-center text-slate-500">{t("admin.players.loadError")}</div>
           ) : (
             <>
               {activeTab === "transaction" && (
@@ -149,7 +171,7 @@ export function AdminPlayerDetailPanel({
                       </thead>
                       <tbody>
                         {detail.walletTx.length === 0 ? (
-                          <tr><td colSpan={5} className="px-3 py-4 text-center text-slate-500">暂无流水</td></tr>
+                          <tr><td colSpan={5} className="px-3 py-4 text-center text-slate-500">{t("admin.players.noLedger")}</td></tr>
                         ) : (
                           detail.walletTx.map((t) => (
                             <tr key={t.id} className="border-b border-slate-100 bg-sky-50/30">
@@ -177,7 +199,7 @@ export function AdminPlayerDetailPanel({
                     href={"/admin/players/" + detail.id + "/wallet"}
                     className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700"
                   >
-                    进入该顾客前台代操作
+                    {t("admin.players.openWallet")}
                   </Link>
                 </div>
               )}
@@ -190,36 +212,63 @@ export function AdminPlayerDetailPanel({
                     rel="noreferrer"
                     className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700"
                   >
-                    打开聊天
+                    {t("admin.players.openChat")}
                   </a>
                 </div>
               )}
 
               {activeTab === "details" && (
-                <dl className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
-                  <dt className="text-slate-600">User ID</dt>
-                  <dd className="font-mono text-slate-900">{detail.userRef}</dd>
-                  <dt className="text-slate-600">Name</dt>
-                  <dd className="text-slate-900">{detail.displayName ?? "—"}</dd>
-                  <dt className="text-slate-600">Mobile</dt>
-                  <dd className="text-slate-900">{detail.mobile ?? "—"}</dd>
-                  <dt className="text-slate-600">Bank / Account</dt>
-                  <dd className="text-slate-900">{[detail.bankName, detail.bankAccount].filter(Boolean).join(" / ") || "—"}</dd>
-                  <dt className="text-slate-600">Register</dt>
-                  <dd className="text-slate-900">{new Date(detail.createdAt).toLocaleString()}</dd>
-                  <dt className="text-slate-600">Last Login</dt>
-                  <dd className="text-slate-900">{detail.lastLoginAt ? new Date(detail.lastLoginAt).toLocaleString() : "—"}</dd>
-                  <dt className="text-slate-600">Last Login IP</dt>
-                  <dd className="text-slate-900">{detail.lastLoginIp ?? "—"}</dd>
-                  <dt className="text-slate-600">Deposit Count</dt>
-                  <dd className="text-slate-900">{detail.depositCount}</dd>
-                  <dt className="text-slate-600">Withdraw Count</dt>
-                  <dd className="text-slate-900">{detail.withdrawCount}</dd>
-                </dl>
+                <div className="space-y-4">
+                  <dl className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
+                    <dt className="text-slate-600">User ID</dt>
+                    <dd className="font-mono text-slate-900">{detail.userRef}</dd>
+                    <dt className="text-slate-600">Name</dt>
+                    <dd className="text-slate-900">{detail.displayName ?? "—"}</dd>
+                    <dt className="text-slate-600">Mobile</dt>
+                    <dd className="text-slate-900">{detail.mobile ?? "—"}</dd>
+                    <dt className="text-slate-600">Bank / Account</dt>
+                    <dd className="text-slate-900">{[detail.bankName, detail.bankAccount].filter(Boolean).join(" / ") || "—"}</dd>
+                    <dt className="text-slate-600">Register</dt>
+                    <dd className="text-slate-900">{new Date(detail.createdAt).toLocaleString()}</dd>
+                    <dt className="text-slate-600">Last Login</dt>
+                    <dd className="text-slate-900">{detail.lastLoginAt ? new Date(detail.lastLoginAt).toLocaleString() : "—"}</dd>
+                    <dt className="text-slate-600">Last Login IP</dt>
+                    <dd className="text-slate-900">{detail.lastLoginIp ?? "—"}</dd>
+                    <dt className="text-slate-600">Deposit Count</dt>
+                    <dd className="text-slate-900">{detail.depositCount}</dd>
+                    <dt className="text-slate-600">Withdraw Count</dt>
+                    <dd className="text-slate-900">{detail.withdrawCount}</dd>
+                  </dl>
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                    <p className="mb-2 text-sm font-medium text-amber-900">{t("admin.players.resetPasswordTitle")}</p>
+                    <button
+                      type="button"
+                      onClick={handleResetPassword}
+                      disabled={resetting}
+                      className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
+                    >
+                      {resetting ? t("admin.players.resetting") : t("admin.players.resetPasswordBtn")}
+                    </button>
+                    {resetPasswordMessage && (
+                      <div className="mt-3">
+                        <pre className="whitespace-pre-wrap rounded border border-amber-200 bg-white p-3 text-sm text-slate-800">
+                          {resetPasswordMessage}
+                        </pre>
+                        <button
+                          type="button"
+                          onClick={copyMessage}
+                          className="mt-2 rounded bg-sky-600 px-3 py-1.5 text-sm text-white hover:bg-sky-700"
+                        >
+                          {t("admin.players.copyTemplate")}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
 
               {["bet", "commission", "credit", "setting", "problem", "game", "ip", "similarity", "usertag", "log"].includes(activeTab) && (
-                <div className="py-8 text-center text-slate-500">该功能后续开放</div>
+                <div className="py-8 text-center text-slate-500">{t("admin.players.comingSoon")}</div>
               )}
             </>
           )}

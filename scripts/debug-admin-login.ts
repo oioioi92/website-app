@@ -3,12 +3,16 @@
  */
 import { chromium } from "playwright-core";
 
-const loginUrl = "https://admin1167.net/admin/login";
-const email = "admin@example.com";
-const password = "change_me_123";
-const chromePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const loginUrl = process.env.DEBUG_LOGIN_URL ?? "https://admin1167.net/admin/login";
+const email = process.env.ADMIN_SEED_EMAIL ?? process.env.DEBUG_LOGIN_EMAIL ?? "";
+const password = process.env.ADMIN_SEED_PASSWORD ?? process.env.DEBUG_LOGIN_PASSWORD ?? "";
+const chromePath = process.env.CHROME_PATH ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
 async function main() {
+  if (!email || !password) {
+    console.error("请设置环境变量 ADMIN_SEED_EMAIL / ADMIN_SEED_PASSWORD 或 DEBUG_LOGIN_EMAIL / DEBUG_LOGIN_PASSWORD");
+    process.exit(1);
+  }
   console.log("=== 后台登录回跳问题排查 ===\n");
 
   const browser = await chromium.launch({

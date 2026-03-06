@@ -1,18 +1,27 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import { BankSettingsClient } from "@/components/admin/BankSettingsClient";
 
-export const dynamic = "force-dynamic";
-
 export default function AdminSettingsBankPage() {
+  const { t } = useLocale();
   return (
-    <div>
-      <div className="flex items-center gap-2 text-[13px] text-[var(--compact-muted)]">
-        <Link href="/admin/settings" className="hover:text-[var(--compact-primary)]">Settings</Link>
+    <div className="max-w-4xl">
+      <div className="flex items-center gap-2 text-[13px] text-slate-500">
+        <Link href="/admin/settings" className="hover:text-indigo-600 transition-colors">Settings</Link>
         <span>/</span>
-        <span>Bank</span>
+        <span className="font-medium text-slate-700">Bank</span>
       </div>
-      <h1 className="mt-2 text-lg font-semibold text-[var(--compact-text)]">Bank</h1>
-      <p className="mt-0.5 text-[13px] text-[var(--compact-muted)]">出款银行账户、限额、维护开关</p>
+      <div className="mt-4 rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-50/80 to-white p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-2xl">🏦</div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-800">Bank</h1>
+            <p className="mt-0.5 text-sm text-slate-500">{t("admin.settingsBank.pageSubtitle")}</p>
+          </div>
+        </div>
+      </div>
       <div className="mt-6">
         <BankSettingsClient />
       </div>

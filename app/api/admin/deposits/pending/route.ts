@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   const [items, total] = await Promise.all([
     db.depositRequest.findMany({
       where: { status: "PENDING" },
-      include: { member: { select: { id: true, userRef: true, displayName: true } } },
+      include: { member: { select: { id: true, userRef: true, displayName: true, mobile: true } } },
       orderBy: { [sortBy]: sortOrder },
       skip,
       take: pageSize
@@ -34,6 +34,8 @@ export async function GET(req: NextRequest) {
       txId: d.txId,
       userId: d.member.userRef,
       memberId: d.memberId,
+      displayName: d.member.displayName ?? null,
+      mobile: d.member.mobile ?? null,
       amount: Number(d.amount),
       channel: d.channel,
       referenceNo: d.referenceNo,

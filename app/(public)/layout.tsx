@@ -3,6 +3,7 @@ import { MobileShell } from "@/components/public/MobileShell";
 import { db } from "@/lib/db";
 import { resolveChatUrl } from "@/lib/public/theme";
 import { getPublicTheme } from "@/lib/theme/getPublicTheme";
+import { getFeatureFlags } from "@/lib/public/featureFlags";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,19 @@ function safeJsonForInlineScript(obj: unknown): string {
 }
 
 export default async function PublicLayout({ children }: { children: ReactNode }) {
-  const theme = (await getPublicTheme()).theme;
+  let theme: Awaited<ReturnType<typeof getPublicTheme>>["theme"];
+  let useVividPortal = false;
+  try {
+    const [themeRes, flags] = await Promise.all([
+      getPublicTheme(),
+      getFeatureFlags(),
+    ]);
+    theme = themeRes.theme;
+    useVividPortal = flags.useVividPortal;
+  } catch {
+    const { parseThemeJson } = await import("@/lib/public/theme");
+    theme = parseThemeJson(null);
+  }
   let social: Array<{ label: string; url: string }> = [];
   const uiAssetOverrides: Record<string, string> = {};
   try {
@@ -40,7 +53,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
   }
   const chatUrl = resolveChatUrl(theme, social);
   return (
-    <MobileShell theme={theme} chatUrl={chatUrl} socialLinks={social}>
+    <MobileShell theme={theme} chatUrl={chatUrl} socialLinks={social} useVividPortal={useVividPortal}>
       <script
         // Make overrides available to client components (namedAssets.ts reads globalThis.__UI_ASSET_OVERRIDES__).
         dangerouslySetInnerHTML={{

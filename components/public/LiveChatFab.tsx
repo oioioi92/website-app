@@ -19,13 +19,13 @@ function BrandFabIcon({
   }
   if (kind === "whatsapp") {
     return (
-      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#25D366] text-[10px] font-black text-[#063A1B]">
+      <span className="inline-flex h-8 w-8 items-center justify-center text-[10px] font-black text-[#25D366]">
         WA
       </span>
     );
   }
   return (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#2AABEE] text-[10px] font-black text-[#052535]">
+    <span className="inline-flex h-8 w-8 items-center justify-center text-[10px] font-black text-[#2AABEE]">
       TG
     </span>
   );
@@ -52,6 +52,9 @@ export function LiveChatFab({
   const [status, setStatus] = useState<"idle" | "connecting" | "online" | "error">("idle");
   const sockRef = useRef<Socket | null>(null);
   const seededRef = useRef(false);
+  const pendingMessageRef = useRef<string | null>(null);
+  const [mobilePanelHeight, setMobilePanelHeight] = useState<number | null>(null);
+  const [mobilePanelTop, setMobilePanelTop] = useState<number>(0);
 
   const wa =
     list.find((x) => x.label.toLowerCase().includes("whatsapp"))?.url?.trim() ?? null;
@@ -59,9 +62,11 @@ export function LiveChatFab({
     list.find((x) => x.label.toLowerCase().includes("telegram"))?.url?.trim() ?? null;
 
   const icon =
+    resolveUiAssetByName("customer-service") ??
+    resolveUiAssetByName("support") ??
+    resolveUiAssetByName("livechat") ??
     resolveUiAssetByName("live") ??
-    resolveUiAssetByName("chat") ??
-    resolveUiAssetByName("livechat");
+    resolveUiAssetByName("chat");
   const waIcon = resolveUiAssetByName("whatsapp");
   const tgIcon = resolveUiAssetByName("telegram");
 
@@ -107,7 +112,8 @@ export function LiveChatFab({
       });
     });
     s.on("conversation_open", (p: { conversationId?: string }) => {
-      if (p?.conversationId) setConversationId(p.conversationId);
+      const cid = p?.conversationId ?? null;
+      if (cid) setConversationId(cid);
       if (!seededRef.current) {
         seededRef.current = true;
         setMsgs((prev) => [
@@ -119,6 +125,12 @@ export function LiveChatFab({
             at: new Date().toLocaleTimeString()
           }
         ]);
+      }
+      const pending = pendingMessageRef.current;
+      if (pending && cid && sockRef.current) {
+        pendingMessageRef.current = null;
+        sockRef.current.emit("visitor_message", { conversationId: cid, bodyText: pending });
+        setMsgs((prev) => [...prev, { id: `local-${Date.now()}`, sender: "visitor", body: pending, at: new Date().toLocaleTimeString() }]);
       }
     });
     s.on("message_new", (m: { id?: string; senderType?: string; bodyText?: string; createdAt?: string }) => {
@@ -144,29 +156,51 @@ export function LiveChatFab({
     };
   }, [open, sessionId, t.livechatreadytext]);
 
+  useEffect(() => {
+    if (!open) {
+      setMobilePanelHeight(null);
+      setMobilePanelTop(0);
+      return;
+    }
+    if (typeof window === "undefined" || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const update = () => {
+      setMobilePanelTop(vv.offsetTop);
+      setMobilePanelHeight(vv.height);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+      setMobilePanelHeight(null);
+      setMobilePanelTop(0);
+    };
+  }, [open]);
+
   function sendMsg() {
     const text = input.trim();
     if (!text) return;
     if (!sockRef.current) return;
+    setInput("");
     if (!conversationId) {
-      setMsgs((prev) => [
-        ...prev,
-        { id: `sys-${Date.now()}`, sender: "system", body: t.livechatwaittext ?? "正在建立会话，请稍后再发。", at: new Date().toLocaleTimeString() }
-      ]);
+      pendingMessageRef.current = text;
       return;
     }
     sockRef.current.emit("visitor_message", { conversationId, bodyText: text });
     setMsgs((prev) => [...prev, { id: `local-${Date.now()}`, sender: "visitor", body: text, at: new Date().toLocaleTimeString() }]);
-    setInput("");
   }
 
   const fullScreenPanel = open ? (
     <section
-      className="fixed inset-0 z-[9999] flex flex-col bg-[#080808] lg:!hidden"
+      className="fixed left-0 right-0 z-[9999] flex flex-col bg-[#080808] lg:!hidden"
       style={{
+        top: mobilePanelTop,
         paddingTop: "env(safe-area-inset-top)",
         paddingBottom: "env(safe-area-inset-bottom)",
-        minHeight: "100dvh"
+        height: mobilePanelHeight ?? "100dvh",
+        minHeight: mobilePanelHeight ?? "100dvh",
       }}
     >
           <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2.5">
@@ -185,13 +219,13 @@ export function LiveChatFab({
                     <span>{m.sender}</span>
                     <span>{m.at}</span>
                   </div>
-                  <p className="whitespace-pre-wrap text-xs text-white/90">{m.body}</p>
+                  <p className="whitespace-pre-wrap break-words text-xs text-white/90 max-h-20 overflow-y-auto">{m.body}</p>
                 </div>
               ))
             )}
           </div>
           <div className="shrink-0 border-t border-white/10 p-2">
-            <div className="mb-2 flex items-center gap-2 text-[10px] text-white/50">
+            <div className="mb-1.5 flex flex-wrap items-center gap-1.5 text-[10px] text-white/50">
               <span>{status === "online" ? (t.livechatonlinetext ?? "Online") : status === "connecting" ? "Connecting..." : "Offline"}</span>
               {wa ? (
                 <a href={wa} target="_blank" rel="noopener noreferrer" className="rounded border border-[color:var(--front-success)]/30 px-1.5 py-0.5 text-[color:var(--front-success-light)]">
@@ -229,7 +263,7 @@ export function LiveChatFab({
   return (
     <>
       {typeof document !== "undefined" && fullScreenPanel ? createPortal(fullScreenPanel, document.body) : null}
-      <div className={`fixed right-3 z-50 ${isChatPage ? "bottom-[208px] lg:bottom-[156px]" : "bottom-[108px] lg:bottom-[34px]"}`}>
+      <div className="fixed right-3 top-1/2 z-50 -translate-y-1/2">
         {open ? (
           <section
             className="hidden flex-1 flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#080808]/98 shadow-[0_18px_44px_rgba(0,0,0,0.6)] lg:flex lg:mb-2 lg:w-[320px] lg:max-w-[calc(100vw-24px)]"
@@ -249,13 +283,13 @@ export function LiveChatFab({
                       <span>{m.sender}</span>
                       <span>{m.at}</span>
                     </div>
-                    <p className="whitespace-pre-wrap text-xs text-white/90">{m.body}</p>
+                    <p className="whitespace-pre-wrap break-words text-xs text-white/90 max-h-20 overflow-y-auto">{m.body}</p>
                   </div>
                 ))
               )}
             </div>
             <div className="shrink-0 border-t border-white/10 p-2">
-              <div className="mb-2 flex items-center gap-2 text-[10px] text-white/50">
+              <div className="mb-1.5 flex flex-wrap items-center gap-1.5 text-[10px] text-white/50">
                 <span>{status === "online" ? (t.livechatonlinetext ?? "Online") : status === "connecting" ? "Connecting..." : "Offline"}</span>
                 {wa ? <a href={wa} target="_blank" rel="noopener noreferrer" className="rounded border border-[color:var(--front-success)]/30 px-1.5 py-0.5 text-[color:var(--front-success-light)]">{waLabel}</a> : null}
                 {tg ? <a href={tg} target="_blank" rel="noopener noreferrer" className="rounded border border-sky-400/30 px-1.5 py-0.5 text-sky-200">{tgLabel}</a> : null}
@@ -279,7 +313,7 @@ export function LiveChatFab({
             href={wa}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--front-success)]/45 bg-black/65 shadow-[0_10px_24px_rgba(0,0,0,0.52)] backdrop-blur transition hover:scale-105"
+            className="group flex items-center justify-center p-1 transition hover:opacity-80"
             style={{ animation: "liveFabFloat 3.2s ease-in-out infinite" }}
             aria-label={waLabel}
             title={waLabel}
@@ -292,7 +326,7 @@ export function LiveChatFab({
             href={tg}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex h-11 w-11 items-center justify-center rounded-full border border-sky-400/45 bg-black/65 shadow-[0_10px_24px_rgba(0,0,0,0.52)] backdrop-blur transition hover:scale-105"
+            className="group flex items-center justify-center p-1 transition hover:opacity-80"
             style={{ animation: "liveFabFloat 3.2s ease-in-out infinite", animationDelay: "0.28s" }}
             aria-label={tgLabel}
             title={tgLabel}
@@ -304,16 +338,17 @@ export function LiveChatFab({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--front-gold)]/45 bg-black/65 shadow-[0_10px_24px_rgba(0,0,0,0.55)] backdrop-blur"
+        className="flex flex-col items-center justify-center gap-0.5 p-1 transition hover:opacity-80"
         style={{ animation: "liveFabFloat 3.2s ease-in-out infinite", animationDelay: "0.14s" }}
         aria-label={labelText}
         title={labelText}
       >
-        {icon ? (
-          <FallbackImage src={icon} alt="" className="h-6 w-6 object-contain" loading="eager" />
-        ) : (
-          <span className="text-[10px] font-extrabold text-[color:var(--rb-gold2)]">{labelText}</span>
-        )}
+        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#322B50] p-1.5" aria-hidden>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.95)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </span>
+        <span className="text-[10px] font-medium text-white/95">Support</span>
       </button>
       <style jsx>{`
         @keyframes liveFabFloat {

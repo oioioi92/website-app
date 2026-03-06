@@ -202,6 +202,10 @@ export const themeSchema = z.object({
     maxWithdraw: null
   }),
   liveTxBgImageUrl: urlAllowRelativeOrHttps({ forbidSvg: true }),
+  pageBackgroundUrl: urlAllowRelativeOrHttps({ forbidSvg: true }),
+  pageBackgroundColor: optionalText(60),
+  themePrimaryColor: optionalText(60),
+  themeAccentColor: optionalText(60),
 
   sectionTitles: sectionTitlesSchema.default({
     quickActions: "QUICK ACTIONS",

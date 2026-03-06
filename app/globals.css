@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @source "../**/*.{js,jsx,ts,tsx,mdx}";
 @import "../styles/admin-compact.css";
+@import "../styles/public-desktop.css";
 
 /*
  * All devices: same complete full-site layout (phone, tablet, desktop, WeChat, any browser).
@@ -46,6 +47,30 @@ video {
 .safe-inset-left { padding-left: env(safe-area-inset-left, 0); }
 .safe-inset-right { padding-right: env(safe-area-inset-right, 0); }
 
+/* 电话版：整页滑动顺滑 + 动态视口高度（地址栏显隐不闪） */
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+body {
+  min-height: -webkit-fill-available;
+  min-height: 100dvh;
+}
+
+/* 横向滚动区：电话上惯性滑动（iOS -webkit-overflow-scrolling: touch） */
+.scroll-touch-horizontal {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-touch-horizontal::-webkit-scrollbar {
+  display: none;
+}
+
 :root {
   color-scheme: light;
   --bg: #07070b;
@@ -78,6 +103,23 @@ video {
   --front-accent-light: #a5f3fc;
   --front-tag: #6366f1;
   --front-tag2: #8b5cf6;
+
+  /* Premium promotion modal (reference-image visual language) */
+  --promo-bg: #070d1f;
+  --promo-bg-2: #0c1430;
+  --promo-panel: #111a36;
+  --promo-panel-2: #162349;
+  --promo-gold-1: #fff3b0;
+  --promo-gold-2: #ffcc52;
+  --promo-gold-3: #ff9a00;
+  --promo-blue: #4db8ff;
+  --promo-success: #22c55e;
+  --promo-danger: #ff4d4f;
+  --promo-text: #ffffff;
+  --promo-muted: rgba(255, 255, 255, 0.75);
+  --promo-radius-lg: 24px;
+  --promo-radius-md: 18px;
+  --promo-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
 
   /*
     UI ASSET SLOT SIZES (locked)
@@ -165,6 +207,14 @@ video {
  */
 [data-admin-theme="dark"] {
   color-scheme: dark;
+  /* 后台字体与间距：紧凑、高效 */
+  --admin-fs-base: 12px;
+  --admin-fs-sm: 11px;
+  --admin-fs-xs: 10px;
+  --admin-fs-lg: 13px;
+  --admin-gap: 8px;
+  --admin-pad: 8px;
+  --admin-radius-sm: 6px;
   --admin-bg: #dde0e7;
   --admin-panel: #ffffff;
   --admin-panel2: #f6f8fc;
@@ -203,40 +253,61 @@ video {
 
 [data-admin-theme="light"] {
   color-scheme: light;
-  --admin-bg: #f3f5f9;
+  /* 后台：清爽主色 + 柔和背景，统一圆角与阴影 */
+  --admin-fs-base: 13px;
+  --admin-fs-sm: 12px;
+  --admin-fs-xs: 11px;
+  --admin-fs-lg: 14px;
+  --admin-gap: 10px;
+  --admin-pad: 12px;
+  --admin-radius-sm: 8px;
+  --admin-bg: #eef1f7;
   --admin-panel: #ffffff;
-  --admin-panel2: #f8f9fc;
-  --admin-border: #dde2ec;
-  --admin-border-strong: #cbd2e1;
-  --admin-text: #1e2430;
-  --admin-muted: #667187;
-  --admin-muted2: #8a93a6;
-  --admin-primary: #00a7e8;
-  --admin-primary2: #0097d1;
-  --admin-danger: #dc3545;
+  --admin-panel2: #f6f8fc;
+  --admin-border: #e2e6ef;
+  --admin-border-strong: #d1d6e2;
+  --admin-text: #1a1f2e;
+  --admin-muted: #5c6475;
+  --admin-muted2: #8890a0;
+  --admin-primary: #0ea5e9;
+  --admin-primary2: #0284c7;
+  --admin-danger: #dc2626;
   --admin-success: #16a34a;
-  --admin-warning: #f59e0b;
-  --admin-shadow: 0 2px 10px rgba(26, 33, 52, 0.06);
-  --admin-radius: 10px;
-  --admin-focus-ring: 0 0 0 3px rgba(0, 167, 232, 0.2);
-  /* 侧栏与顶栏（与 dark 一致：白字 + 略浅深色底） */
-  --admin-sidebar-bg: #1a2030;
-  --admin-sidebar-border: #2a3345;
-  --admin-sidebar-muted: #ffffff;
+  --admin-warning: #d97706;
+  --admin-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --admin-radius: 12px;
+  --admin-focus-ring: 0 0 0 3px rgba(14, 165, 233, 0.2);
+  /* compact 别名（后台表单/卡片统一） */
+  --compact-text: var(--admin-text);
+  --compact-muted: var(--admin-muted);
+  --compact-primary: var(--admin-primary);
+  --compact-card-bg: var(--admin-panel);
+  --compact-card-border: var(--admin-border);
+  --compact-page-bg: var(--admin-panel2);
+  --compact-danger: var(--admin-danger);
+  --compact-success: var(--admin-success);
+  --compact-table-header: var(--admin-panel2);
+  --compact-table-border: var(--admin-border);
+  --compact-sb-hover: rgba(14, 165, 233, 0.08);
+  --compact-sb-active: var(--admin-primary);
+  /* 侧栏与顶栏：深色导航，白字，选中高亮 */
+  --admin-sidebar-bg: #151b28;
+  --admin-sidebar-border: rgba(255, 255, 255, 0.06);
+  --admin-sidebar-muted: rgba(255, 255, 255, 0.7);
   --admin-sidebar-title: #ffffff;
   --admin-sidebar-section: #ffffff;
-  --admin-sidebar-link: #ffffff;
-  --admin-sidebar-link-hover-bg: #252d40;
-  --admin-sidebar-active-bg: #0f253d;
+  --admin-sidebar-link: rgba(255, 255, 255, 0.88);
+  --admin-sidebar-link-hover-bg: rgba(255, 255, 255, 0.08);
+  --admin-sidebar-active-bg: rgba(14, 165, 233, 0.18);
   --admin-sidebar-active-text: #ffffff;
-  --admin-sidebar-active-accent: #00a7e8;
-  --admin-header-bg: #1a2030;
-  --admin-header-border: #2a3345;
+  --admin-sidebar-active-accent: #38bdf8;
+  --admin-header-bg: #151b28;
+  --admin-header-border: rgba(255, 255, 255, 0.06);
   --admin-header-muted: #ffffff;
-  --admin-header-text: #ffffff;
-  --admin-header-input-bg: #252d40;
-  --admin-header-input-border: #3a4558;
-  --admin-header-input-placeholder: #b0b8c8;
+  --admin-header-text: rgba(255, 255, 255, 0.95);
+  --admin-header-input-bg: rgba(255, 255, 255, 0.1);
+  --admin-header-input-border: rgba(255, 255, 255, 0.15);
+  --admin-header-input-placeholder: rgba(255, 255, 255, 0.5);
 }
 
 /* 侧栏文字强制白色，避免被其他样式覆盖 */
@@ -506,7 +577,7 @@ a {
   border-collapse: collapse;
   background: var(--ui-livetx-table-bg);
   color: var(--ui-livetx-cell-text);
-  table-layout: fixed;
+  table-layout: auto;
 }
 .ui-livetx-table th,
 .ui-livetx-table td {
@@ -560,12 +631,38 @@ a {
   background: var(--ui-livetx-cell-bg);
   color: var(--ui-livetx-cell-text);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  min-width: 0;
 }
 .ui-livetx-amt {
   text-align: right;
   font-weight: 800;
+  font-size: 11px;
+  width: 76px;
+  max-width: 76px;
+}
+.ui-livetx-table td.ui-livetx-amt {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.ui-livetx-phone-deposit {
+  width: 90px;
+  max-width: 90px;
+}
+.ui-livetx-table td.ui-livetx-phone-deposit {
+  padding-left: 6px;
+  padding-right: 4px;
+}
+.ui-livetx-phone-withdraw {
+  width: 82px;
+  max-width: 82px;
+}
+.ui-livetx-provider {
+  width: 70px;
+  max-width: 70px;
+  min-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Bonus accordion (locked) */
@@ -1466,5 +1563,912 @@ a {
 @media (prefers-reduced-motion: reduce) {
   .ui-ab-seq {
     animation: none !important;
+  }
+}
+
+/* ========== Promotion 点击进去的 UI：一个容器 ========== */
+/* 不强制整块字体，由详情内你的 HTML/CSS 或 <style> 完全控制 */
+[data-promo-container].promo-detail-container,
+.promo-detail-container {
+  box-sizing: border-box;
+  line-height: 1.6;
+  text-align: left;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif; /* 中性默认，不套用整站字体；详情内用 <style> 或 class 自定 */
+}
+.promo-detail-container .promo-detail-html {
+  line-height: inherit;
+}
+.promo-detail-html {
+  line-height: 1.6;
+  text-align: left;
+}
+.promo-detail-html table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5em 0 1em;
+}
+.promo-detail-html th,
+.promo-detail-html td {
+  padding: 0.5em 0.75em;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-align: left;
+  vertical-align: top;
+}
+.promo-detail-html th {
+  font-weight: 600;
+  color: var(--front-gold-light, #fef3c7);
+  background: rgba(0, 0, 0, 0.2);
+}
+.promo-detail-html ul,
+.promo-detail-html ol {
+  margin: 0.5em 0;
+  padding-left: 1.25em;
+  list-style-position: outside;
+  text-align: left;
+}
+.promo-detail-html li {
+  margin: 0.25em 0;
+  text-align: left;
+}
+.promo-detail-html hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 1em 0;
+}
+.promo-detail-html .warning,
+.promo-detail-html [class*="warning"] {
+  color: var(--front-danger-light, #fecdd3);
+  background: rgba(244, 63, 94, 0.15);
+  padding: 0.5em 0.75em;
+  border-radius: 8px;
+  margin: 0.5em 0;
+}
+.promo-detail-html img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* 浅色弹窗（与参考站白底蓝绿风格一致）：主题 uiText.promomodalvariant = "light" */
+.promo-modal-light .promo-detail-container {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.promo-modal-light .promo-detail-html th,
+.promo-modal-light .promo-detail-html td {
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1e293b;
+}
+.promo-modal-light .promo-detail-html th {
+  color: #1e40af;
+  background: rgba(59, 130, 246, 0.12);
+}
+.promo-modal-light .promo-detail-html hr {
+  border-top-color: rgba(0, 0, 0, 0.12);
+}
+.promo-modal-light .promo-terms-table th,
+.promo-modal-light .promo-terms-table td {
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1e293b;
+}
+.promo-modal-light .promo-terms-table th {
+  color: #1e40af;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* 统一白卡弹窗：标题栏+内容+按钮一体 */
+.promo-modal-unified .promo-modal-content {
+  padding: 0;
+}
+.promo-modal-unified .promo-modal-table-wrap {
+  padding: 0 0 12px;
+}
+.promo-modal-unified .promo-modal-table-wrap .ptb-popup {
+  max-width: none;
+  box-shadow: none;
+  border-radius: 0;
+  background: transparent;
+  margin: 0;
+}
+.promo-modal-unified .promo-modal-table-wrap .ptb-popup-body {
+  padding: 12px 16px 16px;
+}
+.promo-modal-unified .promo-modal-table-wrap .ptb-popup-table {
+  border-spacing: 0 4px;
+}
+.promo-modal-unified .promo-modal-table-wrap .ptb-popup-left,
+.promo-modal-unified .promo-modal-table-wrap .ptb-popup-right {
+  font-size: 12px;
+  padding: 10px 12px;
+}
+.promo-modal-unified .promo-modal-table-wrap .ptb-popup-warning {
+  margin-top: 12px;
+  margin-left: 0;
+  margin-right: 0;
+  font-size: 11px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ========== Premium 深色赌场风格：列表 + 弹窗 + 规则区 ========== */
+:root {
+  --font-promo-heading: "Montserrat", "Poppins", "Inter", sans-serif;
+  --font-promo-body: "Inter", "Noto Sans SC", sans-serif;
+  --font-promo-cjk: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+.promo-list-card {
+  border: 1px solid rgba(255, 204, 82, 0.32);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(77, 184, 255, 0.14) 0%, rgba(77, 184, 255, 0) 55%),
+    linear-gradient(165deg, #0b132b 0%, #070d1f 55%, #040812 100%);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 0 22px rgba(255, 195, 65, 0.12);
+}
+.promo-list-card-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 48% at 90% 12%, rgba(77, 184, 255, 0.16) 0%, transparent 70%);
+  pointer-events: none;
+}
+.promo-list-card-title {
+  font-family: var(--font-promo-heading), var(--font-promo-cjk), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, #fff3b0 0%, #ffcc52 55%, #ff9a00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 12px rgba(255, 183, 64, 0.24);
+}
+.promo-hub-premium-card {
+  border: 1px solid rgba(255, 204, 82, 0.28);
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgba(77, 184, 255, 0.14) 0%, rgba(77, 184, 255, 0) 56%),
+    linear-gradient(165deg, #0b132b 0%, #070d1f 60%, #040812 100%);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 20px rgba(255, 186, 58, 0.11);
+}
+.promo-hub-premium-card:hover {
+  border-color: rgba(255, 224, 138, 0.5);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.5), 0 0 24px rgba(255, 188, 61, 0.2);
+}
+.promo-hub-premium-title {
+  font-family: var(--font-promo-heading), var(--font-promo-cjk), sans-serif;
+  color: #fdf6d3;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.promo-modal-premium {
+  border-radius: 24px;
+  border: 1px solid rgba(255, 204, 82, 0.26);
+  background:
+    radial-gradient(120% 80% at 110% -20%, rgba(77, 184, 255, 0.2) 0%, rgba(77, 184, 255, 0) 52%),
+    linear-gradient(180deg, #0c1430 0%, #070d1f 100%);
+}
+.promo-modal-premium .promo-modal-premium-hero {
+  position: relative;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  background:
+    radial-gradient(120% 110% at 8% -20%, rgba(255, 154, 0, 0.14) 0%, transparent 62%),
+    radial-gradient(100% 100% at 100% 0%, rgba(77, 184, 255, 0.22) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(12, 20, 48, 0.94) 0%, rgba(9, 16, 38, 0.94) 100%);
+}
+.promo-modal-premium .promo-modal-premium-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  border: 1px solid rgba(77, 184, 255, 0.52);
+  background: linear-gradient(180deg, rgba(22, 40, 84, 0.95), rgba(13, 25, 53, 0.95));
+  box-shadow: 0 0 14px rgba(77, 184, 255, 0.2);
+}
+.promo-modal-premium .promo-modal-premium-title-wrap {
+  padding-right: 88px;
+}
+.promo-modal-premium .promo-modal-premium-kicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(156, 212, 255, 0.9);
+  font-weight: 700;
+}
+.promo-modal-premium .promo-modal-premium-title {
+  margin: 0;
+  font-size: clamp(18px, 4.5vw, 26px);
+  line-height: 1.1;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: linear-gradient(180deg, #fff3b0 0%, #ffcc52 52%, #ff9a00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 26px rgba(255, 170, 59, 0.38);
+}
+.promo-modal-premium .promo-modal-premium-meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.promo-modal-premium .promo-modal-premium-meta-chip {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 3px 10px;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.promo-modal-premium .promo-modal-premium-meta-chip.is-gold {
+  color: #2b1801;
+  border-color: rgba(255, 231, 144, 0.4);
+  background: linear-gradient(135deg, #ffe9a9, #ffb64f);
+}
+.promo-modal-premium .promo-modal-premium-meta-chip.is-blue {
+  color: #e3f4ff;
+  border-color: rgba(77, 184, 255, 0.5);
+  background: linear-gradient(135deg, rgba(44, 102, 170, 0.92), rgba(27, 66, 124, 0.92));
+}
+.promo-modal-premium .promo-modal-premium-meta-chip.is-purple {
+  color: #efe9ff;
+  border-color: rgba(179, 136, 255, 0.48);
+  background: linear-gradient(135deg, rgba(94, 61, 163, 0.95), rgba(60, 42, 118, 0.95));
+}
+
+/* 弹窗内容区：从左边开始，绝不居中。子块拉满宽、文字强制左对齐 */
+.promo-modal-premium .promo-modal-content {
+  padding: 0;
+  background: transparent;
+  text-align: left !important;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+.promo-modal-premium .promo-modal-content > * {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+/* 规则区及其中文字、列表、段落：一律从左边开始，不居中 */
+.promo-modal-premium .promo-modal-premium-rules-panel,
+.promo-modal-premium .promo-modal-premium-rules-panel *,
+.promo-modal-premium .promo-detail-html,
+.promo-modal-premium .promo-detail-html *,
+.promo-modal-premium .promo-modal-rules-list,
+.promo-modal-premium .promo-modal-rules-list *,
+.promo-modal-premium .promo-modal-premium-warning,
+.promo-modal-premium .promo-modal-premium-warning *,
+.promo-modal-premium .promo-premium-rules-list,
+.promo-modal-premium .promo-premium-rules-list * {
+  text-align: left !important;
+}
+/* 覆盖后台 HTML 或内联的居中样式，强制左对齐 */
+.promo-modal-premium .promo-modal-content [style*="text-align: center"],
+.promo-modal-premium .promo-modal-content [style*="text-align:center"] {
+  text-align: left !important;
+}
+.promo-modal-premium .promo-modal-premium-rules-panel {
+  display: block !important;
+  text-align: left !important;
+}
+/* 有序/无序列表、列表项、段落：明确左对齐（覆盖后台 HTML 的居中） */
+.promo-modal-premium .promo-detail-html ol,
+.promo-modal-premium .promo-detail-html ul,
+.promo-modal-premium .promo-detail-html li,
+.promo-modal-premium .promo-detail-html p,
+.promo-modal-premium .promo-detail-html div,
+.promo-modal-premium .promo-detail-html-premium ol,
+.promo-modal-premium .promo-detail-html-premium ul,
+.promo-modal-premium .promo-detail-html-premium li,
+.promo-modal-premium .promo-detail-html-premium p,
+.promo-modal-premium .promo-detail-html-premium div {
+  text-align: left !important;
+}
+/* 输入框、下拉框：文字也从左边开始 */
+.promo-modal-premium .promo-detail-html input,
+.promo-modal-premium .promo-detail-html select,
+.promo-modal-premium .promo-detail-html textarea,
+.promo-modal-premium .promo-detail-html-premium input,
+.promo-modal-premium .promo-detail-html-premium select,
+.promo-modal-premium .promo-detail-html-premium textarea {
+  text-align: left !important;
+}
+/* 规则行右侧「数值」保持右对齐，不随上面被改成左对齐 */
+.promo-modal-premium .promo-premium-rule-value-wrap,
+.promo-modal-premium .promo-premium-rule-value {
+  text-align: right !important;
+}
+/* 规则/条款区统一从前面开始（像参考图），不居中 */
+.promo-modal-premium .promo-modal-premium-rules-panel {
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background:
+    linear-gradient(160deg, rgba(22, 35, 73, 0.94) 0%, rgba(15, 24, 51, 0.95) 40%, rgba(11, 19, 43, 0.98) 100%);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.38),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 0 34px rgba(77, 184, 255, 0.08);
+  overflow: hidden;
+}
+.promo-premium-rules {
+  padding: 14px;
+}
+.promo-premium-rules-heading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.promo-premium-rules-heading {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ffd978;
+  font-family: var(--font-promo-heading), var(--font-promo-cjk), sans-serif;
+  font-weight: 800;
+}
+.promo-premium-rules-divider {
+  width: 56px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 204, 82, 0.82), transparent);
+  box-shadow: 0 0 8px rgba(255, 204, 82, 0.25);
+}
+.promo-premium-rules-list {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+.promo-premium-rule-row {
+  min-height: 56px;
+  border-radius: 14px;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  background:
+    radial-gradient(140% 130% at 100% 0%, rgba(77, 184, 255, 0.14) 0%, rgba(77, 184, 255, 0) 60%),
+    linear-gradient(140deg, rgba(25, 40, 80, 0.9) 0%, rgba(20, 31, 64, 0.92) 46%, rgba(15, 24, 52, 0.94) 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 0 14px rgba(96, 165, 250, 0.08);
+}
+.promo-premium-rule-label-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+.promo-premium-rule-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffe8a8;
+  border: 1px solid rgba(255, 204, 82, 0.36);
+  background: linear-gradient(150deg, rgba(255, 184, 56, 0.2), rgba(255, 143, 44, 0.08));
+  flex: 0 0 24px;
+  margin-top: 1px;
+}
+.promo-premium-rule-icon.is-success {
+  color: #84f7b2;
+  border-color: rgba(34, 197, 94, 0.45);
+  background: linear-gradient(150deg, rgba(34, 197, 94, 0.2), rgba(20, 83, 45, 0.08));
+}
+.promo-premium-rule-icon.is-danger {
+  color: #ffb8b7;
+  border-color: rgba(255, 77, 79, 0.5);
+  background: linear-gradient(150deg, rgba(255, 77, 79, 0.2), rgba(127, 29, 29, 0.08));
+}
+.promo-premium-rule-label {
+  color: #f8fafc;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  word-break: break-word;
+}
+.promo-premium-rule-value-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 0;
+  flex-shrink: 0;
+  text-align: right;
+}
+.promo-premium-rule-value {
+  color: #f8fafc;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: right;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.promo-premium-rule-value.is-gold {
+  color: #ffd66d;
+  text-shadow: 0 0 12px rgba(255, 190, 74, 0.3);
+}
+.promo-premium-rule-value.is-success {
+  color: #9df7c0;
+}
+.promo-premium-rule-value.is-danger {
+  color: #ffb1b0;
+}
+.promo-premium-rule-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  color: #fff !important;
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.9), rgba(59, 130, 246, 0.9));
+  border: 1px solid rgba(96, 165, 250, 0.6);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+.promo-premium-rule-link:hover {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.45);
+  transform: translateY(-1px);
+}
+.promo-premium-rule-badge {
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: linear-gradient(145deg, #a855f7, #7c3aed);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.45);
+}
+.promo-premium-rule-status {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.promo-premium-rule-status--check {
+  background: rgba(34, 197, 94, 0.9);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+}
+.promo-premium-rule-status--info {
+  background: rgba(59, 130, 246, 0.9);
+  color: #fff;
+  font-style: italic;
+  font-size: 10px;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.35);
+}
+.promo-premium-rule-status--x {
+  background: rgba(239, 68, 68, 0.9);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
+}
+
+/* 规则区整体贴左：最小左侧留白，文字从左边开始（不再从中间/内缩） */
+.promo-modal-premium .promo-modal-rules-outer {
+  padding-left: 8px !important;
+}
+.promo-modal-premium .promo-modal-rules-inner,
+.promo-modal-premium .promo-modal-premium-rules-panel {
+  padding-left: 8px !important;
+}
+.promo-modal-premium .promo-modal-premium-rules-wrap {
+  padding-left: 8px !important;
+}
+/* 列表只留圆点位，紧贴左 */
+.promo-modal-rules-list {
+  list-style-position: outside;
+  list-style-type: disc;
+  padding-left: 1.25em;
+  margin: 0;
+  margin-left: 0;
+  line-height: 1.5;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+}
+.promo-modal-rules-list li {
+  margin-bottom: 0.5em;
+  margin-left: 0;
+  padding-left: 0;
+  text-align: left;
+  display: list-item;
+}
+.promo-modal-rules-list li:last-child {
+  margin-bottom: 0;
+}
+.promo-modal-premium .promo-detail-html,
+.promo-modal-premium .promo-detail-html-premium {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+.promo-modal-premium .promo-detail-html ul,
+.promo-modal-premium .promo-detail-html ol,
+.promo-modal-premium .promo-detail-html-premium ul,
+.promo-modal-premium .promo-detail-html-premium ol {
+  padding-left: 1.25em !important;
+  margin-left: 0 !important;
+  list-style-position: outside !important;
+}
+.promo-modal-premium .promo-detail-html ol,
+.promo-modal-premium .promo-detail-html-premium ol {
+  list-style-type: decimal !important;
+}
+
+.promo-modal-premium-warning {
+  display: block !important;
+  text-align: left !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+.promo-premium-warning-box {
+  margin-top: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background:
+    radial-gradient(100% 120% at 0% 0%, rgba(255, 180, 82, 0.25) 0%, transparent 55%),
+    linear-gradient(145deg, rgba(56, 21, 27, 0.95), rgba(45, 19, 25, 0.92));
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+.promo-premium-warning-box p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+.promo-premium-warning-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 116, 42, 0.45);
+  color: #ffbe94;
+  background: rgba(99, 26, 32, 0.7);
+  flex: 0 0 26px;
+}
+.promo-premium-warning-highlight {
+  color: #f97316;
+  font-weight: 800;
+}
+.promo-premium-footer-text {
+  margin-top: 8px;
+  padding: 10px 14px;
+  text-align: left;
+  font-family: var(--font-promo-body), var(--font-promo-cjk), Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #f8fafc;
+  line-height: 1.5;
+  border-radius: 12px;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  background: linear-gradient(140deg, rgba(25, 40, 80, 0.85), rgba(15, 24, 52, 0.9));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+/* 页脚内段落/块统一对齐，不额外缩进，多行整齐 */
+.promo-premium-footer-text p,
+.promo-premium-footer-text div {
+  margin: 0 0 0.5em 0;
+  padding: 0;
+  text-align: left;
+  line-height: 1.5;
+}
+.promo-premium-footer-text p:last-child,
+.promo-premium-footer-text div:last-child {
+  margin-bottom: 0;
+}
+.promo-premium-footer-text span {
+  display: inline;
+}
+/* 页脚内列表：与参考图一致，圆点垂直对齐、文字左缘整齐 */
+.promo-premium-footer-text ul,
+.promo-premium-footer-text ol {
+  margin: 0 0 0.6em 0;
+  padding-left: 1.35em;
+  list-style-position: outside;
+  list-style-type: disc;
+}
+.promo-premium-footer-text ul li,
+.promo-premium-footer-text ol li {
+  margin-bottom: 0.35em;
+  padding-left: 0;
+  line-height: 1.5;
+}
+.promo-premium-footer-text ul li:last-child,
+.promo-premium-footer-text ol li:last-child {
+  margin-bottom: 0;
+}
+/* 页脚富文本格式类 */
+.promo-premium-footer-text .ft-gold { color: #ffd66d; }
+.promo-premium-footer-text .ft-orange { color: #f97316; }
+.promo-premium-footer-text .ft-red { color: #ef4444; }
+.promo-premium-footer-text .ft-blue { color: #93c5fd; }
+.promo-premium-footer-text .ft-green { color: #6ee7b7; }
+.promo-premium-footer-text .ft-white { color: #f8fafc; }
+.promo-premium-footer-text .ft-size-sm { font-size: 10px; }
+.promo-premium-footer-text .ft-size-md { font-size: 12px; }
+.promo-premium-footer-text .ft-size-lg { font-size: 16px; font-weight: 800; }
+.promo-premium-footer-text .ft-bold { font-weight: 800; }
+.promo-premium-footer-text .ft-font-default { font-family: inherit; }
+.promo-premium-footer-text .ft-font-elegant { font-family: var(--font-promo-elegant), "Playfair Display", Georgia, serif; }
+.promo-premium-footer-text .ft-font-serif { font-family: Georgia, "Times New Roman", "Palatino Linotype", serif; }
+.promo-premium-footer-img {
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(96, 165, 250, 0.15);
+}
+
+/* PROMOTION RULES 下方正文：统一字体、字号、左对齐 */
+.promo-modal-premium .promo-modal-premium-rules-panel .promo-detail-html,
+.promo-modal-premium .promo-modal-premium-rules-panel .promo-detail-html-premium,
+.promo-modal-premium .promo-modal-premium-rules-panel .promo-modal-rules-list,
+.promo-modal-premium .promo-modal-premium-rules-panel .promo-premium-rules-list {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+  text-align: left;
+  color: #e2e8f0;
+}
+.promo-modal-premium .promo-detail-html-premium {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  text-align: left;
+}
+.promo-modal-premium .promo-detail-html-premium p,
+.promo-modal-premium .promo-detail-html-premium li,
+.promo-modal-premium .promo-detail-html-premium div {
+  text-align: left;
+}
+.promo-modal-premium .promo-modal-rules-list,
+.promo-modal-premium .promo-modal-rules-list li {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+.promo-modal-premium .promo-detail-html-premium .promo-table,
+.promo-modal-premium .promo-detail-html-premium table {
+  width: 100%;
+  border-collapse: separate !important;
+  border-spacing: 0 10px !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+.promo-modal-premium .promo-detail-html-premium .promo-table tr,
+.promo-modal-premium .promo-detail-html-premium tr {
+  height: 78px;
+}
+.promo-modal-premium .promo-detail-html-premium .promo-table td,
+.promo-modal-premium .promo-detail-html-premium td {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 12px 14px !important;
+  vertical-align: middle !important;
+}
+.promo-modal-premium .promo-detail-html-premium .promo-table td:first-child,
+.promo-modal-premium .promo-detail-html-premium tr td:first-child {
+  border-radius: 18px 0 0 18px !important;
+  color: #f8fafc !important;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background:
+    radial-gradient(120% 130% at 100% 0%, rgba(77, 184, 255, 0.15) 0%, rgba(77, 184, 255, 0) 60%),
+    linear-gradient(140deg, rgba(25, 40, 80, 0.92), rgba(15, 24, 52, 0.95)) !important;
+}
+.promo-modal-premium .promo-detail-html-premium .promo-table td:last-child,
+.promo-modal-premium .promo-detail-html-premium tr td:last-child {
+  border-radius: 0 18px 18px 0 !important;
+  color: #f8fafc !important;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: right;
+  background:
+    radial-gradient(120% 130% at 100% 0%, rgba(255, 154, 0, 0.14) 0%, rgba(255, 154, 0, 0) 58%),
+    linear-gradient(140deg, rgba(24, 38, 76, 0.94), rgba(17, 29, 60, 0.96)) !important;
+}
+.promo-modal-premium .promo-detail-html-premium .warning,
+.promo-modal-premium .promo-detail-html-premium .warning-footer,
+.promo-modal-premium .promo-detail-html-premium [class*="warning"] {
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 116, 42, 0.38) !important;
+  background: linear-gradient(145deg, rgba(56, 21, 27, 0.9), rgba(45, 19, 25, 0.92)) !important;
+  color: #ffd5c0 !important;
+  box-shadow: 0 0 18px rgba(255, 111, 30, 0.16) !important;
+}
+.promo-modal-premium .promo-detail-html-premium .vision-section {
+  border-radius: 12px !important;
+  border: 1px solid rgba(77, 184, 255, 0.28) !important;
+  background: linear-gradient(145deg, rgba(20, 43, 72, 0.95), rgba(13, 32, 56, 0.95)) !important;
+  color: #a8deff !important;
+}
+
+.promo-modal-premium .promo-modal-premium-btn-primary,
+.promo-modal-premium .promo-modal-premium-btn-secondary {
+  border-radius: 999px;
+  color: #fff !important;
+  font-family: var(--font-promo-body), var(--font-promo-cjk), Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+}
+.promo-modal-premium .promo-modal-premium-btn-primary {
+  border: 1px solid rgba(255, 200, 80, 0.6);
+  background: linear-gradient(135deg, #f59e0b 0%, #eab308 50%, #f97316 100%);
+  box-shadow: 0 4px 20px rgba(251, 146, 60, 0.4), 0 0 20px rgba(245, 158, 11, 0.25);
+}
+.promo-modal-premium .promo-modal-premium-btn-primary:hover {
+  box-shadow: 0 6px 24px rgba(251, 146, 60, 0.5), 0 0 24px rgba(245, 158, 11, 0.35);
+}
+.promo-modal-premium .promo-modal-premium-btn-secondary {
+  border: 1px solid rgba(96, 165, 250, 0.6);
+  color: #fff !important;
+  background: linear-gradient(140deg, rgba(30, 58, 95, 0.98), rgba(15, 35, 65, 0.98));
+  box-shadow: 0 0 16px rgba(96, 165, 250, 0.25);
+}
+.promo-modal-premium .promo-modal-premium-btn-secondary:hover {
+  box-shadow: 0 0 20px rgba(96, 165, 250, 0.35);
+}
+
+@media (max-width: 520px) {
+  .promo-premium-rule-row {
+    min-height: 52px;
+    padding: 8px 10px;
+  }
+  .promo-premium-rule-value {
+    font-size: 13px;
+  }
+  .promo-modal-premium .promo-modal-premium-title {
+    font-size: 20px;
+  }
+}
+
+/* ---------- 容器内可用 class：格子、字体颜色、闪/跳动等 ---------- */
+.promo-detail-container .promo-cell {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.5em 0.75em;
+  background: rgba(0, 0, 0, 0.2);
+}
+.promo-detail-container .promo-grid {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+}
+.promo-detail-container .promo-text-gold { color: #fcd34d; }
+.promo-detail-container .promo-text-red { color: #fca5a5; }
+.promo-detail-container .promo-text-green { color: #86efac; }
+.promo-detail-container .promo-text-white { color: #fff; }
+.promo-detail-container .promo-text-muted { color: rgba(255, 255, 255, 0.7); }
+.promo-detail-container .promo-highlight {
+  background: rgba(252, 211, 77, 0.15);
+  border-radius: 4px;
+  padding: 0.25em 0.5em;
+}
+.promo-detail-container .promo-blink {
+  animation: promo-blink 1.2s ease-in-out infinite;
+}
+.promo-detail-container .promo-flash {
+  animation: promo-flash 1.5s ease-in-out infinite;
+}
+.promo-detail-container .promo-bounce {
+  animation: promo-bounce 0.8s ease-in-out infinite;
+}
+.promo-detail-container .promo-pulse {
+  animation: promo-pulse 1.2s ease-in-out infinite;
+}
+.promo-detail-container .promo-cell-header {
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--front-gold-light, #fcd34d);
+}
+@keyframes promo-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@keyframes promo-flash {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.5); }
+}
+@keyframes promo-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes promo-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo-detail-container .promo-blink,
+  .promo-detail-container .promo-flash,
+  .promo-detail-container .promo-bounce,
+  .promo-detail-container .promo-pulse {
+    animation: none;
+  }
+}
+
+/* ========== 全局点击特效（任意位置点击出现扩散粒子） ========== */
+.click-effect-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.click-effect-particle {
+  position: fixed;
+  border-radius: 4px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    #fcd34d 0%,
+    #fcd34d 28%,
+    #f472b6 55%,
+    #ec4899 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 0 6px rgba(236, 72, 153, 0.4);
+  opacity: 0;
+  animation: click-effect-burst 700ms ease-out forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes click-effect-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 0), var(--ty, 0)) scale(0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .click-effect-particle {
+    animation: none;
+    opacity: 0;
   }
 }

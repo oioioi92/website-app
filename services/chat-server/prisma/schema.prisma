@@ -15,19 +15,48 @@ model Conversation {
   visitorUa       String?
   entryUrl        String?
   referrer        String?
+  visitorName     String?
+  visitorEmail    String?
+  visitorPhone    String?
   assignedAdminId String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   closedAt        DateTime?
 
-  messages         Message[]
-  tags             ConversationTag[]
-  notes            Note[]
-  riskScores       RiskScore[]
+  // 等待计时 + Open/Close/Delete（SPEC）
+  openedAt             DateTime?  // 客服点击 Open 认领时间
+  openedByAgentId      String?
+  pendingCustomerMsgAt DateTime?  // 客户最后一条未回复消息时间（计时起点）
+  firstReplyAt         DateTime?  // 客服对该 pending 的第一次回复时间（计时终点）
+  lastAgentMsgAt       DateTime?
+  deletedAt            DateTime?  // soft delete
+  lastWaitMs           Int?       // 最近一次等待时长（写 wait_log 时写入，供列表显示「接待耗时」）
+
+  messages            Message[]
+  tags                ConversationTag[]
+  notes               Note[]
+  riskScores          RiskScore[]
+  waitLogs            ConversationWaitLog[]
 
   @@index([status, updatedAt])
   @@index([visitorSessionId, status])
   @@index([assignedAdminId, status])
+  @@index([deletedAt])
+}
+
+model ConversationWaitLog {
+  id             String   @id @default(cuid())
+  conversationId String
+  customerMsgAt  DateTime @map("customer_msg_at")
+  agentReplyAt   DateTime @map("agent_reply_at")
+  waitMs         Int      @map("wait_ms")
+  agentId        String   @map("agent_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("conversation_wait_logs")
 }
 
 model ConversationTag {
@@ -61,6 +90,7 @@ model Message {
   senderType     String   // visitor | admin | system
   adminId        String?
   bodyText       String
+  metadataJson   Json?    // e.g. { "quickReplies": ["存款", "提款"] } 供顾客点击
   ip             String?
   sessionId      String?
   createdAt      DateTime @default(now())

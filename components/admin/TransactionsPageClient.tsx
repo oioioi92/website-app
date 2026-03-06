@@ -2,10 +2,12 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import type { TxPreset } from "@/config/transactions.presets";
 import { ReportTableFromApi } from "@/components/admin/ReportTableFromApi";
 
 export function TransactionsPageClient({ presets }: { presets: TxPreset[] }) {
+  const { t } = useLocale();
   const searchParams = useSearchParams();
   const presetKey = searchParams.get("preset") || "all";
   const current = presets.find((p) => p.key === presetKey) || presets[0];
@@ -24,9 +26,9 @@ export function TransactionsPageClient({ presets }: { presets: TxPreset[] }) {
             className={`admin-compact-btn admin-compact-btn-ghost rounded-md px-3 text-[13px] ${
               presetKey === p.key ? "bg-[var(--compact-sb-active)] text-white border-[var(--compact-primary)]" : ""
             }`}
-            title={p.tooltip}
+            title={t(`admin.transactionsPresets.${p.key}Tooltip` as "admin.transactionsPresets.allTooltip")}
           >
-            {p.label}
+            {t(`admin.transactionsPresets.${p.key}` as "admin.transactionsPresets.all")}
           </Link>
         ))}
       </div>

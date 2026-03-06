@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getClientIp } from "@/lib/net/clientIp";
 
-const FRONTEND_DOMAIN = (process.env.FRONTEND_DOMAIN ?? "admin1167.com").toLowerCase();
-const ADMIN_DOMAIN = (process.env.ADMIN_DOMAIN ?? "admin1167.net").toLowerCase();
+// 生产环境必须在 .env 中设置；不写死 .com/.net，避免前后台域名混用翻车
+const FRONTEND_DOMAIN = (process.env.FRONTEND_DOMAIN ?? "").toLowerCase();
+const ADMIN_DOMAIN = (process.env.ADMIN_DOMAIN ?? "").toLowerCase();
 
 function stripPort(host: string) {
   return host.split(":")[0].toLowerCase();
@@ -81,9 +82,6 @@ export function proxy(req: NextRequest) {
       const allow = parseAllowlist(env("ADMIN_IP_ALLOWLIST"));
       const ip = getClientIp(req.headers);
       if (!isAllowedIp(ip, allow)) {
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/c61c53b9-4e86-47a3-ab7a-2e00967a7a09',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'sec-audit-pre',hypothesisId:'H2',location:'proxy.ts:102',message:'admin ip allowlist blocked',data:{isProd,host,pathname,protectWholeHost,isAdminPath,allowEnabled,allowCount:allow.length,ipKind:ip==="local"?"local":"nonlocal"},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         if (pathname.startsWith("/api/")) return NextResponse.json({ error: "IP_FORBIDDEN" }, { status: 403 });
         return new NextResponse("Forbidden", { status: 403 });
       }

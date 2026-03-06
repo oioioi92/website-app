@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
   const member = await db.member.findUnique({
     where: { userRef },
-    select: { id: true, userRef: true, displayName: true, isActive: true }
+    select: { id: true, userRef: true, displayName: true, isActive: true, referralCode: true }
   });
   return NextResponse.json({ member: member ?? null });
 }

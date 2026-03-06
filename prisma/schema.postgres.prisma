@@ -59,11 +59,15 @@ model AuditLog {
 }
 
 model Promotion {
-  id         String   @id @default(cuid())
-  title      String
-  subtitle   String?
-  coverUrl   String?
-  detailJson Json
+  id                   String   @id @default(cuid())
+  title                String
+  subtitle             String?
+  coverUrl             String?
+  coverUrlMobilePromo  String?  // 手机版活动页照片
+  promoLink            String?  // 点击跳转链接
+  coverUrlDesktopHome  String?  // 电脑版首页缩图
+  coverUrlMobileHome   String?  // 手机版首页缩图
+  detailJson           Json
   percent    Decimal  @default(0) @db.Decimal(5,2)
   startAt    DateTime?
   endAt      DateTime?
@@ -143,10 +147,38 @@ model ThemeHistory {
   @@index([createdAt])
 }
 
+// 新注册待发送（客服复制话术用 WhatsApp 发给用户）
+model RegisterPendingSend {
+  id                String    @id @default(cuid())
+  memberId          String    @unique
+  member            Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  tempPasswordPlain String
+  createdAt         DateTime  @default(now())
+  sentAt            DateTime?
+
+  @@index([sentAt])
+}
+
+// WhatsApp Business 收件箱：来自 Webhook 的入站消息 + 后台发出的出站消息
+model WhatsAppMessage {
+  id             String    @id @default(cuid())
+  phone          String    // wa_id（E.164 格式）
+  direction      String    // "in" | "out"
+  content        String    // 文本内容
+  metaMessageId  String?   @unique // Meta 消息 ID（入站去重用）
+  createdAt      DateTime  @default(now())
+  memberId       String?
+  member         Member?   @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@index([phone, createdAt])
+  @@index([memberId])
+}
+
 model Member {
   id               String    @id @default(cuid())
   userRef          String    @unique
   displayName      String?
+  dateOfBirth      DateTime?
   isActive         Boolean   @default(true)
   passwordHash     String?
   mustChangePassword Boolean @default(false)
@@ -166,11 +198,13 @@ model Member {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  walletTx    WalletTransaction[]
-  providerTx  ProviderTransaction[]
-  promoClaims PromotionClaim[]
-  depositRequests DepositRequest[]
+  walletTx           WalletTransaction[]
+  providerTx         ProviderTransaction[]
+  promoClaims        PromotionClaim[]
+  depositRequests    DepositRequest[]
   withdrawalRequests WithdrawalRequest[]
+  registerPendingSend RegisterPendingSend?
+  whatsappMessages   WhatsAppMessage[]
 
   @@index([referrerId])
   @@index([agentId])
@@ -351,6 +385,29 @@ model PromotionClaimAttempt {
   @@index([promotionId, happenedAt])
   @@index([memberId, happenedAt])
   @@index([ok, reason, happenedAt])
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String?
+  userRef   String?
+  message   String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model ReferrerClick {
+  id          String   @id @default(cuid())
+  referrerId  String?
+  source      String?
+  ip          String?
+  userAgent   String?
+  clickedAt   DateTime @default(now())
+
+  @@index([referrerId, clickedAt])
 }
 
 // ---------------------------------------------------------------------------

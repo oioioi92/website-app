@@ -1,0 +1,16 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\user\Desktop\Website-new> dir app\api\admin\dashboard-counters\route.t
+dir : Cannot find path 'C:\Users\user\Desktop\Website-new\app\api\admin\dashboard-counters\route.t' because it does
+not exist.
+At line:1 char:1
++ dir app\api\admin\dashboard-counters\route.t
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\user\D...ounters\route.t:String) [Get-ChildItem], ItemNotFound
+   Exception
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+
+PS C:\Users\user\Desktop\Website-new>
