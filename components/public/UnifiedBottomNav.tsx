@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * 唯一底部导航：固定 6 项，顺序 Home → Games → Promo → History → Live Chat → Setting。
@@ -57,7 +57,7 @@ export function UnifiedBottomNav({ variant = "default" }: { variant?: Variant })
     >
       {ITEMS.map((n) => {
         const active = path === n.href || (n.href !== "/" && path.startsWith(n.href));
-        const label = t(n.labelKey) || (n.href === "/chat" ? "Live Chat" : n.labelKey.split(".").pop());
+        const label = n.href === "/chat" ? "Live Chat" : (t(n.labelKey) || n.labelKey.split(".").pop());
         return (
           <Link
             key={n.href}

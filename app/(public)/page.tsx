@@ -90,39 +90,23 @@ export default async function PublicHomePage() {
       code: `P${idx + 1}`
     }));
 
-    if (!flags.useLegacyHome) {
-      return (
-        <>
-          <div className="hidden lg:block">
-            <VividHomeClient
-              siteName={mockTheme.siteName ?? "Site"}
-              promotions={mockPromotions}
-              games={mockGames}
-              loginUrl={mockTheme.loginUrl ?? "/login"}
-              registerUrl={mockTheme.registerUrl ?? "/register-wa"}
-              depositUrl={mockTheme.depositUrl ?? "/deposit"}
-              internalTestMode={internalTestMode}
-            />
-          </div>
-          <div className="lg:hidden">
-            <VividMobileHome theme={mockTheme} promotions={mockPromotions} games={mockGames} internalTestMode={internalTestMode} />
-          </div>
-        </>
-      );
-    }
-
     return (
-      <div className="mx-auto max-w-lg px-4 py-12 text-center">
-        <p className="text-lg font-semibold text-white">数据库未连接</p>
-        <p className="mt-2 text-sm text-white/70">
-          请在项目根目录的 <code className="rounded bg-white/10 px-1">.env</code> 中配置{" "}
-          <code className="rounded bg-white/10 px-1">DATABASE_URL</code>，格式示例：
-        </p>
-        <pre className="mt-3 overflow-x-auto rounded-lg border border-white/20 bg-black/30 p-3 text-left text-xs text-[color:var(--rb-gold2)]">
-          DATABASE_URL=&quot;postgresql://用户:密码@localhost:5432/数据库名&quot;
-        </pre>
-        <p className="mt-3 text-xs text-white/50">配置后重启 dev 服务器（npm run dev）</p>
-      </div>
+      <>
+        <div className="hidden lg:block">
+          <VividHomeClient
+            siteName={mockTheme.siteName ?? "Site"}
+            promotions={mockPromotions}
+            games={mockGames}
+            loginUrl={mockTheme.loginUrl ?? "/login"}
+            registerUrl={mockTheme.registerUrl ?? "/register-wa"}
+            depositUrl={mockTheme.depositUrl ?? "/deposit"}
+            internalTestMode={internalTestMode}
+          />
+        </div>
+        <div className="lg:hidden">
+          <VividMobileHome theme={mockTheme} promotions={mockPromotions} games={mockGames} internalTestMode={internalTestMode} />
+        </div>
+      </>
     );
   }
 }

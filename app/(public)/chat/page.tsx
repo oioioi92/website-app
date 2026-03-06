@@ -1,7 +1,6 @@
 import { EmbeddedChatClient } from "@/components/public/EmbeddedChatClient";
 import { db } from "@/lib/db";
 import { getPublicTheme } from "@/lib/theme/getPublicTheme";
-import { getFeatureFlags } from "@/lib/public/featureFlags";
 import type { ThemeConfig } from "@/lib/public/theme";
 
 export const dynamic = "force-dynamic";
@@ -9,13 +8,8 @@ export const dynamic = "force-dynamic";
 export default async function PublicChatPage() {
   let dbSocial: Array<{ label: string; url: string }> = [];
   let theme: ThemeConfig | null = null;
-  // 始终使用 Vivid Portal 版本（现代设计）
-  const useVivid = true;
   try {
-    const [, { theme: t }] = await Promise.all([
-      getFeatureFlags(),
-      getPublicTheme(),
-    ]);
+    const { theme: t } = await getPublicTheme();
     theme = t;
     dbSocial = await db.socialLink.findMany({
       where: { isActive: true },
@@ -56,7 +50,7 @@ export default async function PublicChatPage() {
     <EmbeddedChatClient
       uiText={theme?.uiText ?? {}}
       quickLinks={deduped}
-      vivid={useVivid}
+      vivid={true}
       siteName={theme?.siteName ?? "KINGDOM888"}
       loginUrl={theme?.loginUrl ?? "/login"}
       registerUrl={theme?.registerUrl ?? "/register-wa"}

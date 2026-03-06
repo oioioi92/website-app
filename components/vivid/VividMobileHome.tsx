@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
@@ -437,7 +437,7 @@ export function VividMobileHome({
       >
         {BOTTOM_NAV_DEFS.map((n) => {
           const isActive = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href));
-          const label = n.key === "liveChat" ? (t("public.vivid.bottomNav.liveChat") || "Live Chat") : t(`public.vivid.bottomNav.${n.key}`) || n.key;
+          const label = n.key === "liveChat" ? "Live Chat" : (t(`public.vivid.bottomNav.${n.key}`) || n.key);
           return (
             <Link
               key={n.href}
