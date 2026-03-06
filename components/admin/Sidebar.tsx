@@ -206,14 +206,18 @@ export function Sidebar({ collapsed, onNavigate, user }: SidebarProps) {
                             <div key={grp.key} className="admin-nav-settings-group">
                               {(grp.children ?? []).map((child) => {
                                 const childActive = pathname === child.href || (child.href !== "/admin/settings" && pathname.startsWith(child.href));
+                                const childLabel = (() => {
+                                  const out = t(`admin.settingsNav.${child.key}`);
+                                  return (out && !out.startsWith("admin.settingsNav.")) ? out : child.label;
+                                })();
                                 return (
                                   <Link
                                     key={child.key}
                                     href={child.href}
                                     className={`admin-nav-item admin-nav-settings-item ${childActive ? "active" : ""}`}
-                                    title={child.label}
+                                    title={childLabel}
                                   >
-                                    <span className="admin-nav-label">{child.label}</span>
+                                    <span className="admin-nav-label">{childLabel}</span>
                                   </Link>
                                 );
                               })}

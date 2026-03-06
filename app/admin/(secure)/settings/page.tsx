@@ -33,7 +33,7 @@ export default function AdminSettingsPage() {
               className="admin-card flex flex-col gap-1 p-5 transition hover:border-[var(--compact-primary)] hover:shadow-md"
             >
               <span className="font-medium text-[var(--compact-text)]">{group.label}</span>
-              <span className="text-[13px] text-[var(--compact-muted)]">{group.description}</span>
+              <span className="text-[13px] text-[var(--compact-muted)]">{t(`admin.settingsCard.${group.key}`) || group.description}</span>
             </Link>
           );
         })}
