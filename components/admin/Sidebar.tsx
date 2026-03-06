@@ -204,7 +204,6 @@ export function Sidebar({ collapsed, onNavigate, user }: SidebarProps) {
                         <div className="admin-nav-settings-list" onClick={() => onNavigate?.()}>
                           {filteredSettingsNav.map((grp) => (
                             <div key={grp.key} className="admin-nav-settings-group">
-                              <div className="admin-nav-settings-group-title">{grp.label}</div>
                               {(grp.children ?? []).map((child) => {
                                 const childActive = pathname === child.href || (child.href !== "/admin/settings" && pathname.startsWith(child.href));
                                 return (
