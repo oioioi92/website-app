@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * 唯一底部导航：固定 6 项，顺序 Home → Games → Promo → History → Live Chat → Setting。
@@ -32,7 +32,7 @@ export function UnifiedBottomNav({ variant = "default" }: { variant?: Variant })
       data-has-live-chat="true"
       data-unified-bottom-nav="true"
       data-from-layout="true"
-      className={"lg:hidden " + (isVivid ? "" : "border-t border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)]/98 backdrop-blur")}
+      className={isVivid ? "" : "border-t border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)]/98 backdrop-blur"}
       style={{
         position: "fixed",
         bottom: 0,
