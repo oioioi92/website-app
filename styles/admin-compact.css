@@ -595,6 +595,18 @@
     grid-column: 1;
   }
 
+  /* 电话版：顶栏固定顶部，进入任意子页面后仍可见，不随内容滚动消失 */
+  .admin-shell .admin-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: var(--topbar-h);
+    z-index: 999;
+    flex-shrink: 0;
+  }
+
   /* 窄屏：四个快捷入口都展示（Chat / Pending / Player List / Reports），不再收进 More */
   .admin-quick-action-bar__secondary {
     display: flex !important;
