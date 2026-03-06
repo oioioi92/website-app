@@ -1,8 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
-import { usePathname } from "next/navigation";
 import "@/styles/vivid-portal.css";
 import { FallbackImage } from "@/components/FallbackImage";
 import { LiveTransactionTable } from "@/components/public/LiveTransactionTable";
@@ -24,15 +23,6 @@ const QUICK_ACTION_DEFS = [
   { key: "support",  href: "/chat",       icon: "💬" },
 ];
 
-const BOTTOM_NAV_DEFS = [
-  { key: "home",    href: "/",          icon: "🏠" },
-  { key: "games",   href: "/games",     icon: "🎮" },
-  { key: "promo",   href: "/promotion", icon: "🎁" },
-  { key: "history", href: "/history",   icon: "📜" },
-  { key: "liveChat", href: "/chat",     icon: "💬" },
-  { key: "setting", href: "/settings",  icon: "⚙️" },
-];
-
 export function VividMobileHome({
   theme,
   promotions = [],
@@ -44,7 +34,6 @@ export function VividMobileHome({
   games?: Game[];
   internalTestMode?: boolean;
 }) {
-  const pathname = usePathname();
   const { t } = useLocale();
   const siteName = theme.siteName ?? "KINGDOM888";
   const loginUrl = theme.loginUrl ?? "/login";
@@ -77,11 +66,7 @@ export function VividMobileHome({
   const topPromos = promotions.slice(0, 6);
 
   return (
-    <div
-      className="vp-shell lg:hidden"
-      data-page-has-bottom-nav="true"
-      style={{ paddingBottom: 80 }}
-    >
+    <div className="vp-shell lg:hidden">
       {/* ── Sticky Top Bar ── */}
       <header style={{
         position: "sticky",
@@ -214,7 +199,7 @@ export function VividMobileHome({
                 fontWeight: 600,
               }}
             >
-              <span style={{ fontSize: 22 }}>{a.icon}</span>
+              <span style={{ fontSize: 22 }}>{"icon" in a ? a.icon : "💰"}</span>
               <span>{a.label}</span>
             </Link>
           ))}
@@ -416,51 +401,6 @@ export function VividMobileHome({
         onClose={() => setSelectedPromo(null)}
         routeBonus="/bonus"
       />
-
-      {/* 本页内嵌底部栏：固定 6 项含 Live Chat，不依赖 layout */}
-      <nav
-        data-bottom-nav-items="6"
-        data-has-live-chat="true"
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          background: "rgba(13,13,26,0.97)",
-          borderTop: "1px solid rgba(120,80,255,0.3)",
-          backdropFilter: "blur(12px)",
-          display: "grid",
-          gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-          paddingBottom: "env(safe-area-inset-bottom, 4px)",
-        }}
-      >
-        {BOTTOM_NAV_DEFS.map((n) => {
-          const isActive = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href));
-          const label = n.key === "liveChat" ? "Live Chat" : (t(`public.vivid.bottomNav.${n.key}`) || n.key);
-          return (
-            <Link
-              key={n.href}
-              href={n.href}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 3,
-                padding: "10px 2px 8px",
-                textDecoration: "none",
-                color: isActive ? "#a855f7" : "rgba(157,149,201,0.75)",
-                fontSize: 10,
-                fontWeight: isActive ? 700 : 500,
-              }}
-            >
-              <span style={{ fontSize: 18 }}>{n.icon}</span>
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{label}</span>
-            </Link>
-          );
-        })}
-      </nav>
     </div>
   );
 }
