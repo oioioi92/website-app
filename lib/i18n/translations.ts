@@ -957,6 +957,10 @@ const ADMIN_ZH = {
     loadError: "加载失败",
     saveError: "保存失败",
     saveSuccess: "已保存到后台",
+    addBank: "新增银行",
+    noBanks: "暂无银行账户，点击「新增银行」添加。",
+    remove: "删除",
+    bankCardTitle: "银行账户",
   },
   depositsList: {
     pageTitle: "入款记录",
@@ -1724,6 +1728,10 @@ const ADMIN_EN = {
     loadError: "Failed to load",
     saveError: "Failed to save",
     saveSuccess: "Saved to backend",
+    addBank: "Add bank",
+    noBanks: "No bank accounts yet. Click «Add bank» to add one.",
+    remove: "Remove",
+    bankCardTitle: "Bank account",
   },
   depositsList: {
     pageTitle: "Deposit Records",
@@ -2491,6 +2499,10 @@ const ADMIN_MS = {
     loadError: "Gagal dimuatkan",
     saveError: "Gagal disimpan",
     saveSuccess: "Disimpan ke backend",
+    addBank: "Tambah bank",
+    noBanks: "Tiada akaun bank. Klik «Tambah bank» untuk menambah.",
+    remove: "Buang",
+    bankCardTitle: "Akaun bank",
   },
   depositsList: {
     pageTitle: "Rekod Deposit",
