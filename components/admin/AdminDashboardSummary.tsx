@@ -49,6 +49,7 @@ export function AdminDashboardSummary() {
       .finally(() => setLoading(false));
   }
 
+  // 仅挂载时拉一次，避免依赖变化重复请求
   useEffect(() => {
     const today = toDateInputValue(new Date());
     setDateFrom(today);
@@ -65,7 +66,8 @@ export function AdminDashboardSummary() {
       .then((d) => setData(d))
       .catch(() => setData(null))
       .finally(() => setLoading(false));
-  }, [setForbidden]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 只跑一次
+  }, []);
 
   const runSearch = () => load();
 

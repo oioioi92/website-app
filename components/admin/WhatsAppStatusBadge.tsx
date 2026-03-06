@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-const POLL_INTERVAL_MS = 30_000;
+const POLL_INTERVAL_MS = 60_000; // 1 分钟，减少 API 消耗；切到其他标签页时暂停
 
 export function WhatsAppStatusBadge() {
   const [ok, setOk] = useState<boolean | null>(null);
@@ -24,8 +24,13 @@ export function WhatsAppStatusBadge() {
 
   useEffect(() => {
     fetchStatus();
-    const t = setInterval(fetchStatus, POLL_INTERVAL_MS);
-    return () => clearInterval(t);
+    let t: ReturnType<typeof setInterval> | null = null;
+    const start = () => { if (!t) t = setInterval(fetchStatus, POLL_INTERVAL_MS); };
+    const stop = () => { if (t) { clearInterval(t); t = null; } };
+    const onVis = () => { if (document.visibilityState === "visible") start(); else stop(); };
+    start();
+    document.addEventListener("visibilitychange", onVis);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVis); };
   }, []);
 
   const loading = ok === null && mode === null;

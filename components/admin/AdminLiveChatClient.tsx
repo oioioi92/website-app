@@ -162,11 +162,30 @@ export function AdminLiveChatClient() {
       .catch(() => {});
   }
 
+  // 队列轮询：30s 一次，页面不可见时暂停，减少 API 消耗
   useEffect(() => {
     loadQueue();
     loadTemplates();
-    const t = setInterval(loadQueue, 10000);
-    return () => clearInterval(t);
+    let t: ReturnType<typeof setInterval> | null = null;
+    const startPoll = () => {
+      if (!t) t = setInterval(loadQueue, 30000);
+    };
+    const stopPoll = () => {
+      if (t) {
+        clearInterval(t);
+        t = null;
+      }
+    };
+    const onVisibility = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") startPoll();
+      else stopPoll();
+    };
+    startPoll();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stopPoll();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   // 读秒：每秒更新一次，用于实时显示每位顾客的等待时长

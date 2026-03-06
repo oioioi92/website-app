@@ -9,7 +9,7 @@ type Status = {
   blocked: string[] | null;
 };
 
-const POLL_MS = 30_000;
+const POLL_MS = 60_000; // 1 分钟，减少 API 消耗
 
 export function AdminDashboardWhatsAppStatus() {
   const [status, setStatus] = useState<Status | null>(null);
@@ -25,8 +25,13 @@ export function AdminDashboardWhatsAppStatus() {
 
   useEffect(() => {
     fetchStatus();
-    const t = setInterval(fetchStatus, POLL_MS);
-    return () => clearInterval(t);
+    let t: ReturnType<typeof setInterval> | null = null;
+    const start = () => { if (!t) t = setInterval(fetchStatus, POLL_MS); };
+    const stop = () => { if (t) { clearInterval(t); t = null; } };
+    const onVis = () => { if (document.visibilityState === "visible") start(); else stop(); };
+    start();
+    document.addEventListener("visibilitychange", onVis);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVis); };
   }, []);
 
   if (loading) {

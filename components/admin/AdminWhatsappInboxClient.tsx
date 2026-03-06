@@ -58,13 +58,36 @@ export function AdminWhatsappInboxClient() {
     loadConvs();
   }, []);
 
+  // 选中会话时拉消息，25s 轮询；页面不可见时暂停
+  const POLL_MS = 25000;
   useEffect(() => {
-    if (selected) {
-      loadMessages(selected);
-      pollRef.current = setInterval(() => loadMessages(selected), 8000);
+    if (!selected) {
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+      }
+      return;
     }
+    loadMessages(selected);
+    const startPoll = () => {
+      if (!pollRef.current)
+        pollRef.current = setInterval(() => loadMessages(selected), POLL_MS);
+    };
+    const stopPoll = () => {
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+      }
+    };
+    startPoll();
+    const onVisibility = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") startPoll();
+      else stopPoll();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      stopPoll();
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [selected]);
 

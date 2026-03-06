@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAdminApiContext } from "@/lib/admin-api-context";
 
-const REFRESH_MS = 30_000;
+const REFRESH_MS = 60_000; // 1 分钟，切到其他标签页时暂停
 
 type Counter = { chatUnread: number; pendingTx: number };
 
@@ -100,7 +100,16 @@ export function AdminQuickActionBar() {
       .catch(() => {});
   };
 
-  useEffect(() => { fetchCounters(); const t = setInterval(fetchCounters, REFRESH_MS); return () => clearInterval(t); }, []);
+  useEffect(() => {
+    fetchCounters();
+    let t: ReturnType<typeof setInterval> | null = null;
+    const start = () => { if (!t) t = setInterval(fetchCounters, REFRESH_MS); };
+    const stop = () => { if (t) { clearInterval(t); t = null; } };
+    const onVis = () => { if (document.visibilityState === "visible") start(); else stop(); };
+    start();
+    document.addEventListener("visibilitychange", onVis);
+    return () => { stop(); document.removeEventListener("visibilitychange", onVis); };
+  }, []);
   useEffect(() => { const onFocus = () => fetchCounters(); window.addEventListener("focus", onFocus); return () => window.removeEventListener("focus", onFocus); }, []);
   useEffect(() => {
     const close = (e: MouseEvent) => { if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false); };
