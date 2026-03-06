@@ -564,9 +564,16 @@
   }
 }
 
-/* ---- 电话版：侧栏改为 overlay 抽屉 + 遮罩 ---- */
+/* ---- 电话版：侧栏改为 overlay 抽屉 + 遮罩；尺寸随视口自动适应不同机型 ---- */
 @media (max-width: 768px) {
+  /* 电话版流体尺寸：小屏略小、大屏正常，不同手机显示更一致 */
   .admin-shell {
+    font-size: clamp(13px, 1.8vw + 11px, 16px);
+    --topbar-h: clamp(44px, 11vw, 52px);
+    --admin-fs-base: clamp(12px, 1.2vw + 11px, 14px);
+    --admin-fs-sm: clamp(11px, 1vw + 10px, 12px);
+    --admin-fs-xs: clamp(10px, 0.8vw + 9px, 11px);
+    --admin-fs-lg: clamp(13px, 1.2vw + 11.5px, 14px);
     grid-template-columns: 1fr;
     /* 顶栏 fixed 后不占流，第一行改为 0，主区用 padding-top 预留顶栏高度 */
     grid-template-rows: 0 1fr;
@@ -625,11 +632,18 @@
     gap: 4px;
   }
 
-  /* 主区预留顶栏高度，避免内容顶到顶栏下；点击 Home 后顶栏始终在视口顶部可见 */
+  /* 主区预留顶栏高度，避免内容顶到顶栏下；内边距随视口微调 */
   .admin-shell .admin-page {
-    padding: 10px;
-    padding-top: calc(var(--topbar-h) + env(safe-area-inset-top, 0px) + 10px);
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    padding: clamp(8px, 2vw, 12px);
+    padding-top: calc(var(--topbar-h) + env(safe-area-inset-top, 0px) + clamp(8px, 2vw, 12px));
+    padding-bottom: max(clamp(8px, 2vw, 12px), env(safe-area-inset-bottom));
+  }
+
+  /* 避免系统对后台文字再做一次缩放，由上面流体字号统一控制 */
+  .admin-shell,
+  .admin-shell * {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   /* 遮罩：仅在小屏且侧栏展开时显示，可点击关闭 */
