@@ -902,6 +902,12 @@ const ADMIN_ZH = {
     "bank": "银行/对账",
     "user-kpi": "User KPI Daily",
   },
+  reportPlaceholder: {
+    colDate: "日期",
+    colCount: "笔数",
+    colTotal: "合计",
+    comingSoon: "即将推出",
+  },
   players: {
     pageTitle: "玩家列表",
     pageDesc: "顾客资料与经营指标。每位顾客支持：Chat 直接发信息，Wallet 进入其前台代操作。",
@@ -1744,6 +1750,12 @@ const ADMIN_EN = {
     "bank": "Bank / Reconciliation",
     "user-kpi": "User KPI Daily",
   },
+  reportPlaceholder: {
+    colDate: "Date",
+    colCount: "Count",
+    colTotal: "Total",
+    comingSoon: "Coming soon",
+  },
   players: {
     pageTitle: "Player List",
     pageDesc: "Customer data and operational metrics. Each customer: Chat to message, Wallet for front-end operations.",
@@ -2581,6 +2593,12 @@ const ADMIN_MS = {
     "bonus-cost": "Ringkasan Kos Bonus",
     "bank": "Bank / Penyelarasan",
     "user-kpi": "KPI Pengguna Harian",
+  },
+  reportPlaceholder: {
+    colDate: "Tarikh",
+    colCount: "Bilangan",
+    colTotal: "Jumlah",
+    comingSoon: "Akan datang",
   },
   players: {
     pageTitle: "Senarai Pemain",

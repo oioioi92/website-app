@@ -28,7 +28,7 @@ export function StickySaveBar({ onSave, saving, success, error, message }: Stick
           disabled={saving}
           className="admin-compact-btn admin-compact-btn-primary min-h-[40px] px-5 py-2 font-medium"
         >
-          {saving ? "..." : t("admin.settingsBank.save")}
+          {saving ? (t("admin.common.saving") ?? "...") : (t("admin.common.save") ?? t("admin.settingsBank.save") ?? "Save")}
         </button>
         {message && (
           <span

@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useLocale } from "@/lib/i18n/context";
 import { useAdminApiContext } from "@/lib/admin-api-context";
+import { StickySaveBar } from "@/components/admin/StickySaveBar";
 import type { ReferralConfig } from "@/app/api/admin/settings/referral/route";
 
 const PLATFORMS: { value: string; label: string }[] = [
@@ -14,11 +16,13 @@ const PLATFORMS: { value: string; label: string }[] = [
 ];
 
 export function AdminReferralSettingsClient() {
+  const { t } = useLocale();
   const { setForbidden } = useAdminApiContext();
   const [config, setConfig] = useState<ReferralConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/settings/referral", { credentials: "include" })
@@ -35,7 +39,8 @@ export function AdminReferralSettingsClient() {
   const handleSave = () => {
     if (!config) return;
     setSaving(true);
-    setMessage(null);
+    setSaveSuccess(false);
+    setSaveError(false);
     fetch("/api/admin/settings/referral", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -44,12 +49,12 @@ export function AdminReferralSettingsClient() {
     })
       .then((r) => {
         if (r.ok) {
-          setMessage("已保存");
+          setSaveSuccess(true);
           return;
         }
         throw new Error("Save failed");
       })
-      .catch(() => setMessage("保存失败"))
+      .catch(() => setSaveError(true))
       .finally(() => setSaving(false));
   };
 
@@ -62,7 +67,7 @@ export function AdminReferralSettingsClient() {
   };
 
   if (loading || !config) {
-    return <p className="text-[var(--admin-muted)]">加载中…</p>;
+    return <p className="text-[var(--admin-muted)]">{t("admin.common.loading") ?? "加载中…"}</p>;
   }
 
   return (
@@ -109,20 +114,18 @@ export function AdminReferralSettingsClient() {
         </div>
 
         <div className="flex items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="admin-compact-btn admin-compact-btn-primary"
-          >
-            {saving ? "保存中…" : "保存"}
-          </button>
           <Link href="/admin/settings" className="admin-compact-btn admin-compact-btn-ghost">
-            返回设置
+            {t("admin.settingsSection.backToSettings") ?? "返回设置"}
           </Link>
-          {message && <span className="text-[13px] text-[var(--admin-muted)]">{message}</span>}
         </div>
       </div>
+      <StickySaveBar
+        onSave={handleSave}
+        saving={saving}
+        success={saveSuccess}
+        error={saveError}
+        message={saveSuccess ? (t("admin.site.saved") ?? "已保存") : saveError ? (t("admin.common.saveError") ?? "保存失败") : undefined}
+      />
     </div>
   );
 }
