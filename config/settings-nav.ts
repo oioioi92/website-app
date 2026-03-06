@@ -21,17 +21,9 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
   {
     key: "theme",
     label: "Theme",
-    description: "前台主题、配色、背景、入口与弹窗文案",
+    description: "前台主题、配色、背景、入口与弹窗文案（站点名称、Logo、跑马灯、首页媒体等统一入口）",
     children: [
       { key: "theme", label: "Theme / 前台照片", href: "/admin/settings/theme", permission: "edit_content" },
-    ],
-  },
-  {
-    key: "frontend",
-    label: "Frontend",
-    description: "站点名称、Logo、跑马灯、弹窗、首页媒体、展示样式（统一入口）",
-    children: [
-      { key: "frontend", label: "Frontend", href: "/admin/settings/frontend/home-media", permission: "edit_content" },
     ],
   },
   {
