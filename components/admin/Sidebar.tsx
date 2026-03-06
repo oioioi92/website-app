@@ -4,8 +4,11 @@ import type { JSX } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ADMIN_NAV } from "@/config/admin-nav";
+import { SETTINGS_NAV } from "@/config/settings-nav";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminUser } from "@/lib/admin-user-context";
+import { can } from "@/lib/rbac-client";
 
 const NAV_ICONS: Record<string, JSX.Element> = {
   chat: (
@@ -148,7 +151,17 @@ type SidebarProps = {
 export function Sidebar({ collapsed, onNavigate, user }: SidebarProps) {
   const pathname = usePathname();
   const { t } = useLocale();
-  const role = user?.role ?? "admin";
+  const adminUser = useAdminUser() ?? user;
+  const role = adminUser?.role ?? "admin";
+  const isInSettings = pathname.startsWith("/admin/settings");
+  const filteredSettingsNav = adminUser
+    ? SETTINGS_NAV.map((group) => ({
+        ...group,
+        children: (group.children ?? []).filter(
+          (item) => can(adminUser.role, item.permission ?? "settings")
+        ),
+      })).filter((group) => group.children.length > 0)
+    : SETTINGS_NAV;
 
   return (
     <aside className={`admin-sidebar ${collapsed ? "collapsed" : ""}`}>
@@ -168,6 +181,50 @@ export function Sidebar({ collapsed, onNavigate, user }: SidebarProps) {
             <div key={group.key}>
               <div className="admin-nav-group-title">{t(`admin.groups.${group.key}`)}</div>
               {group.items.map((item) => {
+                if (item.key === "settings") {
+                  const settingsActive = pathname === "/admin/settings" || pathname.startsWith("/admin/settings/");
+                  const label = (() => {
+                    const out = t(`admin.nav.${item.key}`);
+                    if (out && !out.startsWith("admin.nav.")) return out;
+                    return item.label;
+                  })();
+                  return (
+                    <div key={item.key} className="admin-nav-settings-wrap">
+                      <div onClick={() => onNavigate?.()}>
+                        <Link
+                          href="/admin/settings"
+                          className={`admin-nav-item ${settingsActive ? "active" : ""}`}
+                          title={t(`admin.navTooltip.${item.key}`) || label}
+                        >
+                          <NavIcon icon={item.icon} />
+                          <span className="admin-nav-label">{label}</span>
+                        </Link>
+                      </div>
+                      {isInSettings && (
+                        <div className="admin-nav-settings-list" onClick={() => onNavigate?.()}>
+                          {filteredSettingsNav.map((grp) => (
+                            <div key={grp.key} className="admin-nav-settings-group">
+                              <div className="admin-nav-settings-group-title">{grp.label}</div>
+                              {(grp.children ?? []).map((child) => {
+                                const childActive = pathname === child.href || (child.href !== "/admin/settings" && pathname.startsWith(child.href));
+                                return (
+                                  <Link
+                                    key={child.key}
+                                    href={child.href}
+                                    className={`admin-nav-item admin-nav-settings-item ${childActive ? "active" : ""}`}
+                                    title={child.label}
+                                  >
+                                    <span className="admin-nav-label">{child.label}</span>
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
                 const href = item.href ?? "#";
                 const active = href !== "#" && (pathname === href || pathname.startsWith(href + "/"));
                 const label = (() => {
