@@ -568,7 +568,8 @@
 @media (max-width: 768px) {
   .admin-shell {
     grid-template-columns: 1fr;
-    grid-template-rows: var(--topbar-h) 1fr;
+    /* 顶栏 fixed 后不占流，第一行改为 0，主区用 padding-top 预留顶栏高度 */
+    grid-template-rows: 0 1fr;
   }
 
   .admin-shell .admin-sidebar {
@@ -595,16 +596,21 @@
     grid-column: 1;
   }
 
-  /* 电话版：顶栏固定顶部，进入任意子页面后仍可见，不随内容滚动消失 */
+  /* 电话版：顶栏固定顶部，进入 Home 等任意子页面后始终可见；安全区 + 高层级避免被挡 */
   .admin-shell .admin-topbar {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
-    height: var(--topbar-h);
-    z-index: 999;
+    min-height: var(--topbar-h);
+    height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px));
+    padding-top: env(safe-area-inset-top, 0px);
+    z-index: 9999;
     flex-shrink: 0;
+    /* 避免被主内容区或子页面创建的层叠上下文盖住 */
+    isolation: isolate;
+    background: var(--admin-header-bg);
   }
 
   /* 窄屏：四个快捷入口都展示（Chat / Pending / Player List / Reports），不再收进 More */
@@ -619,8 +625,10 @@
     gap: 4px;
   }
 
+  /* 主区预留顶栏高度，避免内容顶到顶栏下；点击 Home 后顶栏始终在视口顶部可见 */
   .admin-shell .admin-page {
     padding: 10px;
+    padding-top: calc(var(--topbar-h) + env(safe-area-inset-top, 0px) + 10px);
     padding-bottom: max(10px, env(safe-area-inset-bottom));
   }
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/admin/Sidebar";
 import { AdminQuickActionBar } from "@/components/admin/AdminQuickActionBar";
 import { AdminTopbarMenus } from "@/components/admin/AdminTopbarMenus";
@@ -16,11 +17,20 @@ type AdminUser = { id: string; email: string; role: string };
 export function AdminShell({ children, user }: { children: React.ReactNode; user?: AdminUser }) {
   const { t } = useLocale();
   const [collapsed, setCollapsed] = useState(true);
+  const mainRef = useRef<HTMLElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const m = typeof window !== "undefined" ? window.matchMedia("(max-width: 768px)") : null;
     if (m?.matches) setCollapsed(false);
   }, []);
+
+  /* 点击 Home 进入 /admin 时，主内容区滚回顶部，保证顶栏和首页内容一起可见 */
+  useEffect(() => {
+    if (pathname === "/admin" && mainRef.current) {
+      mainRef.current.scrollTop = 0;
+    }
+  }, [pathname]);
   return (
     <AdminUserProvider user={user}>
     <AdminApiProvider>
@@ -56,7 +66,7 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
         <AdminQuickActionBar />
         <AdminTopbarMenus />
       </header>
-      <main className="admin-page">
+      <main ref={mainRef} className="admin-page">
         <AdminErrorBoundary>{children}</AdminErrorBoundary>
       </main>
     </div>
