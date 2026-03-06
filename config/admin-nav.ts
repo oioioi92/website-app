@@ -33,11 +33,7 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "REPORT",
     defaultOpen: true,
     items: [
-      { key: "daily-sales", label: "Daily Sales", tooltip: "小时/每日销量汇总", href: "/admin/reports/hourly-sales", icon: "bar-chart", permission: "approve" },
-      { key: "game-sales", label: "Game Sales", tooltip: "按游戏输赢（Win/Loss by Game）", href: "/admin/reports/winloss-by-game", icon: "game", permission: "view" },
-      { key: "bonus", label: "Bonus", tooltip: "Bonus 明细/成本", href: "/admin/reports/bonus", icon: "gift", permission: "view" },
-      { key: "bank-tx", label: "Bank Transaction", tooltip: "银行汇总/对账入口", href: "/admin/reports/bank", icon: "bank", permission: "approve" },
-      { key: "all-reports", label: "All Reports…", tooltip: "报表中心（搜索/收藏）", href: "/admin/reports", icon: "report", permission: "view" },
+      { key: "dashboard", label: "Reports", tooltip: "统一报表：筛选、流水、游戏输赢、Bonus 等一页完成", href: "/admin/dashboard", icon: "report", permission: "view" },
     ],
   },
   {
