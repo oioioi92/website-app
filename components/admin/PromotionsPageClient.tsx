@@ -133,48 +133,51 @@ export function PromotionsPageClient() {
 
   return (
     <div className="promo-admin-list promo-admin-list--reference" data-promo-admin-version="reference-v1">
-      <div className="promo-admin-list-toolbar flex flex-wrap items-center gap-3 pb-4">
-        <Link
-          href="/admin/promotions/new"
-          className="admin-compact-btn admin-compact-btn-primary text-[13px]"
-        >
-          {t("admin.promotionsList.newPromo")}
-        </Link>
-        <label className="flex items-center gap-2 text-[13px] text-[var(--admin-text)] cursor-pointer">
-          <input
-            type="checkbox"
-            checked={activeOnly}
-            onChange={(e) => setActiveOnly(e.target.checked)}
-            className="rounded border-[var(--admin-border)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
-          />
-          <span>{t("admin.promotionsList.activeOnly")}</span>
-        </label>
-        <select
-          value={viewMode}
-          onChange={(e) => setViewMode(e.target.value as "reference" | "simple")}
-          className="admin-compact-input rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-1.5 text-[12px] text-[var(--admin-text)]"
-        >
-          <option value="reference">{t("admin.promotionsList.viewReference")}</option>
-          <option value="simple">{t("admin.promotionsList.viewSimple")}</option>
-        </select>
-        <button
-          type="button"
-          onClick={load}
-          disabled={loading}
-          className="admin-compact-btn admin-compact-btn-ghost text-[13px]"
-        >
-          {loading ? (t("admin.promotionsList.loading") ?? "Loading…") : (t("admin.promotionsList.refresh") ?? "Refresh")}
-        </button>
-        {data && (
-          <span className="text-[12px] text-[var(--admin-muted)]">
-            {t("admin.promotionsList.totalCount").replace("{total}", String(total)).replace("{activeCount}", String(activeCount))}
-          </span>
-        )}
+      {/* 工具栏：电话版圆角容器、触控友好 */}
+      <div className="promo-admin-list-toolbar rounded-xl border border-[var(--admin-border)] bg-[var(--admin-panel)] px-3 py-3 md:rounded-none md:border-0 md:bg-transparent md:px-0 md:py-0 md:pb-4">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+          <Link
+            href="/admin/promotions/new"
+            className="admin-compact-btn admin-compact-btn-primary min-h-[40px] flex-1 min-w-[140px] text-[13px] md:flex-none"
+          >
+            {t("admin.promotionsList.newPromo")}
+          </Link>
+          <label className="flex shrink-0 items-center gap-2 text-[13px] text-[var(--admin-text)] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={activeOnly}
+              onChange={(e) => setActiveOnly(e.target.checked)}
+              className="h-4 w-4 rounded border-[var(--admin-border)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
+            />
+            <span>{t("admin.promotionsList.activeOnly")}</span>
+          </label>
+          <select
+            value={viewMode}
+            onChange={(e) => setViewMode(e.target.value as "reference" | "simple")}
+            className="admin-compact-input min-h-[40px] w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-2 text-[13px] text-[var(--admin-text)] md:w-auto md:py-1.5 md:text-[12px]"
+          >
+            <option value="reference">{t("admin.promotionsList.viewReference")}</option>
+            <option value="simple">{t("admin.promotionsList.viewSimple")}</option>
+          </select>
+          <button
+            type="button"
+            onClick={load}
+            disabled={loading}
+            className="admin-compact-btn admin-compact-btn-ghost min-h-[40px] shrink-0 text-[13px]"
+          >
+            {loading ? (t("admin.promotionsList.loading") ?? "Loading…") : (t("admin.promotionsList.refresh") ?? "Refresh")}
+          </button>
+          {data && (
+            <span className="w-full shrink-0 text-[12px] text-[var(--admin-muted)] md:w-auto">
+              {t("admin.promotionsList.totalCount").replace("{total}", String(total)).replace("{activeCount}", String(activeCount))}
+            </span>
+          )}
+        </div>
       </div>
 
       {viewMode === "simple" ? (
         <div className="admin-card overflow-hidden">
-          <div className="border-b border-[var(--admin-border)] px-5 py-3 flex items-center justify-between bg-[var(--admin-panel2)]">
+          <div className="border-b border-[var(--admin-border)] px-4 py-3 flex items-center justify-between bg-[var(--admin-panel2)] md:px-5">
             <span className="text-[13px] font-semibold text-[var(--admin-text)]">{t("admin.promotionsList.listTitle")}</span>
             {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} {t("admin.promotionsList.itemsUnit")}</span>}
           </div>
@@ -185,72 +188,129 @@ export function PromotionsPageClient() {
           ) : items.length === 0 ? (
             <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions") ?? "No promotions yet"}</div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th className="w-[28%]">{t("admin.promotionsList.colTitle")}</th>
-                    <th className="w-[18%]">{t("admin.promotionsList.colSubtitle")}</th>
-                    <th className="w-[10%]">CTA</th>
-                    <th className="w-[10%]">{t("admin.promotionsList.colStatus")}</th>
-                    <th className="w-[10%] text-right">{t("admin.promotionsList.colSort")}</th>
-                    <th className="w-[14%]">{t("admin.promotionsList.colCreatedAt")}</th>
-                    <th className="w-[12%] text-right">{t("admin.promotionsList.colAction")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((p) => (
-                    <tr key={p.id} className="hover:bg-[var(--admin-panel2)]/50">
-                      <td className="font-medium text-[var(--admin-text)] max-w-[200px] truncate">{p.title}</td>
-                      <td className="text-[var(--admin-muted)] max-w-[140px] truncate">{p.subtitle ?? "—"}</td>
-                      <td className="text-[13px]">{p.ctaLabel ?? "—"}</td>
-                      <td>
-                        <span className={`promo-admin-badge ${p.isActive ? "promo-admin-badge--on" : "promo-admin-badge--off"}`}>
+            <>
+              {/* 电话版：Simple 卡片列表 */}
+              <div className="space-y-3 p-3 md:hidden">
+                {items.map((p) => {
+                  const rowIndex = items.findIndex((i) => i.id === p.id);
+                  return (
+                    <div
+                      key={p.id}
+                      className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-panel)] p-3 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <Link href={`/admin/promotions/${p.id}/edit`} className="min-w-0 flex-1 font-medium text-[var(--admin-text)] hover:underline">
+                          <span className="line-clamp-2">{p.title}</span>
+                        </Link>
+                        <span className={`promo-admin-badge shrink-0 ${p.isActive ? "promo-admin-badge--on" : "promo-admin-badge--off"}`}>
                           {p.isActive ? t("admin.promotionsList.statusOn") : t("admin.promotionsList.statusOff")}
                         </span>
-                      </td>
-                      <td className="text-right">
-                        <div className="flex items-center justify-end gap-0.5">
+                      </div>
+                      {(p.subtitle || p.ctaLabel) && (
+                        <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-[var(--admin-muted)]">
+                          {p.subtitle && <span className="truncate">{p.subtitle}</span>}
+                          {p.ctaLabel && <span>CTA: {p.ctaLabel}</span>}
+                        </div>
+                      )}
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--admin-border)] pt-2">
+                        <div className="flex items-center gap-1">
                           <button
                             type="button"
                             title={t("admin.promotionsList.moveUp")}
-                            disabled={items.findIndex((i) => i.id === p.id) === 0 || movingId === p.id}
+                            disabled={rowIndex <= 0 || movingId === p.id}
                             onClick={() => moveOrder(p.id, "up")}
-                            className="promo-order-btn"
+                            className="promo-order-btn min-h-[36px] min-w-[36px]"
                           >
                             ↑
                           </button>
                           <button
                             type="button"
                             title={t("admin.promotionsList.moveDown")}
-                            disabled={items.findIndex((i) => i.id === p.id) === items.length - 1 || movingId === p.id}
+                            disabled={rowIndex >= items.length - 1 || movingId === p.id}
                             onClick={() => moveOrder(p.id, "down")}
-                            className="promo-order-btn"
+                            className="promo-order-btn min-h-[36px] min-w-[36px]"
                           >
                             ↓
                           </button>
                         </div>
-                      </td>
-                      <td className="text-[12px] text-[var(--admin-muted)] tabular-nums">
-                        {p.createdAt ? new Date(p.createdAt).toLocaleString("zh-CN", { dateStyle: "short", timeStyle: "short" }) : "—"}
-                      </td>
-                      <td className="text-right">
-                        <div className="promo-admin-actions justify-end">
+                        <div className="promo-admin-actions">
                           <Link href={`/admin/promotions/${p.id}/edit`}>{t("admin.promotionsList.edit")}</Link>
                           <span className="text-[var(--admin-border)]">|</span>
                           <Link href={`/promotion#${encodeURIComponent(p.id)}`} target="_blank" rel="noreferrer">{t("admin.promotionsList.front")}</Link>
                         </div>
-                      </td>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* 桌面版：Simple 表格 */}
+              <div className="hidden overflow-x-auto md:block">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th className="w-[28%]">{t("admin.promotionsList.colTitle")}</th>
+                      <th className="w-[18%]">{t("admin.promotionsList.colSubtitle")}</th>
+                      <th className="w-[10%]">CTA</th>
+                      <th className="w-[10%]">{t("admin.promotionsList.colStatus")}</th>
+                      <th className="w-[10%] text-right">{t("admin.promotionsList.colSort")}</th>
+                      <th className="w-[14%]">{t("admin.promotionsList.colCreatedAt")}</th>
+                      <th className="w-[12%] text-right">{t("admin.promotionsList.colAction")}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {items.map((p) => (
+                      <tr key={p.id} className="hover:bg-[var(--admin-panel2)]/50">
+                        <td className="font-medium text-[var(--admin-text)] max-w-[200px] truncate">{p.title}</td>
+                        <td className="text-[var(--admin-muted)] max-w-[140px] truncate">{p.subtitle ?? "—"}</td>
+                        <td className="text-[13px]">{p.ctaLabel ?? "—"}</td>
+                        <td>
+                          <span className={`promo-admin-badge ${p.isActive ? "promo-admin-badge--on" : "promo-admin-badge--off"}`}>
+                            {p.isActive ? t("admin.promotionsList.statusOn") : t("admin.promotionsList.statusOff")}
+                          </span>
+                        </td>
+                        <td className="text-right">
+                          <div className="flex items-center justify-end gap-0.5">
+                            <button
+                              type="button"
+                              title={t("admin.promotionsList.moveUp")}
+                              disabled={items.findIndex((i) => i.id === p.id) === 0 || movingId === p.id}
+                              onClick={() => moveOrder(p.id, "up")}
+                              className="promo-order-btn"
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              title={t("admin.promotionsList.moveDown")}
+                              disabled={items.findIndex((i) => i.id === p.id) === items.length - 1 || movingId === p.id}
+                              onClick={() => moveOrder(p.id, "down")}
+                              className="promo-order-btn"
+                            >
+                              ↓
+                            </button>
+                          </div>
+                        </td>
+                        <td className="text-[12px] text-[var(--admin-muted)] tabular-nums">
+                          {p.createdAt ? new Date(p.createdAt).toLocaleString("zh-CN", { dateStyle: "short", timeStyle: "short" }) : "—"}
+                        </td>
+                        <td className="text-right">
+                          <div className="promo-admin-actions justify-end">
+                            <Link href={`/admin/promotions/${p.id}/edit`}>{t("admin.promotionsList.edit")}</Link>
+                            <span className="text-[var(--admin-border)]">|</span>
+                            <Link href={`/promotion#${encodeURIComponent(p.id)}`} target="_blank" rel="noreferrer">{t("admin.promotionsList.front")}</Link>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       ) : (
         <div className="admin-card overflow-hidden promo-admin-table-reference">
-          <div className="border-b border-[var(--admin-border)] px-5 py-3 flex items-center justify-between bg-[var(--admin-panel2)]">
+          <div className="border-b border-[var(--admin-border)] px-4 py-3 flex items-center justify-between bg-[var(--admin-panel2)] md:px-5">
             <span className="text-[13px] font-semibold text-[var(--admin-text)]">{t("admin.promotionsList.listTitle")} (Reference)</span>
             {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} {t("admin.promotionsList.itemsUnit")}</span>}
           </div>
@@ -261,35 +321,17 @@ export function PromotionsPageClient() {
           ) : items.length === 0 ? (
             <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions") ?? "No promotions yet"}</div>
           ) : (
-            <div className="overflow-x-auto">
-              {groups.map((groupKey) => {
-                const groupItems = getItemsInGroup(groupKey);
-                if (groupItems.length === 0) return null;
-                const displayName = groupKey === "OTHER" ? t("admin.promotionsList.other") : groupKey;
-                return (
-                  <div key={groupKey} className="promo-admin-category-block">
-                    <div className="promo-admin-category-header">{displayName}</div>
-                    <table className="admin-table promo-admin-table promo-admin-table--reference">
-                      <thead>
-                        <tr>
-                          <th className="promo-admin-th-id">ID</th>
-                          <th className="text-center w-20">{t("admin.promotionsList.colSort")}</th>
-                          <th>Name</th>
-                          <th>Action</th>
-                          <th>Claim Condition</th>
-                          <th>Amount</th>
-                          <th>Max Payout</th>
-                          <th>Rollover</th>
-                          <th>Turnover</th>
-                          <th>Max Withdraw</th>
-                          <th>Min Topup Amount</th>
-                          <th>Max Topup Amount</th>
-                          <th>Min Times of Topup</th>
-                          <th>Claim Limit</th>
-                          <th>Claim Config</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+            <>
+              {/* 电话版：Reference 按分组卡片列表，避免表格列被截断 */}
+              <div className="md:hidden">
+                {groups.map((groupKey) => {
+                  const groupItems = getItemsInGroup(groupKey);
+                  if (groupItems.length === 0) return null;
+                  const displayName = groupKey === "OTHER" ? t("admin.promotionsList.other") : groupKey;
+                  return (
+                    <div key={groupKey} className="promo-admin-category-block border-b border-[var(--admin-border)]">
+                      <div className="promo-admin-category-header">{displayName}</div>
+                      <div className="space-y-3 p-3">
                         {groupItems.map((p) => {
                           const r = p.ruleJson ?? {};
                           const grant = r.grant ?? {};
@@ -298,20 +340,45 @@ export function PromotionsPageClient() {
                           const rollover = r.rollover;
                           const rolloverMul = r.rolloverMultiplier;
                           const rolloverDisplay = rollover === true ? (rolloverMul != null && rolloverMul > 0 ? `✓ x${rolloverMul}` : "✓") : rollover === false ? "✗" : "—";
-                          const minDep = r.eligible?.minDeposit;
-                          const claimConfigStr = p.ruleJson ? JSON.stringify(p.ruleJson) : "{}";
                           const rowIndex = items.findIndex((i) => i.id === p.id);
                           return (
-                            <tr key={p.id} className="hover:bg-[var(--admin-panel2)]/50">
-                              <td className="promo-admin-td-id tabular-nums text-[12px] font-mono">{p.id.slice(-6)}</td>
-                              <td className="text-center">
-                                <div className="flex items-center justify-center gap-0.5">
+                            <div
+                              key={p.id}
+                              className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-panel)] p-3 shadow-sm"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <span className="font-mono text-[11px] text-[var(--admin-muted)]">{p.id.slice(-6)}</span>
+                                  <Link href={`/admin/promotions/${p.id}/edit`} className="mt-0.5 block font-medium text-[var(--admin-text)] hover:underline">
+                                    <span className="line-clamp-2">{p.title}</span>
+                                  </Link>
+                                </div>
+                                <span className={`promo-admin-badge promo-admin-badge--ref shrink-0 ${p.isActive ? "promo-admin-badge--on" : "promo-admin-badge--off"}`}>
+                                  {p.isActive ? "ACTIVE" : "INACTIVE"}
+                                </span>
+                              </div>
+                              <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[12px]">
+                                <dt className="text-[var(--admin-muted)]">Claim</dt>
+                                <dd>{getClaimCondition(r, true)}</dd>
+                                <dt className="text-[var(--admin-muted)]">Amount</dt>
+                                <dd className="tabular-nums">{getAmount(r, p.percent)}</dd>
+                                <dt className="text-[var(--admin-muted)]">Max Payout</dt>
+                                <dd className="tabular-nums">{cap != null ? cap : "—"}</dd>
+                                <dt className="text-[var(--admin-muted)]">Rollover</dt>
+                                <dd>{rolloverDisplay}</dd>
+                                <dt className="text-[var(--admin-muted)]">Turnover</dt>
+                                <dd className="tabular-nums">{turnover != null ? turnover : "—"}</dd>
+                                <dt className="text-[var(--admin-muted)]">Limit</dt>
+                                <dd>{getClaimLimit(r)}</dd>
+                              </dl>
+                              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--admin-border)] pt-2">
+                                <div className="flex items-center gap-1">
                                   <button
                                     type="button"
                                     title={t("admin.promotionsList.moveUp")}
                                     disabled={rowIndex <= 0 || movingId === p.id}
                                     onClick={() => moveOrder(p.id, "up")}
-                                    className="promo-order-btn"
+                                    className="promo-order-btn min-h-[36px] min-w-[36px]"
                                   >
                                     ↑
                                   </button>
@@ -320,43 +387,121 @@ export function PromotionsPageClient() {
                                     title={t("admin.promotionsList.moveDown")}
                                     disabled={rowIndex >= items.length - 1 || movingId === p.id}
                                     onClick={() => moveOrder(p.id, "down")}
-                                    className="promo-order-btn"
+                                    className="promo-order-btn min-h-[36px] min-w-[36px]"
                                   >
                                     ↓
                                   </button>
                                 </div>
-                              </td>
-                              <td className="font-medium text-[var(--admin-text)] max-w-[180px] truncate">{p.title}</td>
-                              <td>
-                                <div className="flex flex-wrap gap-1 items-center">
-                                  <Link href={`/admin/promotions/${p.id}/edit`} className="text-[12px] text-blue-600 underline">EDIT</Link>
-                                  <span className={`promo-admin-badge promo-admin-badge--ref ${p.isActive ? "promo-admin-badge--on" : "promo-admin-badge--off"}`}>
-                                    {p.isActive ? "ACTIVE" : "INACTIVE"}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="text-[12px]">{getClaimCondition(r, true)}</td>
-                              <td className="tabular-nums text-[12px]">{getAmount(r, p.percent)}</td>
-                              <td className="tabular-nums text-[12px]">{cap != null ? cap : "—"}</td>
-                              <td className="tabular-nums text-[12px]">{rolloverDisplay}</td>
-                              <td className="tabular-nums text-[12px]">{turnover != null ? turnover : "—"}</td>
-                              <td className="text-[12px]">—</td>
-                              <td className="tabular-nums text-[12px]">{minDep != null ? minDep : "—"}</td>
-                              <td className="text-[12px]">—</td>
-                              <td className="text-[12px]">—</td>
-                              <td className="text-[12px]">{getClaimLimit(r)}</td>
-                              <td className="promo-admin-claim-config text-[11px] font-mono text-[var(--admin-muted)] max-w-[200px] truncate" title={claimConfigStr}>
-                                {claimConfigStr.length > 40 ? claimConfigStr.slice(0, 40) + "…" : claimConfigStr || "{}"}
-                              </td>
-                            </tr>
+                                <Link href={`/admin/promotions/${p.id}/edit`} className="text-[13px] font-medium text-[var(--admin-primary)] underline">
+                                  EDIT
+                                </Link>
+                              </div>
+                            </div>
                           );
                         })}
-                      </tbody>
-                    </table>
-                  </div>
-                );
-              })}
-            </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* 桌面版：Reference 表格 */}
+              <div className="hidden overflow-x-auto md:block">
+                {groups.map((groupKey) => {
+                  const groupItems = getItemsInGroup(groupKey);
+                  if (groupItems.length === 0) return null;
+                  const displayName = groupKey === "OTHER" ? t("admin.promotionsList.other") : groupKey;
+                  return (
+                    <div key={groupKey} className="promo-admin-category-block">
+                      <div className="promo-admin-category-header">{displayName}</div>
+                      <table className="admin-table promo-admin-table promo-admin-table--reference">
+                        <thead>
+                          <tr>
+                            <th className="promo-admin-th-id">ID</th>
+                            <th className="text-center w-20">{t("admin.promotionsList.colSort")}</th>
+                            <th>Name</th>
+                            <th>Action</th>
+                            <th>Claim Condition</th>
+                            <th>Amount</th>
+                            <th>Max Payout</th>
+                            <th>Rollover</th>
+                            <th>Turnover</th>
+                            <th>Max Withdraw</th>
+                            <th>Min Topup Amount</th>
+                            <th>Max Topup Amount</th>
+                            <th>Min Times of Topup</th>
+                            <th>Claim Limit</th>
+                            <th>Claim Config</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {groupItems.map((p) => {
+                            const r = p.ruleJson ?? {};
+                            const grant = r.grant ?? {};
+                            const cap = grant.capAmount;
+                            const turnover = r.turnover;
+                            const rollover = r.rollover;
+                            const rolloverMul = r.rolloverMultiplier;
+                            const rolloverDisplay = rollover === true ? (rolloverMul != null && rolloverMul > 0 ? `✓ x${rolloverMul}` : "✓") : rollover === false ? "✗" : "—";
+                            const minDep = r.eligible?.minDeposit;
+                            const claimConfigStr = p.ruleJson ? JSON.stringify(p.ruleJson) : "{}";
+                            const rowIndex = items.findIndex((i) => i.id === p.id);
+                            return (
+                              <tr key={p.id} className="hover:bg-[var(--admin-panel2)]/50">
+                                <td className="promo-admin-td-id tabular-nums text-[12px] font-mono">{p.id.slice(-6)}</td>
+                                <td className="text-center">
+                                  <div className="flex items-center justify-center gap-0.5">
+                                    <button
+                                      type="button"
+                                      title={t("admin.promotionsList.moveUp")}
+                                      disabled={rowIndex <= 0 || movingId === p.id}
+                                      onClick={() => moveOrder(p.id, "up")}
+                                      className="promo-order-btn"
+                                    >
+                                      ↑
+                                    </button>
+                                    <button
+                                      type="button"
+                                      title={t("admin.promotionsList.moveDown")}
+                                      disabled={rowIndex >= items.length - 1 || movingId === p.id}
+                                      onClick={() => moveOrder(p.id, "down")}
+                                      className="promo-order-btn"
+                                    >
+                                      ↓
+                                    </button>
+                                  </div>
+                                </td>
+                                <td className="font-medium text-[var(--admin-text)] max-w-[180px] truncate">{p.title}</td>
+                                <td>
+                                  <div className="flex flex-wrap gap-1 items-center">
+                                    <Link href={`/admin/promotions/${p.id}/edit`} className="text-[12px] text-blue-600 underline">EDIT</Link>
+                                    <span className={`promo-admin-badge promo-admin-badge--ref ${p.isActive ? "promo-admin-badge--on" : "promo-admin-badge--off"}`}>
+                                      {p.isActive ? "ACTIVE" : "INACTIVE"}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="text-[12px]">{getClaimCondition(r, true)}</td>
+                                <td className="tabular-nums text-[12px]">{getAmount(r, p.percent)}</td>
+                                <td className="tabular-nums text-[12px]">{cap != null ? cap : "—"}</td>
+                                <td className="tabular-nums text-[12px]">{rolloverDisplay}</td>
+                                <td className="tabular-nums text-[12px]">{turnover != null ? turnover : "—"}</td>
+                                <td className="text-[12px]">—</td>
+                                <td className="tabular-nums text-[12px]">{minDep != null ? minDep : "—"}</td>
+                                <td className="text-[12px]">—</td>
+                                <td className="text-[12px]">—</td>
+                                <td className="text-[12px]">{getClaimLimit(r)}</td>
+                                <td className="promo-admin-claim-config text-[11px] font-mono text-[var(--admin-muted)] max-w-[200px] truncate" title={claimConfigStr}>
+                                  {claimConfigStr.length > 40 ? claimConfigStr.slice(0, 40) + "…" : claimConfigStr || "{}"}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}
