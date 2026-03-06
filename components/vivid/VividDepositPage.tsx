@@ -1,9 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import "@/styles/vivid-portal.css";
 import { VividTopbar } from "./VividTopbar";
 import { VividFooter } from "./VividFooter";
+
+type PublicBankItem = { bankName: string; bankCode: string; accountName: string; accountNumber: string };
 
 export function VividDepositPage({
   siteName = "KINGDOM888",
@@ -20,6 +24,7 @@ export function VividDepositPage({
   chatUrl?: string;
   whatsappUrl?: string | null;
 }) {
+  const { t } = useLocale();
   if (depositUrl) {
     return (
       <div className="vp-shell">
@@ -37,6 +42,14 @@ export function VividDepositPage({
       </div>
     );
   }
+
+  const [bankAccounts, setBankAccounts] = useState<PublicBankItem[]>([]);
+  useEffect(() => {
+    fetch("/api/public/bank-accounts")
+      .then((r) => (r.ok ? r.json() : { items: [] }))
+      .then((d: { items?: PublicBankItem[] }) => setBankAccounts(Array.isArray(d.items) ? d.items : []))
+      .catch(() => setBankAccounts([]));
+  }, []);
 
   const steps = [
     { step: "1", text: "Contact our support via WhatsApp or Live Chat" },
@@ -86,6 +99,42 @@ export function VividDepositPage({
             ))}
           </div>
         </div>
+
+        {bankAccounts.length > 0 && (
+          <div className="vp-card" style={{ padding: 24, marginBottom: 16 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--vp-text)", marginBottom: 16 }}>
+              {t("public.vivid.deposit.bankListTitle") ?? "Bank accounts for transfer"}
+            </h2>
+            <p style={{ margin: 0, fontSize: 13, color: "var(--vp-muted)", marginBottom: 16 }}>
+              {t("public.vivid.deposit.bankListDesc") ?? "Transfer to one of the following bank account(s), then contact support with your receipt."}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {bankAccounts.map((bank, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: 14,
+                    borderRadius: "var(--vp-r-card)",
+                    border: "1px solid var(--vp-border)",
+                    background: "var(--vp-card2, rgba(255,255,255,0.03))",
+                  }}
+                >
+                  {(bank.bankName || bank.bankCode) && (
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--vp-text)" }}>
+                      {[bank.bankName, bank.bankCode].filter(Boolean).join(" ")}
+                    </p>
+                  )}
+                  <p style={{ margin: "4px 0 0", fontSize: 14, color: "var(--vp-muted)" }}>
+                    {t("public.vivid.deposit.accountName") ?? "Account name"}: {bank.accountName || "—"}
+                  </p>
+                  <p style={{ margin: "2px 0 0", fontSize: 14, color: "var(--vp-muted)", fontVariantNumeric: "tabular-nums" }}>
+                    {t("public.vivid.deposit.accountNumber") ?? "Account number"}: {bank.accountNumber || "—"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {whatsappUrl && (

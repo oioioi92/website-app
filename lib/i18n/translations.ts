@@ -88,6 +88,12 @@ const PUBLIC_ZH = {
       noTransactions: "暂无进出款记录",
       noAccounts: "暂无游戏账号",
     },
+    deposit: {
+      bankListTitle: "入款银行账户",
+      bankListDesc: "请转入以下任一银行账户，然后联系客服并提供转账凭证。",
+      accountName: "户名",
+      accountNumber: "账号",
+    },
     settings: {
       title: "设置",
       changePassword: "修改登入密码",
@@ -178,6 +184,12 @@ const PUBLIC_EN = {
       noTransactions: "No transactions yet",
       noAccounts: "No game accounts",
     },
+    deposit: {
+      bankListTitle: "Bank accounts for transfer",
+      bankListDesc: "Transfer to one of the following bank account(s), then contact support with your receipt.",
+      accountName: "Account name",
+      accountNumber: "Account number",
+    },
     settings: {
       title: "Setting",
       changePassword: "Change login password",
@@ -267,6 +279,12 @@ const PUBLIC_MS = {
       gameAccounts: "Akaun Permainan & Kata Laluan",
       noTransactions: "Tiada transaksi lagi",
       noAccounts: "Tiada akaun permainan",
+    },
+    deposit: {
+      bankListTitle: "Akaun bank untuk pemindahan",
+      bankListDesc: "Pindahkan ke salah satu akaun bank berikut, kemudian hubungi sokongan dengan resit anda.",
+      accountName: "Nama akaun",
+      accountNumber: "Nombor akaun",
     },
     settings: {
       title: "Tetapan",
