@@ -38,6 +38,15 @@ type ChatMessage = {
   createdAt: string;
 };
 
+const IMG_PREFIX = "[img]";
+function parseImageBody(body: string): string | null {
+  const txt = (body ?? "").trim();
+  if (!txt.startsWith(IMG_PREFIX)) return null;
+  const url = txt.slice(IMG_PREFIX.length).trim();
+  if (!/^https?:\/\//i.test(url)) return null;
+  return url;
+}
+
 const FALLBACK_TEMPLATES: Template[] = [
   { id: "1", title: "Ong Ong Boss", bodyText: "Ong Ong Boss" },
   { id: "2", title: "Sila Tunggu Sebentar", bodyText: "Sila tunggu sebentar, kami akan semak." },
@@ -86,9 +95,11 @@ export function AdminLiveChatClient() {
   const [waitLogsOpen, setWaitLogsOpen] = useState(false);
   const [waitLogs, setWaitLogs] = useState<Array<{ customerMsgAt: string; agentReplyAt: string; waitMs: number; agentId: string }>>([]);
   const [sessionPin, setSessionPin] = useState<Record<string, string>>({});
+  const [uploadingImage, setUploadingImage] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const adminIdRef = useRef<string | null>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // 打开会话或消息更新时滚动到底部，显示最新一条消息
   useEffect(() => {
@@ -294,6 +305,37 @@ export function AdminLiveChatClient() {
       loadQueue();
       if (waitLogsOpen && selectedId) void fetchWaitLogs(selectedId);
     }, 800);
+  };
+
+  const sendImage = async (file: File) => {
+    if (!selectedId || !socketRef.current) return;
+    setUploadingImage(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/chat/upload-image", { method: "POST", body: fd, credentials: "include" });
+      const data = (await res.json().catch(() => ({}))) as { publicUrl?: string };
+      if (!res.ok || !data.publicUrl) return;
+      const rawOptions =
+        quickRepliesInput.trim() ||
+        (typeof localStorage !== "undefined" ? localStorage.getItem(DEFAULT_QUICK_REPLIES_KEY) || "" : "");
+      const quickReplies = rawOptions
+        .split(/[,，、]/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 10);
+      socketRef.current.emit("admin_message", {
+        conversationId: selectedId,
+        bodyText: `${IMG_PREFIX}${data.publicUrl}`,
+        ...(quickReplies.length > 0 ? { quickReplies } : {})
+      });
+      setTimeout(() => {
+        loadQueue();
+        if (waitLogsOpen && selectedId) void fetchWaitLogs(selectedId);
+      }, 800);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const saveDefaultQuickReplies = () => {
@@ -821,7 +863,16 @@ export function AdminLiveChatClient() {
                                 {isAdmin ? t("admin.chat.agentLabel") : t("admin.chat.visitor")}
                               </p>
                             )}
-                            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.bodyText}</p>
+                            {(() => {
+                              const imgUrl = parseImageBody(msg.bodyText);
+                              return imgUrl ? (
+                                <a href={imgUrl} target="_blank" rel="noopener noreferrer" className="block">
+                                  <img src={imgUrl} alt="" className="max-w-full max-h-64 rounded-lg object-contain" />
+                                </a>
+                              ) : (
+                                <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.bodyText}</p>
+                              );
+                            })()}
                             <p className="text-[10px] text-slate-400 mt-1.5">
                               {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : ""}
                             </p>
@@ -978,10 +1029,33 @@ export function AdminLiveChatClient() {
           <button type="button" onClick={sendMessage} className="rounded bg-indigo-600 p-1.5 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 shrink-0" title={t("admin.chat.send")}>
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
           </button>
-          <button type="button" className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 shrink-0" title={t("admin.chat.image")}>
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void sendImage(file);
+              e.target.value = "";
+            }}
+          />
+          <button
+            type="button"
+            disabled={uploadingImage || !selectedId}
+            onClick={() => imageInputRef.current?.click()}
+            className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 shrink-0 disabled:opacity-50"
+            title={t("admin.chat.image")}
+          >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" /></svg>
           </button>
-          <button type="button" className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 shrink-0" title={t("admin.chat.attachment")}>
+          <button
+            type="button"
+            disabled={uploadingImage || !selectedId}
+            onClick={() => imageInputRef.current?.click()}
+            className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 shrink-0 disabled:opacity-50"
+            title={t("admin.chat.attachment")}
+          >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
           </button>
         </div>
