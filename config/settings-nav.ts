@@ -29,37 +29,25 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
   {
     key: "frontend",
     label: "Frontend",
-    description: "站点基础信息、公告、弹窗、首页媒体、展示样式",
+    description: "站点名称、Logo、跑马灯、弹窗、首页媒体、展示样式（统一入口）",
     children: [
-      { key: "general", label: "General", href: "/admin/settings/frontend/general", permission: "edit_content" },
-      { key: "notices", label: "Notices & Marquee", href: "/admin/settings/frontend/notices", permission: "edit_content" },
-      { key: "popups", label: "Popups", href: "/admin/settings/frontend/popups", permission: "edit_content" },
-      { key: "downloadBar", label: "Download Bar", href: "/admin/settings/frontend/download-bar", permission: "edit_content" },
-      { key: "homeMedia", label: "Home Media", href: "/admin/settings/frontend/home-media", permission: "edit_content" },
-      { key: "display", label: "Display", href: "/admin/settings/frontend/display", permission: "edit_content" },
+      { key: "frontend", label: "Frontend", href: "/admin/settings/frontend/home-media", permission: "edit_content" },
     ],
   },
   {
     key: "promotions",
     label: "Promotion Center",
-    description: "优惠内容、图片、跳转、布局、弹窗与预览",
+    description: "优惠活动列表，行内进入编辑/Media/Links/Preview",
     children: [
       { key: "list", label: "Promotion List", href: "/admin/settings/promotions/list", permission: "edit_content" },
-      { key: "content", label: "Content", href: "/admin/settings/promotions/content", permission: "edit_content" },
-      { key: "media", label: "Media", href: "/admin/settings/promotions/media", permission: "edit_content" },
-      { key: "links", label: "Link & Route", href: "/admin/settings/promotions/links", permission: "edit_content" },
-      { key: "layout", label: "Layout", href: "/admin/settings/promotions/layout", permission: "edit_content" },
-      { key: "preview", label: "Preview", href: "/admin/settings/promotions/preview", permission: "edit_content" },
     ],
   },
   {
     key: "referral",
     label: "Referral Center",
-    description: "推荐系统、分享规则、展示与参数",
+    description: "推荐系统、分享规则与展示（统一入口）",
     children: [
-      { key: "general", label: "General", href: "/admin/settings/referral/general", permission: "settings" },
-      { key: "sharing", label: "Sharing", href: "/admin/settings/referral/sharing", permission: "settings" },
-      { key: "display", label: "Display", href: "/admin/settings/referral/display", permission: "settings" },
+      { key: "referral", label: "Referral", href: "/admin/settings/referral/general", permission: "settings" },
     ],
   },
   {
