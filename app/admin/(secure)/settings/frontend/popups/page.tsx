@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useLocale } from "@/lib/i18n/context";
+import { ThemeSettingsClient } from "@/components/admin/ThemeSettingsClient";
 
 export default function SettingsFrontendPopupsPage() {
-  const { t } = useLocale();
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-4xl">
       <div className="flex items-center gap-2 text-[13px] text-slate-500">
         <Link href="/admin/settings" className="hover:text-indigo-600">Settings</Link>
         <span>/</span>
@@ -15,13 +14,10 @@ export default function SettingsFrontendPopupsPage() {
         <span className="font-medium text-slate-700">Popups</span>
       </div>
       <h1 className="mt-4 text-lg font-semibold text-slate-800">Popups</h1>
-      <p className="mt-1 text-sm text-slate-500">弹窗、年龄确认等</p>
-      <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-800">
-        {t("admin.settingsPlaceholder.comingSoon")}
+      <p className="mt-1 text-sm text-slate-500">Age Gate、弹窗文案等（保存至主题）</p>
+      <div className="mt-6">
+        <ThemeSettingsClient />
       </div>
-      <p className="mt-4 text-sm text-slate-500">
-        Age Gate 等可在 <Link href="/admin/settings/theme" className="text-indigo-600 hover:underline">THEME</Link> 中配置。
-      </p>
     </div>
   );
 }

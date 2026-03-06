@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AdminReferralSettingsClient } from "@/components/admin/AdminReferralSettingsClient";
 import { useLocale } from "@/lib/i18n/context";
 
 export default function SettingsReferralDisplayPage() {
@@ -15,9 +16,9 @@ export default function SettingsReferralDisplayPage() {
         <span>Display</span>
       </div>
       <h1 className="mt-2 text-lg font-semibold text-[var(--compact-text)]">Referral — Display</h1>
-      <p className="mt-0.5 text-[13px] text-[var(--compact-muted)]">推荐模块前台展示样式与文案</p>
-      <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/50 p-6 text-sm text-slate-600">
-        <p>展示相关配置可在 <Link href="/admin/settings/referral/general" className="text-indigo-600 hover:underline">General</Link> 中一并设置。</p>
+      <p className="mt-0.5 text-[13px] text-[var(--compact-muted)]">推荐模块前台展示样式与文案（与 General/Sharing 同源，保存至推荐设置 API）</p>
+      <div className="mt-6">
+        <AdminReferralSettingsClient />
       </div>
     </div>
   );
