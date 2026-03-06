@@ -105,3 +105,11 @@
 
 - 将 4 处客服入口由 `/live-chat` 统一为 `/chat`（见 1.2）。
 - 本报告写入 `docs/SCAN-REPORT.md`。
+
+---
+
+## 8. 若底部栏仍只显示 5 项（没有 Live Chat）
+
+- **确认运行目录**：当前修改在 **worktree** `.../worktrees/Website-new/iiw`。若你在 **Desktop** 的 `Website-new` 跑 `npm run dev`，看到的是旧代码。请在本 worktree 下执行 `npm run dev`，或把 `fix/admin-full-repair-plan` 分支合并到主仓库后再跑。
+- **确认渲染的是哪个底栏**：在浏览器开发者工具里看底部 `<nav>`：带 `data-bottom-nav-items="6"` 的即本次修复的组件（应有 6 项含 Live Chat）。
+- **清缓存**：硬刷新（Ctrl+Shift+R）或清空站点数据后重开页面，排除旧 bundle 缓存。

@@ -14,7 +14,7 @@ const BOTTOM_NAV_CONFIG = [
   { labelKey: "public.vivid.bottomNav.setting", href: "/settings", emoji: "⚙️" },
 ] as const;
 
-/** Vivid 底部固定导航（Home / Games / Promo / History / Live Chat / Setting），保证“下面的 bar 不管怎样都一直存在”。 */
+/** Vivid 底部固定导航：固定 6 列，Home / Games / Promo / History / Live Chat / Setting，防止被挤掉或只显示 5 项。 */
 export function VividBottomNav() {
   const path = usePathname();
   const { t } = useLocale();
@@ -22,6 +22,7 @@ export function VividBottomNav() {
     <nav
       role="navigation"
       aria-label="Bottom navigation"
+      data-bottom-nav-items="6"
       style={{
         position: "fixed",
         bottom: 0,
@@ -31,25 +32,27 @@ export function VividBottomNav() {
         background: "rgba(13,13,26,0.97)",
         borderTop: "1px solid rgba(120,80,255,0.3)",
         backdropFilter: "blur(12px)",
-        display: "flex",
+        display: "grid",
+        gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
         paddingBottom: "env(safe-area-inset-bottom, 4px)",
       }}
     >
       {BOTTOM_NAV_CONFIG.map((n) => {
         const active = path === n.href;
         const isLiveChat = n.href === "/chat";
+        const label = isLiveChat ? (t(n.labelKey) || "Live Chat") : t(n.labelKey);
         return (
           <Link
             key={n.href}
             href={n.href}
-            aria-label={t(n.labelKey)}
+            aria-label={label}
             data-nav-item={isLiveChat ? "live-chat" : undefined}
             style={{
-              flex: 1,
               minWidth: 0,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              justifyContent: "center",
               gap: 3,
               padding: "10px 2px 8px",
               textDecoration: "none",
@@ -60,7 +63,7 @@ export function VividBottomNav() {
             }}
           >
             <span style={{ fontSize: 18 }} aria-hidden>{n.emoji}</span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{t(n.labelKey)}</span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{label}</span>
             {active && (
               <span style={{
                 width: 20,

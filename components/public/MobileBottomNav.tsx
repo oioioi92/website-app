@@ -4,16 +4,67 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FallbackImage } from "@/components/FallbackImage";
 import { resolveUiAssetByName } from "@/lib/public/namedAssets";
+import { useLocale } from "@/lib/i18n/context";
 import type { ThemeConfig } from "@/lib/public/theme";
+import type { ThemeBottomNavItem } from "@/lib/public/theme";
+
+const DEFAULT_ITEMS: ThemeBottomNavItem[] = [
+  { href: "/", label: "Home", icon: "🏠", badge: null },
+  { href: "/games", label: "Games", icon: "🎮", badge: null },
+  { href: "/promotion", label: "Promo", icon: "🎁", badge: null },
+  { href: "/history", label: "History", icon: "📜", badge: null },
+  { href: "/chat", label: "Live Chat", icon: "💬", badge: null },
+  { href: "/settings", label: "Setting", icon: "⚙️", badge: null },
+];
+
+/** 从 theme 里按 href 找对应项，找不到用默认。 */
+function pickItem(list: ThemeBottomNavItem[], href: string, fallback: ThemeBottomNavItem): ThemeBottomNavItem {
+  const normalized = href.toLowerCase().replace(/\/$/, "") || "/";
+  const found = list.find((x) => (x.href ?? "").toLowerCase().replace(/\/$/, "") === normalized);
+  return found ?? fallback;
+}
+
+/**
+ * 底部栏固定 6 项，顺序：Home, Games, Promo, History, Live Chat, Setting。
+ * 第 5 项（History 与 Setting 之间）固定为 Live Chat，文案用 i18n。
+ */
+function buildBottomNavWithLiveChat(
+  themeNav: ThemeBottomNavItem[],
+  liveChatLabel: string
+): ThemeBottomNavItem[] {
+  const list = Array.isArray(themeNav) ? themeNav : [];
+  const home = pickItem(list, "/", DEFAULT_ITEMS[0]);
+  const games = pickItem(list, "/games", DEFAULT_ITEMS[1]);
+  const promo = pickItem(list, "/promotion", pickItem(list, "/bonus", DEFAULT_ITEMS[2]));
+  const history = pickItem(list, "/history", DEFAULT_ITEMS[3]);
+  const setting = pickItem(list, "/settings", DEFAULT_ITEMS[5]);
+  const liveChatItem: ThemeBottomNavItem = {
+    href: "/chat",
+    label: liveChatLabel,
+    icon: "💬",
+    badge: null,
+  };
+  return [
+    { ...home, href: "/", label: home.label },
+    { ...games, href: "/games", label: games.label },
+    { ...promo, href: promo.href, label: promo.label },
+    { ...history, href: "/history", label: history.label },
+    liveChatItem,
+    { ...setting, href: "/settings", label: setting.label },
+  ];
+}
 
 export function MobileBottomNav({ chatUrl, theme }: { chatUrl: string; theme: ThemeConfig }) {
   const pathname = usePathname();
-  const items = theme.bottomNav.slice(0, 5);
+  const { t } = useLocale();
+  const themeNav = theme?.bottomNav ?? [];
+  const liveChatLabel = t("public.vivid.bottomNav.liveChat") || "Live Chat";
+  const items = buildBottomNavWithLiveChat(themeNav, liveChatLabel);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)]/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
-      <div className="mx-auto grid max-w-[520px] grid-cols-5 gap-1.5">
-        {items.map((item) => {
+    <nav data-mobile-shell-nav data-bottom-nav-items="6" className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)]/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
+      <div className="mx-auto grid max-w-[520px] grid-cols-6 gap-1.5" style={{ gridTemplateColumns: "repeat(6, minmax(0, 1fr))" }}>
+        {items.map((item, index) => {
           const labelLower = item.label.toLowerCase();
           const hrefLower = item.href.toLowerCase();
           const isChatItem =
@@ -44,7 +95,7 @@ export function MobileBottomNav({ chatUrl, theme }: { chatUrl: string; theme: Th
           return (
             useExternalAnchor ? (
               <a
-                key={item.label}
+                key={`nav-${index}-${item.href}`}
                 href={resolvedHref}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -66,7 +117,7 @@ export function MobileBottomNav({ chatUrl, theme }: { chatUrl: string; theme: Th
               </a>
             ) : (
               <Link
-                key={item.label}
+                key={`nav-${index}-${item.href}`}
                 href={resolvedHref}
                 className={className}
               >
