@@ -45,7 +45,24 @@ const REPORT_CENTER_SLUGS = [
   "lucky-draw-4d",
 ];
 
-const PLACEHOLDER_REPORT_SLUGS: string[] = [];
+/** 报表中心中后端尚未实现的 slug，显示「即将推出」占位，避免 404 或报错（customer 映射 user-kpi 已实现，不占位） */
+const PLACEHOLDER_REPORT_SLUGS: string[] = [
+  "bank",
+  "gateway-search",
+  "winloss-by-player",
+  "top-referrer",
+  "promotion-report",
+  "commission",
+  "staff",
+  "activity-log",
+  "rebate-angpao",
+  "manual",
+  "feedback",
+  "leaderboard",
+  "referrer-click",
+  "lucky-number",
+  "lucky-draw-4d",
+];
 
 export function AdminReportsSlugClient() {
   const params = useParams<{ slug?: string[] }>();

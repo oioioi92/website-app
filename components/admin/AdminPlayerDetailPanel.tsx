@@ -36,24 +36,23 @@ type MemberDetail = {
   walletTx: WalletTx[];
 };
 
-const TABS = [
-  { id: "transaction", label: "TRANSACTION" },
-  { id: "wallet", label: "WALLET" },
-  { id: "chat", label: "CHAT" },
-  { id: "details", label: "DETAILS" },
-  { id: "bet", label: "BET HISTORY" },
-  { id: "commission", label: "COMMISSION" },
-  { id: "credit", label: "CREDIT" },
-  { id: "setting", label: "SETTING" },
-  { id: "problem", label: "PROBLEM" },
-  { id: "game", label: "GAME" },
-  { id: "ip", label: "IP" },
-  { id: "similarity", label: "SIMILARITY" },
-  { id: "usertag", label: "USER TAG" },
-  { id: "log", label: "LOG" }
+const TAB_IDS = [
+  "transaction",
+  "wallet",
+  "chat",
+  "details",
+  "bet",
+  "commission",
+  "credit",
+  "setting",
+  "problem",
+  "game",
+  "ip",
+  "similarity",
+  "usertag",
+  "log",
 ] as const;
-
-type TabId = (typeof TABS)[number]["id"];
+type TabId = (typeof TAB_IDS)[number];
 
 export function AdminPlayerDetailPanel({
   memberId,
@@ -125,19 +124,19 @@ export function AdminPlayerDetailPanel({
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-1 border-b border-slate-200 bg-white px-2 py-2">
-          {TABS.map((tab) => (
+          {TAB_IDS.map((id) => (
             <button
-              key={tab.id}
+              key={id}
               type="button"
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setActiveTab(id)}
               className={
                 "rounded px-2.5 py-1.5 text-xs font-medium " +
-                (activeTab === tab.id
+                (activeTab === id
                   ? "bg-sky-100 text-sky-800 ring-1 ring-sky-300"
                   : "text-slate-600 hover:bg-slate-100")
               }
             >
-              {tab.label}
+              {t(`admin.players.tab${id.charAt(0).toUpperCase() + id.slice(1)}` as "admin.players.tabTransaction") ?? id}
             </button>
           ))}
         </div>
@@ -267,7 +266,17 @@ export function AdminPlayerDetailPanel({
                 </div>
               )}
 
-              {["bet", "commission", "credit", "setting", "problem", "game", "ip", "similarity", "usertag", "log"].includes(activeTab) && (
+              {activeTab === "credit" && (
+                <div className="space-y-4">
+                  <dl className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
+                    <dt className="text-slate-600">{t("admin.players.creditBalance") ?? "Main wallet balance"}</dt>
+                    <dd className="font-semibold text-slate-900">{detail.mainWalletBalance.toFixed(2)}</dd>
+                  </dl>
+                  <p className="text-xs text-slate-500">{t("admin.players.comingSoon")}</p>
+                </div>
+              )}
+
+              {["bet", "commission", "setting", "problem", "game", "ip", "similarity", "usertag", "log"].includes(activeTab) && (
                 <div className="py-8 text-center text-slate-500">{t("admin.players.comingSoon")}</div>
               )}
             </>
@@ -281,7 +290,7 @@ export function AdminPlayerDetailPanel({
             onClick={onClose}
             className="w-full rounded-lg bg-red-500 py-2.5 text-sm font-bold text-white hover:bg-red-600"
           >
-            CLOSE
+            {t("admin.players.close") ?? "Close"}
           </button>
         </div>
       </div>
