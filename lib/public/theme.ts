@@ -115,6 +115,10 @@ export type ThemeConfig = {
   };
   /** V3.1: LiveTx 区域背景图（可选） */
   liveTxBgImageUrl: string | null;
+  /** 前台整页背景图（Header 及以下区域） */
+  pageBackgroundUrl: string | null;
+  /** 前台整页背景色（CSS 合法值，如 #0a0a0a） */
+  pageBackgroundColor: string | null;
   /** P0: 首页模块标题（前台不再写死） */
   sectionTitles: ThemeSectionTitles;
   /** P0: 前台主要入口路由（/bonus、/promotion 等） */
@@ -129,6 +133,19 @@ export type ThemeConfig = {
   uiGameCategories: string[];
   /** P0: V2 顶部 pills 分类（可配置） */
   categoryPills: ThemeCategoryPill[];
+  /** Vivid Portal：促销卡片样式配置 */
+  vividPromoCardConfig: {
+    /** 图片区高度（px），默认 180 */
+    imgHeight: number;
+    /** 是否显示百分比/高亮标签 */
+    showPercent: boolean;
+    /** 是否显示副标题 */
+    showSubtitle: boolean;
+    /** 是否显示 T&C 按钮 */
+    showTnc: boolean;
+    /** 每行几列（2 或 3），默认 3 */
+    columns: number;
+  };
 };
 
 const defaults: ThemeConfig = {
@@ -215,7 +232,14 @@ const defaults: ThemeConfig = {
     { id: "fishing", label: "FISHING" },
     { id: "sports", label: "SPORTS" },
     { id: "live", label: "LIVE" }
-  ]
+  ],
+  vividPromoCardConfig: {
+    imgHeight: 180,
+    showPercent: true,
+    showSubtitle: true,
+    showTnc: true,
+    columns: 3,
+  }
 };
 
 function asRecord(input: unknown): Record<string, unknown> | null {
@@ -291,6 +315,8 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
     partnershipBadgeUrl: normalizeUrlForUi(t.partnershipBadgeUrl),
     centerSlotImageUrl: normalizeUrlForUi(t.centerSlotImageUrl),
     liveTxBgImageUrl: normalizeUrlForUi(t.liveTxBgImageUrl),
+    pageBackgroundUrl: normalizeUrlForUi(t.pageBackgroundUrl),
+    pageBackgroundColor: sanitizeText(t.pageBackgroundColor, 60) || null,
     actionBarDepositColor: sanitizeText(t.actionBarDepositColor, 60) || null,
     actionBarWithdrawColor: sanitizeText(t.actionBarWithdrawColor, 60) || null,
     actionBarButtonImages: {
@@ -325,6 +351,16 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
       t.promotionFontPreset === "compact" || t.promotionFontPreset === "bold"
         ? t.promotionFontPreset
         : "default",
+    vividPromoCardConfig: {
+      imgHeight: typeof t.vividPromoCardConfig?.imgHeight === "number"
+        && t.vividPromoCardConfig.imgHeight >= 80
+        && t.vividPromoCardConfig.imgHeight <= 600
+        ? t.vividPromoCardConfig.imgHeight : 180,
+      showPercent:  t.vividPromoCardConfig?.showPercent  !== false,
+      showSubtitle: t.vividPromoCardConfig?.showSubtitle !== false,
+      showTnc:      t.vividPromoCardConfig?.showTnc      !== false,
+      columns:      t.vividPromoCardConfig?.columns === 2 ? 2 : 3,
+    },
     heroBanners: Array.isArray(t.heroBanners)
       ? t.heroBanners
           .map((b) => ({
@@ -743,7 +779,18 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
     promotionFontPreset,
     bottomNav,
     uiGameCategories,
-    categoryPills
+    categoryPills,
+    vividPromoCardConfig: (() => {
+      const v = asRecord(obj.vividPromoCardConfig);
+      const h = typeof v?.imgHeight === "number" && v.imgHeight >= 80 && v.imgHeight <= 600 ? v.imgHeight : 180;
+      return {
+        imgHeight: h,
+        showPercent: v?.showPercent !== false,
+        showSubtitle: v?.showSubtitle !== false,
+        showTnc: v?.showTnc !== false,
+        columns: v?.columns === 2 ? 2 : 3
+      };
+    })()
   };
 }
 
