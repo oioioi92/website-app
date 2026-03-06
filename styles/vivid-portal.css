@@ -45,6 +45,11 @@ body:has(.vp-shell) .min-h-screen                   { background: #080810 !impor
   --vp-r-pill:    999px;
   --vp-gap:       24px;
   --vp-w:         1100px;
+  --vp-topbar-bg:     rgba(8, 8, 18, 0.96);
+  --vp-topbar-border: rgba(150, 80, 255, 0.35);
+  --vp-marquee-bg:    var(--vp-card);
+  --vp-marquee-border: var(--vp-border);
+  --vp-marquee-text:  var(--vp-text);
 
   min-height: 100vh;
   min-height: 100dvh;
@@ -69,8 +74,8 @@ body:has(.vp-shell) .min-h-screen                   { background: #080810 !impor
 
 /* ---- Topbar ---- */
 .vp-shell .vp-bar {
-  background: rgba(8, 8, 18, 0.96);
-  border-bottom: 1px solid rgba(150, 80, 255, 0.35);
+  background: var(--vp-topbar-bg);
+  border-bottom: 1px solid var(--vp-topbar-border);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   position: sticky;
@@ -88,7 +93,7 @@ body:has(.vp-shell) .min-h-screen                   { background: #080810 !impor
 .vp-shell .vp-logo {
   font-size: 20px;
   font-weight: 900;
-  background: linear-gradient(90deg, #cc80ff, #9060ff);
+  background: linear-gradient(90deg, var(--vp-accent), var(--vp-accent2));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

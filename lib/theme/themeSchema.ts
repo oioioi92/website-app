@@ -238,6 +238,11 @@ export const themeSchema = z.object({
   frontSuccess: optionalText(60),
   frontDanger: optionalText(60),
   frontGold: optionalText(60),
+  vpTopbarBg: optionalText(100),
+  vpTopbarBorder: optionalText(100),
+  marqueeBg: optionalText(60),
+  marqueeBorder: optionalText(100),
+  marqueeTextColor: optionalText(60),
 
   sectionTitles: sectionTitlesSchema.default({
     quickActions: "QUICK ACTIONS",

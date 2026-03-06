@@ -63,6 +63,11 @@ export default async function PublicLayout({ children }: { children: ReactNode }
   if (theme?.vpRadiusBtn) vpVars.push(`--vp-r-btn: ${theme.vpRadiusBtn}`);
   if (theme?.vpGap) vpVars.push(`--vp-gap: ${theme.vpGap}`);
   if (theme?.vpMaxWidth) vpVars.push(`--vp-w: ${theme.vpMaxWidth}`);
+  if (theme?.vpTopbarBg) vpVars.push(`--vp-topbar-bg: ${theme.vpTopbarBg}`);
+  if (theme?.vpTopbarBorder) vpVars.push(`--vp-topbar-border: ${theme.vpTopbarBorder}`);
+  if (theme?.marqueeBg) vpVars.push(`--vp-marquee-bg: ${theme.marqueeBg}`);
+  if (theme?.marqueeBorder) vpVars.push(`--vp-marquee-border: ${theme.marqueeBorder}`);
+  if (theme?.marqueeTextColor) vpVars.push(`--vp-marquee-text: ${theme.marqueeTextColor}`);
   const deskVars: string[] = [];
   if (theme?.deskBg) deskVars.push(`--desk-bg: ${theme.deskBg}`);
   if (theme?.deskPanel) deskVars.push(`--desk-panel: ${theme.deskPanel}`);

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useMemo } from "react";
 import "@/styles/vivid-portal.css";
 import { FallbackImage } from "@/components/FallbackImage";
+import { AnnouncementMarquee } from "@/components/public/AnnouncementMarquee";
 import { LiveTransactionTable } from "@/components/public/LiveTransactionTable";
 import { ReferralBlock } from "@/components/public/ReferralBlock";
 import { inferUiGameCategory, UI_GAME_CATEGORIES, type UiGameCategory } from "@/lib/public/uiGameCategories";
@@ -72,8 +73,8 @@ export function VividMobileHome({
         position: "sticky",
         top: 0,
         zIndex: 40,
-        background: "rgba(13,13,26,0.95)",
-        borderBottom: "1px solid rgba(120,80,255,0.25)",
+        background: "var(--vp-topbar-bg)",
+        borderBottom: "1px solid var(--vp-topbar-border)",
         backdropFilter: "blur(12px)",
         display: "flex",
         alignItems: "center",
@@ -128,6 +129,15 @@ export function VividMobileHome({
           </Link>
         </div>
       </header>
+
+      <AnnouncementMarquee
+        text={theme.announcementMarqueeText ?? undefined}
+        messages={theme.marqueeMessages?.length ? theme.marqueeMessages : undefined}
+        variant="vivid"
+        marqueeBg={theme.marqueeBg}
+        marqueeBorder={theme.marqueeBorder}
+        textColor={theme.marqueeTextColor}
+      />
 
       <div style={{ padding: "16px 14px", display: "flex", flexDirection: "column", gap: 14 }}>
 

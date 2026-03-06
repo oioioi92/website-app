@@ -175,6 +175,19 @@ export function ThemeSettingsClient() {
               rows={4}
             />
           </div>
+          <p className="text-[13px] text-[var(--compact-muted)] sm:col-span-2">{t("admin.site.marqueeStyleDesc") ?? "跑马灯与顶栏样式（留空用默认）："}</p>
+          {[
+            { key: "vpTopbarBg", label: "顶栏背景", ph: "rgba(8,8,18,0.96)" },
+            { key: "vpTopbarBorder", label: "顶栏边框", ph: "rgba(150,80,255,0.35)" },
+            { key: "marqueeBg", label: "跑马灯背景", ph: "同卡片色" },
+            { key: "marqueeBorder", label: "跑马灯边框", ph: "同主题边框" },
+            { key: "marqueeTextColor", label: "跑马灯文字色", ph: "#ffffff" },
+          ].map(({ key, label, ph }) => (
+            <div key={key}>
+              <label className={labelClass}>{label}</label>
+              <input type="text" value={String((theme as unknown as Record<string, string | null | undefined>)[key] ?? "")} onChange={(e) => patch({ [key]: e.target.value || null } as Partial<ThemeConfig>)} className={inputClass} placeholder={ph} />
+            </div>
+          ))}
           <div>
             <label className={labelClass}>{t("admin.site.quickActionsTitle")}</label>
             <input type="text" value={theme.sectionTitles?.quickActions ?? ""} onChange={(e) => patchSectionTitles({ quickActions: e.target.value })} className={inputClass} placeholder="QUICK ACTIONS" />

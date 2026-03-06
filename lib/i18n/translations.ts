@@ -399,6 +399,7 @@ const ADMIN_ZH = {
     marqueeMulti: "跑马灯多条文案 (marqueeMessages，每行一条，优先于上面单条)",
     placeholderMarquee: "Welcome — Latest promotions",
     placeholderMarqueeLines: "第一条\n第二条\n第三条",
+    marqueeStyleDesc: "跑马灯与顶栏样式（留空用默认）：",
     quickActionsTitle: "快捷操作区标题",
     liveTxTitle: "流水区标题",
     gameZoneTitle: "游戏区标题",

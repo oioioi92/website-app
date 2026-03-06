@@ -164,6 +164,13 @@ export type ThemeConfig = {
   frontSuccess: string | null;
   frontDanger: string | null;
   frontGold: string | null;
+  /** Vivid Topbar 背景/边框（不设则用默认） */
+  vpTopbarBg: string | null;
+  vpTopbarBorder: string | null;
+  /** 跑马灯区域背景/边框/文字色 */
+  marqueeBg: string | null;
+  marqueeBorder: string | null;
+  marqueeTextColor: string | null;
   /** P0: 首页模块标题（前台不再写死） */
   sectionTitles: ThemeSectionTitles;
   /** P0: 前台主要入口路由（/bonus、/promotion 等） */
@@ -283,6 +290,11 @@ const defaults: ThemeConfig = {
   frontSuccess: null,
   frontDanger: null,
   frontGold: null,
+  vpTopbarBg: null,
+  vpTopbarBorder: null,
+  marqueeBg: null,
+  marqueeBorder: null,
+  marqueeTextColor: null,
   sectionTitles: {
     quickActions: "QUICK ACTIONS",
     liveTransaction: "LIVE TRANSACTION",
@@ -439,6 +451,11 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
     frontSuccess: sanitizeCssColor(sanitizeText(t.frontSuccess, 60)),
     frontDanger: sanitizeCssColor(sanitizeText(t.frontDanger, 60)),
     frontGold: sanitizeCssColor(sanitizeText(t.frontGold, 60)),
+    vpTopbarBg: sanitizeCssColor(sanitizeText(t.vpTopbarBg, 100)) || sanitizeText(t.vpTopbarBg, 100) || null,
+    vpTopbarBorder: sanitizeCssColor(sanitizeText(t.vpTopbarBorder, 100)) || sanitizeText(t.vpTopbarBorder, 100) || null,
+    marqueeBg: sanitizeCssColor(sanitizeText(t.marqueeBg, 60)),
+    marqueeBorder: sanitizeCssColor(sanitizeText(t.marqueeBorder, 100)) || sanitizeText(t.marqueeBorder, 100) || null,
+    marqueeTextColor: sanitizeCssColor(sanitizeText(t.marqueeTextColor, 60)),
     actionBarDepositColor: sanitizeText(t.actionBarDepositColor, 60) || null,
     actionBarWithdrawColor: sanitizeText(t.actionBarWithdrawColor, 60) || null,
     actionBarButtonImages: {
@@ -932,6 +949,11 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
     frontSuccess: sanitizeCssColor(asString(obj.frontSuccess)),
     frontDanger: sanitizeCssColor(asString(obj.frontDanger)),
     frontGold: sanitizeCssColor(asString(obj.frontGold)),
+    vpTopbarBg: sanitizeCssColor(asString(obj.vpTopbarBg)) || asString(obj.vpTopbarBg),
+    vpTopbarBorder: sanitizeCssColor(asString(obj.vpTopbarBorder)) || asString(obj.vpTopbarBorder),
+    marqueeBg: sanitizeCssColor(asString(obj.marqueeBg)),
+    marqueeBorder: sanitizeCssColor(asString(obj.marqueeBorder)) || asString(obj.marqueeBorder),
+    marqueeTextColor: sanitizeCssColor(asString(obj.marqueeTextColor)),
     sectionTitles,
     routes,
     promotionPattern,
