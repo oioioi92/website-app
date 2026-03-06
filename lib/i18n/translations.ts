@@ -708,6 +708,10 @@ const ADMIN_ZH = {
     waitSecLabel: "等待",
     urgentWaitPrefix: "⚠ 严重超时 ",
     warnWaitPrefix: "⏱ 超时 ",
+    pinCategory: "分类",
+    pinDeposit: "入款",
+    pinWithdraw: "出款",
+    pinGameBonus: "游戏奖金",
   },
   settingsPaymentGateway: {
     breadcrumbSettings: "设置",
@@ -1749,6 +1753,10 @@ const ADMIN_EN = {
     waitSecLabel: "Wait",
     urgentWaitPrefix: "⚠ Severe timeout ",
     warnWaitPrefix: "⏱ Timeout ",
+    pinCategory: "Category",
+    pinDeposit: "Deposit",
+    pinWithdraw: "Withdraw",
+    pinGameBonus: "Game Bonus",
   },
   settingsPaymentGateway: {
     breadcrumbSettings: "Settings",
@@ -2780,6 +2788,10 @@ const ADMIN_MS = {
     waitSecLabel: "Tunggu",
     urgentWaitPrefix: "⚠ Lebih masa teruk ",
     warnWaitPrefix: "⏱ Lebih masa ",
+    pinCategory: "Kategori",
+    pinDeposit: "Deposit",
+    pinWithdraw: "Pengeluaran",
+    pinGameBonus: "Bonus Permainan",
   },
   settingsPaymentGateway: {
     breadcrumbSettings: "Tetapan",
