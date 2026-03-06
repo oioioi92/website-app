@@ -219,9 +219,10 @@ const defaults: ThemeConfig = {
   promotionFontPreset: "default",
   bottomNav: [
     { href: "/", label: "HOME", icon: "H", badge: null },
+    { href: "/games", label: "GAMES", icon: "G", badge: null },
+    { href: "/promotion", label: "PROMO", icon: "P", badge: null },
     { href: "/history", label: "HISTORY", icon: "H", badge: null },
-    { href: "/bonus", label: "PROMO", icon: "P", badge: null },
-    { href: "/chat", label: "SUPPORT", icon: "S", badge: null },
+    { href: "/chat", label: "LIVE CHAT", icon: "C", badge: null },
     { href: "/settings", label: "SETTINGS", icon: "S", badge: null }
   ],
   uiGameCategories: ["Casino", "Sportbook", "Slots", "E-Sports", "Poker", "Fishing"],

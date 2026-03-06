@@ -59,7 +59,8 @@ export function MobileBottomNav({ chatUrl, theme }: { chatUrl: string; theme: Th
   const { t } = useLocale();
   const themeNav = theme?.bottomNav ?? [];
   const liveChatLabel = t("public.vivid.bottomNav.liveChat") || "Live Chat";
-  const items = buildBottomNavWithLiveChat(themeNav, liveChatLabel);
+  let items = buildBottomNavWithLiveChat(themeNav, liveChatLabel);
+  if (items.length !== 6) items = [...DEFAULT_ITEMS];
 
   return (
     <nav data-mobile-shell-nav data-bottom-nav-items="6" className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)]/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
