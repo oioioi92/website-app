@@ -251,34 +251,38 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
       </section>
 
       {data && data.summary && Object.keys(data.summary).length > 0 && (
-        <div className="admin-card flex flex-wrap items-center justify-between gap-4 px-5 py-3 bg-[var(--compact-table-header)]">
-          {Object.entries(data.summary).map(([k, v]) => (
-            <span key={k} className="text-[13px] font-medium tabular-nums text-[var(--compact-text)]">
-              {k}: {typeof v === "number" ? v.toFixed(2) : v}
-            </span>
-          ))}
+        <div className="admin-card px-4 py-3 bg-[var(--compact-table-header)] overflow-x-auto">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 min-w-0 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
+            {Object.entries(data.summary).map(([k, v]) => (
+              <span key={k} className="text-[13px] font-medium tabular-nums text-[var(--compact-text)] whitespace-nowrap">
+                {k}: {typeof v === "number" ? v.toFixed(2) : v}
+              </span>
+            ))}
+          </div>
         </div>
       )}
 
-      <section className="admin-card overflow-x-auto">
-        <div className="border-b border-[var(--compact-table-border)] px-4 py-2 flex items-center justify-between bg-[var(--compact-table-header)]">
-          <span className="text-[13px] font-semibold text-[var(--compact-text)]">{title}</span>
-          <div className="flex items-center gap-2 flex-wrap">
+      <section className="admin-card min-w-0">
+        <p className="sm:hidden px-3 py-1 text-[11px] text-[var(--compact-muted)] bg-[var(--compact-table-header)] border-b border-[var(--compact-table-border)]">{t("admin.reports.scrollTableHint")}</p>
+        <div className="border-b border-[var(--compact-table-border)] px-3 sm:px-4 py-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between bg-[var(--compact-table-header)]">
+          <span className="text-[13px] font-semibold text-[var(--compact-text)] shrink-0">{title}</span>
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
             {data && data.rows.length > 0 && (
-              <button type="button" onClick={exportCsv} disabled={exporting} className="admin-compact-btn admin-compact-btn-ghost text-xs disabled:opacity-60">
-                {exporting ? (t("admin.reports.exporting") ?? "导出中…") : t("admin.reports.exportCsv")}
+              <button type="button" onClick={exportCsv} disabled={exporting} className="admin-compact-btn admin-compact-btn-ghost text-xs disabled:opacity-60 shrink-0">
+                {exporting ? (t("admin.reports.exporting") ?? "Exporting…") : t("admin.reports.exportCsv")}
               </button>
             )}
-            {exportStatus === "success" && <span className="text-xs text-emerald-600">{t("admin.reports.exportSuccess") ?? "导出成功"}</span>}
-            {exportStatus === "error" && <span className="text-xs text-red-600">{t("admin.reports.exportCsvFailed")}</span>}
+            {exportStatus === "success" && <span className="text-xs text-emerald-600 shrink-0">{t("admin.reports.exportSuccess") ?? "Export OK"}</span>}
+            {exportStatus === "error" && <span className="text-xs text-red-600 shrink-0">{t("admin.reports.exportCsvFailed")}</span>}
             {data && (
-              <span className="text-xs text-[var(--compact-muted)]">
+              <span className="text-xs text-[var(--compact-muted)] whitespace-nowrap">
                 {t("admin.transactions.totalCountPage").replace("{n}", String(data.rows.length))}
-                {typeof data.summary?.total_count === "number" && ` / ${(t("admin.reports.totalRecords") ?? "共 {n} 条").replace("{n}", String(data.summary.total_count))}`}
+                {typeof data.summary?.total_count === "number" && ` / ${(t("admin.reports.totalRecords") ?? "Total {n}").replace("{n}", String(data.summary.total_count))}`}
               </span>
             )}
           </div>
         </div>
+        <div className="overflow-x-auto">
         {loading ? (
           <div className="py-12 text-center text-[13px] text-[var(--compact-muted)]">{t("admin.common.loading")}</div>
         ) : error ? (
@@ -286,13 +290,13 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
         ) : !data ? (
           <div className="py-12 text-center text-[13px] text-[var(--compact-muted)]">{t("admin.reports.clickSearch")}</div>
         ) : (
-          <table className="admin-table">
+          <table className="admin-table min-w-[640px]" style={{ tableLayout: "auto" }}>
             <thead>
               <tr>
                 {(data.columns as ReportColumn[]).map((col) => (
                   <th
                     key={col.key}
-                    className={col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"}
+                    className={`whitespace-nowrap ${col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : "text-left"}`}
                   >
                     {col.label}
                   </th>
@@ -312,7 +316,7 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
                     {(data.columns as ReportColumn[]).map((col) => (
                       <td
                         key={col.key}
-                        className={`${col.align === "right" ? "num text-right" : col.align === "center" ? "text-center" : "text-left"} ${col.key === "amount" && Number(row[col.key]) < 0 ? "negative" : ""}`}
+                        className={`whitespace-nowrap ${col.align === "right" ? "num text-right" : col.align === "center" ? "text-center" : "text-left"} ${col.key === "amount" && Number(row[col.key]) < 0 ? "negative" : ""}`}
                       >
                         {formatCell(row[col.key], col.key)}
                       </td>
@@ -338,6 +342,7 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
             </div>
           </div>
         )}
+        </div>
       </section>
     </div>
   );

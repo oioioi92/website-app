@@ -580,7 +580,6 @@ const ADMIN_ZH = {
     fontSize: "基础字号",
     deskCssHint: "桌面版 .public-desktop-shell 的 CSS 变量。",
     liveTxBgSizeNote: "背景图",
-    actionBarButtonImagesDesc: "以下为 Action Bar 按钮图片 URL，有则前台用照片代替文字按钮。",
     sectionVividPromoCard: "Vivid Portal — 促销卡片",
     vividPromoImgHeightLabel: "图片区高度（px，80~600）",
     vividPromoImgHeightHint: "建议：160~240。调小则卡片更紧凑，调大则图片更突出。",
@@ -941,6 +940,7 @@ const ADMIN_ZH = {
     exportSuccess: "导出成功",
     exportCsvFailed: "导出失败",
     totalRecords: "共 {n} 条",
+    scrollTableHint: "← 左右滑动表格 →",
     transactionsDetailDesc: "按 Transaction ID、客户、类型、日期、金额、状态筛选，方便员工操作",
     dailySummaryDesc: "按日查看入款笔数、入款金额、提款笔数、提款金额与净额",
     reconciliationDesc: "渠道/供应商/用户账务对账",
@@ -1118,10 +1118,6 @@ const ADMIN_ZH = {
     edit: "编辑",
     front: "前台",
     other: "其他",
-  },
-  players: {
-    pageTitle: "玩家列表",
-    pageDesc: "顾客资料与经营指标。每位顾客支持：Chat 直接发信息，Wallet 进入其前台代操作。",
   },
   playerWallet: {
     backLink: "← 玩家列表",
@@ -1955,6 +1951,7 @@ const ADMIN_EN = {
     exportSuccess: "Export success",
     exportCsvFailed: "Export failed",
     totalRecords: "Total {n} records",
+    scrollTableHint: "← Scroll table horizontally →",
     transactionsDetailDesc: "Filter by Transaction ID, customer, type, date, amount, status for staff use.",
     dailySummaryDesc: "View daily deposit count, deposit amount, withdrawal count, withdrawal amount and net.",
     reconciliationDesc: "Channel / provider / user account reconciliation",
@@ -2132,10 +2129,6 @@ const ADMIN_EN = {
     edit: "Edit",
     front: "Front",
     other: "Other",
-  },
-  players: {
-    pageTitle: "Player List",
-    pageDesc: "Customer profiles and metrics. For each customer: Chat to message, Wallet to operate on their front site.",
   },
   playerWallet: {
     backLink: "← Player List",
@@ -2959,6 +2952,7 @@ const ADMIN_MS = {
     exportSuccess: "Eksport berjaya",
     exportCsvFailed: "Eksport gagal",
     totalRecords: "Jumlah {n} rekod",
+    scrollTableHint: "← Skrol jadual mengufuk →",
     transactionsDetailDesc: "Tapis mengikut Transaction ID, pelanggan, jenis, tarikh, jumlah, status untuk kegunaan kakitangan.",
     dailySummaryDesc: "Lihat bilangan deposit harian, jumlah deposit, bilangan pengeluaran, jumlah pengeluaran dan bersih.",
     reconciliationDesc: "Penyelarasan akaun saluran / pembekal / pengguna",
@@ -3136,10 +3130,6 @@ const ADMIN_MS = {
     edit: "Edit",
     front: "Hadapan",
     other: "Lain",
-  },
-  players: {
-    pageTitle: "Senarai Pemain",
-    pageDesc: "Profil pelanggan dan metrik. Untuk setiap pelanggan: Chat untuk mesej, Wallet untuk urus laman hadapan mereka.",
   },
   playerWallet: {
     backLink: "← Senarai Pemain",
