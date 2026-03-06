@@ -41,7 +41,7 @@ export function PromotionSettingsClient() {
     if (!theme) return;
     setTheme({
       ...theme,
-      uiText: { ...(theme.uiText ?? {}), [key]: value || undefined },
+      uiText: { ...(theme.uiText ?? {}), [key]: value || "" },
     });
   }
 

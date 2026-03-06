@@ -9,7 +9,7 @@ export default async function PublicSettingsPage() {
     const { theme: t } = await getPublicTheme();
     theme = t;
   } catch {
-    theme = { siteName: "KINGDOM888", loginUrl: "/login", registerUrl: "/register-wa", uiText: {} };
+    theme = { siteName: "KINGDOM888", loginUrl: "/login", registerUrl: "/register-wa", uiText: {} } as Awaited<ReturnType<typeof getPublicTheme>>["theme"];
   }
   return (
     <VividSettingsClient

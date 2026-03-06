@@ -114,7 +114,7 @@ export function BankSettingsClient() {
             <div key={it.id} className="admin-card p-6 space-y-4 rounded-2xl border border-slate-200/80 bg-white shadow-md">
               <div className="flex items-center justify-between border-b border-[var(--compact-card-border)] pb-2">
                 <h2 className="text-sm font-semibold text-[var(--compact-text)]">
-                  {it.bankName || it.bankCode || t("admin.settingsBank.bankCardTitle") ?? "银行账户"}
+                  {(it.bankName || it.bankCode || t("admin.settingsBank.bankCardTitle")) ?? "银行账户"}
                 </h2>
                 <button
                   type="button"

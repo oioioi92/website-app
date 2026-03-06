@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/context";
 import { useAdminApiContext } from "@/lib/admin-api-context";
 
 type Row = {
@@ -18,6 +19,7 @@ type Row = {
 };
 
 export function AdminWithdrawalListClient() {
+  const { t } = useLocale();
   const { setForbidden } = useAdminApiContext();
   const [items, setItems] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);

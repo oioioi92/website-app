@@ -33,12 +33,12 @@ export default function SettingsLayout({
             href="/admin/settings"
             className="mb-3 block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200/60"
           >
-            ← {t("admin.settingsNav.backToSettings")}
+            ← {t("admin.settingsSection.backToSettings")}
           </Link>
           {filteredNav.map((group) => (
             <div key={group.key} className="space-y-0.5">
               <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                {group.titleKey ? t(group.titleKey as "admin.settingsNav.frontend") : group.label}
+                {group.label}
               </div>
               {(group.children ?? []).map((item) => {
                 const isActive = pathname === item.href || (item.href !== "/admin/settings" && pathname.startsWith(item.href));

@@ -5,16 +5,16 @@
 ## P0：核心可用性与安全
 
 ### 游戏管理
-- [ ] **Settings → 游戏供应商**：列表加载正常，名称/代码/Logo/启用可编辑，保存成功
+- [ ] **Settings → 游戏管理 / game-providers**：页面含「游戏 API 配置」+「游戏供应商与 Logo」合并；列表加载正常，名称/代码/Logo/启用可编辑，保存成功
 - [ ] **游戏管理（fullManagement）**：新建游戏、排序（上/下）、启用开关、Logo 上传均可用；无字段重叠、按钮挤压
-- [ ] 翻译键均正常显示（无 `admin.gamesManagement.xxx` 等裸 key）
+- [ ] 翻译键均正常显示（gameProviderLogos.pageTitle / pageSubtitle 等已补）
 
 ### Domain
 - [ ] **Admin → Domain**：允许的域名列表加载/添加/移除正常
 - [ ] **空列表可保存**：清空所有域名后点击保存，接口返回成功且再次进入页面仍为空列表
 
-### Tools（图片转网址）
-- [ ] **Admin → Tools**：上传图片获得链接功能正常
+### 图片转网址
+- [ ] **Admin → 图片转网址 /admin/image-to-url**：上传图片获得链接功能正常（与 Tools 同组件）
 - [ ] 文案为「建议图片宽度不超过 1500px…」，无误导性「Max Width: 1500 px」强制限制
 
 ### Security 权限
@@ -29,9 +29,10 @@
 - [ ] **CSV 导出**：按钮点击后显示「导出中…」，成功显示「导出成功」，失败显示错误提示
 
 ### Settings 信息架构
-- [ ] **Settings 首页**：六大块入口正确，点击进入对应子页
-- [ ] **Settings 侧栏**：使用 `group.children` 渲染，无 `group.items` 报错；当前路径高亮正确
-- [ ] **Security**：统一入口为 **/admin/settings/account/security**，2FA/白名单等在此页配置
+- [ ] **Settings 首页**：七大块（Theme、Frontend、Promotion、Referral、Finance、Integrations、Account）入口正确，点击进入对应子页
+- [ ] **Settings 侧栏**：使用 SETTINGS_NAV `group.children` 渲染，当前路径高亮正确；返回键为 `admin.settingsSection.backToSettings`
+- [ ] **Security**：**/admin/settings/account/security** 含 Security Tips、IP 白名单、2FA（TwoFactorSettingsClient）、Create Admin 入口；Login History 在 **/admin/settings/account/login-history** 独立页
+- [ ] **Admin Accounts**：**/admin/settings/account/admins** 列表与创建正常，API 为 /api/admin/settings/admin-users
 
 ## P2：Theme 与前台联动
 

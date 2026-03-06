@@ -205,6 +205,8 @@ const defaults: ThemeConfig = {
     maxWithdraw: null
   },
   liveTxBgImageUrl: null,
+  pageBackgroundUrl: null,
+  pageBackgroundColor: null,
   sectionTitles: {
     quickActions: "QUICK ACTIONS",
     liveTransaction: "LIVE TRANSACTION",
@@ -774,6 +776,8 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
       };
     })(),
     liveTxBgImageUrl: normalizeUrlForUi(obj.liveTxBgImageUrl),
+    pageBackgroundUrl: normalizeUrlForUi(obj.pageBackgroundUrl),
+    pageBackgroundColor: asString(obj.pageBackgroundColor),
     sectionTitles,
     routes,
     promotionPattern,

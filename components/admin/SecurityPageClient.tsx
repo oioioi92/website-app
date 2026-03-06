@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useLocale } from "@/lib/i18n/context";
 import { useAdminApiContext } from "@/lib/admin-api-context";
-import { LoginHistoryClient } from "@/components/admin/LoginHistoryClient";
+import { TwoFactorSettingsClient } from "@/components/admin/TwoFactorSettingsClient";
 
 const TIPS = [
   "Make sure all IP addresses belong to your staff.",
@@ -55,7 +56,7 @@ export function SecurityPageClient() {
     <div className="max-w-4xl space-y-8">
       <div>
         <h1 className="text-xl font-bold text-slate-800">Security</h1>
-        <p className="mt-1 text-sm text-slate-500">Security tips, IP whitelist, activity log</p>
+        <p className="mt-1 text-sm text-slate-500">Security tips, IP whitelist, 2FA, admin accounts</p>
       </div>
 
       <section className="rounded-xl border border-amber-200 bg-amber-50/90 p-5 shadow-sm">
@@ -99,10 +100,25 @@ export function SecurityPageClient() {
         )}
       </section>
 
-      <section>
-        <h2 className="mb-3 text-sm font-semibold text-slate-800">Activity Log / Login History</h2>
-        <p className="mb-4 text-xs text-slate-500">Recent admin session logins (time, staff, session expiry).</p>
-        <LoginHistoryClient />
+      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-2 text-sm font-semibold text-slate-800">Two-Factor Authentication (2FA)</h2>
+        <p className="mb-4 text-xs text-slate-500">
+          Use an authenticator app to add a second factor when signing in. Login history is available under Account & Security → Login History.
+        </p>
+        <TwoFactorSettingsClient />
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-2 text-sm font-semibold text-slate-800">Create Admin / Editor / Viewer</h2>
+        <p className="mb-4 text-xs text-slate-500">
+          Add and manage backend accounts: admin (full access), editor (content & theme), viewer (read-only). Go to Admin Accounts to create or edit.
+        </p>
+        <Link
+          href="/admin/settings/account/admins"
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          Open Admin Accounts →
+        </Link>
       </section>
     </div>
   );

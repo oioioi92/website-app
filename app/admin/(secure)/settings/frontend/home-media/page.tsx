@@ -16,7 +16,7 @@ export default function SettingsFrontendHomeMediaPage() {
       <h1 className="mt-4 text-lg font-semibold text-slate-800">Home Media</h1>
       <p className="mt-1 text-sm text-slate-500">首页轮播、Banner、合作伙伴图等前台照片，可直接上传或粘贴图片 URL。</p>
       <div className="mt-6">
-        <ThemeSettingsClient onlySections="homeMedia" />
+        <ThemeSettingsClient />
       </div>
     </div>
   );

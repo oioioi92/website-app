@@ -10,7 +10,7 @@ export default function AdminSettingsGamesPage() {
     <div className="admin-page-content">
       <div className="flex items-center gap-2 text-[13px] text-[var(--admin-muted)]">
         <Link href="/admin/settings" className="hover:text-[var(--admin-primary)]">
-          {t("admin.settingsNav.backToSettings")}
+          {t("admin.settingsSection.backToSettings")}
         </Link>
         <span>/</span>
         <span>{t("admin.gamesManagement.pageTitle")}</span>

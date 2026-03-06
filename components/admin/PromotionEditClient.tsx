@@ -84,6 +84,12 @@ type Form = {
   title: string;
   subtitle: string;
   coverUrl: string;
+  coverUrlMobilePromo: string;
+  coverUrlDesktopHome: string;
+  coverUrlMobileHome: string;
+  popupCoverUrl: string;
+  popupTextBelow: string;
+  promoLink: string;
   /** 璇︽儏绫诲瀷涓?HTML 鏃剁敤杩欎釜锛岀洿鎺ュ啓 HTML 涓嶇敤 JSON */
   detailHtml: string;
   /** 璇︽儏绫诲瀷涓?Blocks 鏃剁敤杩欎釜锛圝SON 瀛楃涓诧級*/
@@ -145,6 +151,12 @@ const emptyForm: Form = {
   title: "",
   subtitle: "",
   coverUrl: "",
+  coverUrlMobilePromo: "",
+  coverUrlDesktopHome: "",
+  coverUrlMobileHome: "",
+  popupCoverUrl: "",
+  popupTextBelow: "",
+  promoLink: "",
   detailHtml: "",
   detailJson: "{}",
   percent: 0,
@@ -185,6 +197,12 @@ export function PromotionEditClient({ id }: { id?: string }) {
           title: data.title ?? "",
           subtitle: data.subtitle ?? "",
           coverUrl: data.coverUrl ?? "",
+          coverUrlMobilePromo: data.coverUrlMobilePromo ?? "",
+          coverUrlDesktopHome: data.coverUrlDesktopHome ?? "",
+          coverUrlMobileHome: data.coverUrlMobileHome ?? "",
+          popupCoverUrl: data.popupCoverUrl ?? "",
+          popupTextBelow: data.popupTextBelow ?? "",
+          promoLink: data.promoLink ?? "",
           detailHtml: hasHtml ? (raw as { html: string }).html : "",
           detailJson: hasHtml ? "{}" : typeof data.detailJson === "string" ? data.detailJson : JSON.stringify(data.detailJson ?? {}, null, 2),
           percent: Number(data.percent) || 0,
@@ -350,10 +368,10 @@ export function PromotionEditClient({ id }: { id?: string }) {
 
   return (
     <PromotionEditFormLines
-      form={form}
-      patch={patch}
-      patchRule={patchRule}
-      patchRuleDisplay={patchRuleDisplay}
+      form={form as never}
+      patch={patch as never}
+      patchRule={patchRule as never}
+      patchRuleDisplay={patchRuleDisplay as never}
       save={save}
       saving={saving}
       isCreate={isCreate}

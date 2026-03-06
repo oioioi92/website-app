@@ -164,7 +164,7 @@ export function Sidebar({ collapsed, onNavigate, user }: SidebarProps) {
         </div>
 
         <nav className="admin-sidebar-nav flex-1 overflow-y-auto overflow-x-hidden pb-4">
-          {ADMIN_NAV.filter((g) => !g.permission || g.permission === role).map((group) => (
+          {ADMIN_NAV.map((group) => (
             <div key={group.key}>
               <div className="admin-nav-group-title">{t(`admin.groups.${group.key}`)}</div>
               {group.items.map((item) => {

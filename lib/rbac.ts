@@ -50,6 +50,11 @@ export function canViewOnly(user: AdminUser): boolean {
   return hasRole(user, ["viewer"]);
 }
 
+/** 设置类接口：银行、支付网关、推荐、域名、入款规则等，admin/super/finance/ops 可访问 */
+export function canAccessSettings(user: AdminUser): boolean {
+  return hasRole(user, BACKOFFICE_ROLES);
+}
+
 /** Security 敏感接口：IP 白名单、登录历史、活动日志等，仅 admin 可访问 */
 export function canAccessSecuritySettings(user: AdminUser): boolean {
   return hasRole(user, ["admin"]);

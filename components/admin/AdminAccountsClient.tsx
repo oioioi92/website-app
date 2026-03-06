@@ -32,7 +32,7 @@ export function AdminAccountsClient() {
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
-    fetch("/api/admin/admins", { credentials: "include" })
+    fetch("/api/admin/settings/admin-users", { credentials: "include" })
       .then((r) => {
         if (r.status === 403) {
           setForbidden(true);
@@ -91,7 +91,7 @@ export function AdminAccountsClient() {
     }
     setSubmitting(true);
     setMessage(null);
-    fetch("/api/admin/admins", {
+    fetch("/api/admin/settings/admin-users", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

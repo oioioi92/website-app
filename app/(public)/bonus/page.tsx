@@ -20,7 +20,7 @@ export default async function PublicBonusPage() {
       const t = await getPublicTheme();
       theme = t.theme;
     } catch {
-      theme = { siteName: "KINGDOM888", loginUrl: "/login", registerUrl: "/register-wa", routes: { bonus: "/bonus" }, uiText: {} };
+      theme = { siteName: "KINGDOM888", loginUrl: "/login", registerUrl: "/register-wa", routes: { promotion: "/promotion", bonus: "/bonus" }, uiText: {} } as Awaited<ReturnType<typeof getPublicTheme>>["theme"];
     }
   }
   return (

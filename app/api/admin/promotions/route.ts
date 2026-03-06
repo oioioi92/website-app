@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       startAt,
       endAt,
       isClaimable: body.isClaimable !== false,
-      ruleJson: ruleJson === null ? null : (ruleJson as object),
+      ruleJson: ruleJson === null ? Prisma.JsonNull : (ruleJson as object),
       ctaLabel: body.ctaLabel ?? null,
       ctaUrl: body.ctaUrl ?? null,
       isActive: body.isActive !== false,

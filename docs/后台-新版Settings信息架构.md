@@ -44,14 +44,15 @@ Settings（设置首页）
 │   └── Payment Gateway
 │
 ├── 5. Integrations（集成）
-│   ├── Game API
+│   ├── 游戏管理 / Game Providers（API 配置 + 供应商 Logo 合并）
 │   └── WhatsApp
 │
 └── 6. Account & Security（账号与安全）
-    ├── Personal Details
-    ├── Password
-    ├── 2FA（后续）
-    └── Login History（后续）
+    ├── Profile（个人资料）
+    ├── Password（修改密码）
+    ├── Security（IP 白名单、2FA、Create Admin 入口）
+    ├── Login History（登录记录）
+    └── Admin Accounts（创建/管理 admin/editor/viewer）
 ```
 
 ---

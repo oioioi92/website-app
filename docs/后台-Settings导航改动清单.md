@@ -8,7 +8,7 @@
 | Promotion Center | `/admin/settings/promotions/list` |
 | Referral Center | `/admin/settings/referral/general` |
 | Finance | `/admin/settings/finance/banks` |
-| Integrations | `/admin/settings/integrations/game-api` |
+| Integrations | `/admin/settings/game-providers`（游戏 API + Logo 合并页；game-api 已重定向至此） |
 | Account & Security | `/admin/settings/account/profile` |
 
 ## 二、旧路径 → 新路径（Redirect）
@@ -21,7 +21,7 @@
 | `/admin/settings/bank` | `/admin/settings/finance/banks` |
 | `/admin/settings/deposit-topup-rules` | `/admin/settings/finance/deposit-rules` |
 | `/admin/settings/payment-gateway` | `/admin/settings/finance/payment-gateways` |
-| `/admin/settings/game-api` | `/admin/settings/integrations/game-api` |
+| `/admin/settings/game-api` | `/admin/settings/game-providers`（与 Logo 合并） |
 | `/admin/settings/whatsapp` | `/admin/settings/integrations/whatsapp` |
 | `/admin/settings/profile` | `/admin/settings/account/profile` |
 | `/admin/settings/password` | `/admin/settings/account/password` |
@@ -48,9 +48,9 @@ Redirect 在对应旧路径的 `page.tsx` 中通过 `redirect()` 实现，书签
 
 ### Referral Center
 - `/admin/settings/referral` — 直接 redirect 到 `referral/general`
-- `/admin/settings/referral/general` — 占位（后续可接入推荐配置）
-- `/admin/settings/referral/sharing` — 占位
-- `/admin/settings/referral/display` — 占位
+- `/admin/settings/referral/general` — 已接入 AdminReferralSettingsClient（下线代数、分享渠道）
+- `/admin/settings/referral/sharing` — 已接入同一推荐配置组件
+- `/admin/settings/referral/display` — 占位（说明可到 General 设置）
 
 ### Finance
 - `/admin/settings/finance/banks` — 沿用 Bank 设置
@@ -59,14 +59,15 @@ Redirect 在对应旧路径的 `page.tsx` 中通过 `redirect()` 实现，书签
 - `/admin/settings/finance/payment-gateways` — 沿用 Payment Gateway
 
 ### Integrations
-- `/admin/settings/integrations/game-api` — 沿用 Game API
-- `/admin/settings/integrations/whatsapp` — 沿用 WhatsApp
+- `/admin/settings/game-providers` — 游戏 API 配置 + 供应商 Logo 合并页（GameApiSettingsClient + GameProviderLogosClient fullManagement）
+- `/admin/settings/integrations/whatsapp` — redirect 到 settings/whatsapp
 
 ### Account & Security
 - `/admin/settings/account/profile` — 沿用 Personal Detail
 - `/admin/settings/account/password` — 沿用修改密码
-- `/admin/settings/account/security` — 占位
-- `/admin/settings/account/login-history` — 占位
+- `/admin/settings/account/security` — 已实现：Security Tips、IP 白名单、2FA、Create Admin 入口（Login History 已移至独立子页）
+- `/admin/settings/account/login-history` — 已实现 LoginHistoryClient
+- `/admin/settings/account/admins` — 已实现 AdminAccountsClient（创建/管理 admin/editor/viewer，API: settings/admin-users）
 
 ## 四、配置文件
 
