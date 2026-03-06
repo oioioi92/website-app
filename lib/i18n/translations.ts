@@ -342,6 +342,8 @@ const ADMIN_ZH = {
     "ref-tree": "推荐树",
     "admin-accounts": "Admin 账户",
     settings: "设置",
+    promotions: "优惠活动",
+    "image-to-url": "图片转网址",
   },
   adminAccounts: {
     createTitle: "Create Admin",
@@ -1160,6 +1162,8 @@ const ADMIN_EN = {
     "ref-tree": "Referral Tree",
     "admin-accounts": "Admin Accounts",
     settings: "Settings",
+    promotions: "Promotions",
+    "image-to-url": "Image to URL",
   },
   adminAccounts: {
     createTitle: "Create Admin",
@@ -1974,6 +1978,8 @@ const ADMIN_MS = {
     "ref-tree": "Pohon Rujukan",
     "admin-accounts": "Akaun Admin",
     settings: "Tetapan",
+    promotions: "Promosi",
+    "image-to-url": "Imej ke URL",
   },
   adminAccounts: {
     createTitle: "Cipta Admin",

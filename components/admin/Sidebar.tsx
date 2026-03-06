@@ -170,7 +170,11 @@ export function Sidebar({ collapsed, onNavigate, user }: SidebarProps) {
               {group.items.map((item) => {
                 const href = item.href ?? "#";
                 const active = href !== "#" && (pathname === href || pathname.startsWith(href + "/"));
-                const label = t(`admin.nav.${item.key}`);
+                const label = (() => {
+                  const out = t(`admin.nav.${item.key}`);
+                  if (out && !out.startsWith("admin.nav.")) return out;
+                  return item.label;
+                })();
                 return (
                   <div key={item.key} onClick={() => onNavigate?.()}>
                     <Link
