@@ -8,9 +8,11 @@ type Props = {
   value: string;
   onChange: (url: string) => void;
   required?: boolean;
+  /** 上传目录模块，如 "providers" 用于 game provider logo，未配置 R2 时保存到 public/uploads/providers/ */
+  uploadModule?: string;
 };
 
-export function PhotoUploadField({ label, hint = "", value, onChange, required }: Props) {
+export function PhotoUploadField({ label, hint = "", value, onChange, required, uploadModule }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
@@ -21,11 +23,12 @@ export function PhotoUploadField({ label, hint = "", value, onChange, required }
     try {
       const fd = new FormData();
       fd.append("file", file);
+      if (uploadModule) fd.append("module", uploadModule);
       const res = await fetch("/api/admin/upload/image", { method: "POST", credentials: "include", body: fd });
       const json: Record<string, unknown> = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) {
         setUploadErr(
-          res.status === 413 ? "图片太大" : res.status === 503 ? "存储未配置（R2）" : json.error === "FILE_TOO_LARGE" ? "超过 5MB" : json.error === "INVALID_TYPE" ? "仅支持 JPG/PNG/WEBP/GIF" : json.error === "UNAUTHORIZED" ? "请重新登录" : json.error === "R2_NOT_CONFIGURED" ? "存储未配置（R2）" : "上传失败"
+          res.status === 413 ? "图片太大" : res.status === 503 ? "存储未配置（R2）" : json.error === "FILE_TOO_LARGE" ? "超过 5MB" : json.error === "INVALID_TYPE" ? "仅支持 JPG/PNG/WEBP/GIF" : json.error === "UNAUTHORIZED" ? "请重新登录" : json.error === "R2_NOT_CONFIGURED" ? "R2 未配置（已改用本地上传）" : "上传失败"
         );
       } else {
         onChange(String(json.url ?? ""));

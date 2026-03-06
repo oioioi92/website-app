@@ -151,7 +151,7 @@ export function GameProviderLogosClient({ fullManagement = false }: Props) {
                   </button>
                 </div>
                 <div className="w-full min-w-0 max-w-[280px]">
-                  <PhotoUploadField label={t("admin.gameProviderLogos.logoLabel")} hint="" value={p.logoUrl ?? ""} onChange={(url) => updateProvider(p.id, { logoUrl: url || null })} />
+                  <PhotoUploadField label={t("admin.gameProviderLogos.logoLabel")} hint="" value={p.logoUrl ?? ""} onChange={(url) => updateProvider(p.id, { logoUrl: url || null })} uploadModule="providers" />
                 </div>
               </div>
             </div>
@@ -167,7 +167,7 @@ export function GameProviderLogosClient({ fullManagement = false }: Props) {
                 {!p.isActive && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">{t("admin.common.inactive")}</span>}
                 {savingId === p.id && <span className="text-xs text-[var(--admin-muted)]">{t("admin.common.saving")}</span>}
               </div>
-              <PhotoUploadField label={t("admin.gameProviderLogos.logoLabel")} hint="" value={p.logoUrl ?? ""} onChange={(url) => updateProvider(p.id, { logoUrl: url || null })} />
+              <PhotoUploadField label={t("admin.gameProviderLogos.logoLabel")} hint="" value={p.logoUrl ?? ""} onChange={(url) => updateProvider(p.id, { logoUrl: url || null })} uploadModule="providers" />
             </div>
           ))}
         </div>

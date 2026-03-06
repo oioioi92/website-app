@@ -1,3 +1,5 @@
+import { mkdirSync, writeFileSync } from "fs";
+import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
 import { isR2Configured } from "@/lib/r2";
@@ -17,14 +19,10 @@ function getExt(mime: string): string {
   return "webp";
 }
 
-/** POST: 管理员上传图片，返回可用的公开 URL（R2）。用于游戏 Logo、主题图、优惠图等。 */
+/** POST: 管理员上传图片，返回可用的公开 URL（R2 或本地 public/uploads）。用于游戏 Logo、主题图、优惠图等。 */
 export async function POST(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
-
-  if (!isR2Configured()) {
-    return NextResponse.json({ error: "R2_NOT_CONFIGURED", message: "R2 storage not configured" }, { status: 503 });
-  }
 
   const form = await req.formData().catch(() => null);
   if (!form) return NextResponse.json({ error: "INVALID_INPUT" }, { status: 400 });
@@ -40,19 +38,23 @@ export async function POST(req: NextRequest) {
   const body = Buffer.from(await file.arrayBuffer());
 
   try {
-    const { publicUrl } = await uploadObjectToR2({
-      objectKey,
-      contentType: file.type,
-      body,
-    });
-    // 返回相对路径，前端可自行拼 origin；部分调用方期望绝对 URL，这里返回 publicUrl（若 R2_PUBLIC_BASE_URL 为绝对地址则已是完整 URL）
-    const url = publicUrl.startsWith("http") ? publicUrl : `/${objectKey}`;
-    return NextResponse.json({
-      ok: true,
-      url,
-      filename: file.name,
-      size: file.size,
-    });
+    if (isR2Configured()) {
+      const { publicUrl } = await uploadObjectToR2({
+        objectKey,
+        contentType: file.type,
+        body,
+      });
+      const url = publicUrl.startsWith("http") ? publicUrl : `/${objectKey}`;
+      return NextResponse.json({ ok: true, url, filename: file.name, size: file.size });
+    }
+
+    // 未配置 R2 时写入本地 public/uploads/<module>/，供 desktop game provider 等使用
+    const publicDir = path.join(process.cwd(), "public");
+    const fullPath = path.join(publicDir, objectKey);
+    mkdirSync(path.dirname(fullPath), { recursive: true });
+    writeFileSync(fullPath, body);
+    const url = `/${objectKey.replace(/\\/g, "/")}`;
+    return NextResponse.json({ ok: true, url, filename: file.name, size: file.size });
   } catch (e) {
     console.error("[admin/upload/image]", e);
     return NextResponse.json({ error: "UPLOAD_FAILED" }, { status: 500 });
