@@ -429,18 +429,46 @@ export function AdminLiveChatClient() {
 
   return (
     <div className="flex flex-1 flex-col min-h-0 min-w-0 bg-slate-50 overflow-hidden">
-      {/* 顶栏 */}
+      {/* 顶栏：Live Chat 标题 + Templates/Settings 在中间 + # 快捷键在右 */}
       <header className="flex shrink-0 items-center gap-3 bg-indigo-600 px-4 py-2.5 text-white shadow">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20">
+        {/* 电话版：选中会话时显示「返回列表」，点后收起右侧聊天、回到列表 */}
+        {selectedId && (
+          <button
+            type="button"
+            onClick={() => setSelectedId(null)}
+            className="lg:hidden flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20 hover:bg-white/30"
+            title={t("admin.chat.backToList")}
+            aria-label={t("admin.chat.backToList")}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+        )}
+        <span className={`flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 shrink-0 ${selectedId ? "hidden lg:flex" : "flex"}`}>
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </span>
-        <span className="text-sm font-semibold">{t("admin.nav.chat")}</span>
+        <span className="text-sm font-semibold truncate min-w-0">{selected ? getVisitorDisplayLabel(selected) : t("admin.nav.chat")}</span>
+        <div className="flex items-center gap-2 flex-1 justify-center min-w-0">
+          <Link
+            href="/admin/chat/templates"
+            className="rounded border border-white/40 bg-white/10 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-white/20 shrink-0"
+          >
+            {t("admin.templates")}
+          </Link>
+          <Link
+            href="/admin/chat/bot"
+            className="rounded border border-white/40 bg-white/10 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-white/20 shrink-0"
+          >
+            {t("admin.settings")}
+          </Link>
+        </div>
         <button
           type="button"
           onClick={() => setHotkeyPanelOpen((v) => !v)}
-          className="ml-auto rounded-lg bg-white/20 px-2.5 py-1.5 text-xs font-medium hover:bg-white/30"
+          className="rounded-lg bg-white/20 px-2.5 py-1.5 text-xs font-medium hover:bg-white/30 shrink-0"
           title={t("admin.chat.hotkeyTitle")}
         >
           #
@@ -452,9 +480,9 @@ export function AdminLiveChatClient() {
           {t("admin.chat.queueErrorPrefix")}{queueError}{t("admin.chat.queueErrorSuffix")}
         </div>
       )}
-      <div className="flex flex-1 min-h-0">
-        {/* 左侧：会话列表（桌面版：Customer #N + last msg + waiting timer，NO IP） */}
-        <aside className="w-80 shrink-0 border-r border-slate-200 bg-white overflow-y-auto flex flex-col">
+      <div className="flex flex-1 min-h-0 admin-chat-body" data-show-panel={!!selectedId}>
+        {/* 左侧：会话列表（电话版：选中后隐藏，只显示右侧聊天） */}
+        <aside className="admin-chat-list w-80 shrink-0 border-r border-slate-200 bg-white overflow-y-auto flex flex-col">
           <div className="shrink-0 px-3 py-2 border-b border-slate-100">
             <p className="text-xs font-semibold text-amber-700">Conversations</p>
             <p className="text-[10px] text-slate-500 mt-0.5 hidden lg:block">List row: short customer info + last msg + waiting timer (NO IP)</p>
@@ -537,8 +565,8 @@ export function AdminLiveChatClient() {
           )}
         </aside>
 
-        {/* 中间：Chat Panel（桌面版三栏之中栏） */}
-        <section className="flex-1 flex flex-col bg-slate-100/60 min-w-0">
+        {/* 中间：Chat Panel（电话版：选中会话后全屏显示，左侧列表隐藏） */}
+        <section className="admin-chat-panel flex-1 flex flex-col bg-slate-100/60 min-w-0">
           <div className="hidden lg:block shrink-0 px-3 py-2 border-b border-slate-200 bg-white">
             <p className="text-xs font-semibold text-amber-700">Chat Panel</p>
           </div>

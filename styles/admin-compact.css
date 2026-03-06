@@ -59,6 +59,28 @@
   flex: 1;
   min-height: 0;
 }
+
+/* Live Chat 电话版：左侧会话列表与右侧聊天二选一，避免列表挡住聊天 */
+@media (max-width: 1023px) {
+  .admin-chat-body[data-show-panel="false"] .admin-chat-panel {
+    display: none;
+  }
+  .admin-chat-body[data-show-panel="false"] .admin-chat-list {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+  }
+  .admin-chat-body[data-show-panel="true"] .admin-chat-list {
+    display: none;
+  }
+  .admin-chat-body[data-show-panel="true"] .admin-chat-panel {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
 /* WhatsApp Inbox 页：主区填满，电话版布局完整 */
 .admin-shell .admin-page:has(.admin-wa-inbox-root) {
   display: flex;
