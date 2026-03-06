@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { createSession, SESSION_COOKIE } from "@/lib/auth";
+import { getClientIp } from "@/lib/net/clientIp";
+import { rateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req.headers);
+  const bucket = rateLimit(`admin-login:${ip}`, 10, 60 * 1000);
+  if (!bucket.ok) {
+    return NextResponse.json({ error: "TOO_MANY_ATTEMPTS" }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => null) as { email?: string; password?: string } | null;
   const email = typeof body?.email === "string" ? body.email.trim() : "";
   const password = typeof body?.password === "string" ? body.password : "";
@@ -22,6 +31,16 @@ export async function POST(req: NextRequest) {
   }
 
   const { rawToken, expiresAt } = await createSession(user.id, { totpOk: true });
+
+  await writeAuditLog({
+    actorId: user.id,
+    action: "LOGIN",
+    entityType: "AdminUser",
+    entityId: user.id,
+    diffJson: { email: user.email },
+    req,
+    ip: getClientIp(req.headers),
+  });
 
   const res = NextResponse.json({ ok: true, user: { id: user.id, email: user.email, role: user.role } });
   res.cookies.set(SESSION_COOKIE, rawToken, {

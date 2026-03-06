@@ -99,6 +99,7 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
     const sp = buildQueryParams({ forCsv: true });
     fetch(`/api/admin/reports/query/${reportKey}?${sp}`, { credentials: "include" })
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) throw new Error("Export failed");
         return r.blob();
       })

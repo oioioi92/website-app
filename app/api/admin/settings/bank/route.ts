@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canAccessSettings } from "@/lib/rbac";
+import { writeAuditLog } from "@/lib/audit";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +38,7 @@ function normalizeItem(raw: Record<string, unknown>): BankItem {
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canAccessSettings(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const listRow = await db.siteSetting.findUnique({ where: { key: KEY_LIST }, select: { valueJson: true } });
   const rawList = listRow?.valueJson;
@@ -58,6 +61,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canAccessSettings(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   let body: { items?: unknown[] };
   try {
@@ -74,5 +78,15 @@ export async function PUT(req: NextRequest) {
     create: { key: KEY_LIST, valueJson: items as object },
     update: { valueJson: items as object },
   });
+
+  await writeAuditLog({
+    actorId: user.id,
+    action: "SETTINGS_BANK_SAVE",
+    entityType: "SiteSetting",
+    entityId: KEY_LIST,
+    diffJson: { count: items.length },
+    req,
+  });
+
   return NextResponse.json({ ok: true });
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canApproveWithdrawal } from "@/lib/rbac";
 import { db } from "@/lib/db";
 import { parsePagination, parseSort } from "@/lib/backoffice/pagination";
 
@@ -8,6 +9,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canApproveWithdrawal(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const sp = req.nextUrl.searchParams;
   const statusFilter = sp.get("status") ?? "PENDING";
@@ -19,7 +21,7 @@ export async function GET(req: NextRequest) {
   const [items, total] = await Promise.all([
     db.withdrawalRequest.findMany({
       where,
-      include: { member: { select: { id: true, userRef: true, displayName: true } } },
+      include: { member: { select: { id: true, userRef: true, displayName: true, mobile: true } } },
       orderBy: { [sortBy]: sortOrder },
       skip,
       take: pageSize

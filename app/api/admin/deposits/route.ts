@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { getAdminUserFromRequest } from "@/lib/auth";
-import { canManualCreateDeposit } from "@/lib/rbac";
+import { canApproveDeposit, canManualCreateDeposit } from "@/lib/rbac";
 import { db } from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit";
+import { checkCanTopup } from "@/lib/deposit-topup-rules";
 import { parsePagination, parseSort } from "@/lib/backoffice/pagination";
 import { generateTxId } from "@/lib/backoffice/ids";
 
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canApproveDeposit(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const sp = req.nextUrl.searchParams;
   const { page, pageSize, skip } = parsePagination(sp);

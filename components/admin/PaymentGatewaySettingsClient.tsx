@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
+import { StickySaveBar } from "@/components/admin/StickySaveBar";
 
 const inputClass =
   "admin-compact-input w-full rounded-lg border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] px-3 text-[var(--compact-text)] placeholder-[var(--compact-muted)] focus:border-[var(--compact-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--compact-primary)]";
@@ -9,27 +12,34 @@ const labelClass = "mb-1 block text-xs font-medium text-[var(--compact-muted)]";
 const defaultForm = { gatewayName: "", apiBaseUrl: "", merchantId: "", apiKey: "", feeRate: "", enabled: true };
 
 export function PaymentGatewaySettingsClient() {
+  const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [messageKey, setMessageKey] = useState<string | null>(null);
   const [form, setForm] = useState(defaultForm);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/settings/payment-gateway", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("加载失败"))))
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.ok ? r.json() : Promise.reject(new Error("load"));
+      })
       .then((data) => setForm({ ...defaultForm, ...data }))
-      .catch(() => setMessage("加载失败"))
+      .catch(() => setMessageKey("admin.common.loadError"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setForbidden]);
 
   function patch(partial: Partial<typeof form>) {
     setForm((prev) => ({ ...prev, ...partial }));
-    setMessage(null);
+    setMessageKey(null);
   }
 
   function save() {
     setSaving(true);
-    setMessage(null);
+    setMessageKey(null);
     fetch("/api/admin/settings/payment-gateway", {
       method: "PUT",
       credentials: "include",
@@ -37,23 +47,43 @@ export function PaymentGatewaySettingsClient() {
       body: JSON.stringify(form)
     })
       .then((r) => {
-        if (!r.ok) throw new Error("保存失败");
+        if (!r.ok) throw new Error("save");
         return r.json();
       })
-      .then(() => setMessage("已保存到后台"))
-      .catch(() => setMessage("保存失败"))
+      .then(() => setMessageKey("admin.site.saved"))
+      .catch(() => setMessageKey("admin.common.saveError"))
       .finally(() => setSaving(false));
   }
 
-  if (loading) return <div className="text-[13px] text-[var(--compact-muted)]">加载中…</div>;
+  function testConnection() {
+    setTesting(true);
+    setTestResult(null);
+    fetch("/api/admin/settings/payment-gateway/test", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ apiBaseUrl: form.apiBaseUrl }),
+    })
+      .then((r) => r.json())
+      .then((data) => setTestResult({ ok: data.ok ?? false, message: data.message ?? (data.ok ? "OK" : "Failed") }))
+      .catch(() => setTestResult({ ok: false, message: "Request failed" }))
+      .finally(() => setTesting(false));
+  }
 
+  if (loading) return <div className="text-[13px] text-[var(--compact-muted)]">{t("admin.common.loading")}</div>;
+
+  const isError = messageKey === "admin.common.loadError" || messageKey === "admin.common.saveError";
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary">
-          {saving ? "保存中…" : "保存"}
+          {saving ? t("admin.site.saving") : t("admin.site.saveConfig")}
         </button>
-        {message && <span className={`text-[13px] ${message.includes("失败") ? "text-[var(--compact-danger)]" : "text-[var(--compact-muted)]"}`}>{message}</span>}
+        <button type="button" onClick={testConnection} disabled={testing || !form.apiBaseUrl} className="admin-compact-btn admin-compact-btn-ghost">
+          {testing ? "..." : t("admin.settingsGameApi.testConnection")}
+        </button>
+        {testResult && <span className={`text-[13px] ${testResult.ok ? "text-green-600" : "text-red-600"}`}>{testResult.message}</span>}
+        {messageKey && <span className={`text-[13px] ${isError ? "text-[var(--compact-danger)]" : "text-[var(--compact-muted)]"}`}>{t(messageKey)}</span>}
       </div>
       <div className="admin-card p-6 space-y-4">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">入款支付网关</h2>

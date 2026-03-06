@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 import { useLocale } from "@/lib/i18n/context";
 
 export function DomainPageClient() {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<"success" | "error" | null>(null);
@@ -14,11 +16,14 @@ export function DomainPageClient() {
   const load = useCallback(() => {
     setLoading(true);
     fetch("/api/admin/settings/domains", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("load"))))
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.ok ? r.json() : Promise.reject(new Error("load"));
+      })
       .then((data: { domains?: string[] }) => setDomains(Array.isArray(data.domains) ? data.domains : []))
       .catch(() => setDomains([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setForbidden]);
 
   useEffect(() => {
     load();
