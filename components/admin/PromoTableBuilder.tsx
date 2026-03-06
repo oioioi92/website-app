@@ -746,16 +746,18 @@ export function PromoTableBuilder({ data, onChange, defaultPreviewStyle }: { dat
                         {(row.value || "—").replace(/\\n/g, " ").slice(0, 18)}{row.value.length > 18 ? "…" : ""}
                         {row.badge && <span className="ptb-mini-badge">{row.badge}</span>}
                       </span>
-                      <div className="ptb-row-controls" onClick={(e) => e.stopPropagation()}>
-                        <button type="button" onClick={() => duplicateRow(row.id)} className="ptb-icon-btn" title="Duplicate">⎘</button>
-                        <button type="button" disabled={idx === 0} onClick={() => moveRow(row.id, -1)} className="ptb-icon-btn" title="Up">↑</button>
-                        <button type="button" disabled={idx === data.rows.length - 1} onClick={() => moveRow(row.id, 1)} className="ptb-icon-btn" title="Down">↓</button>
-                        <button type="button" onClick={() => removeRow(row.id)} className="ptb-icon-btn ptb-icon-btn--del" title="Delete">✕</button>
-                      </div>
                     </div>
 
                     {isOpen && (
                       <div className="ptb-row-body" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-wrap items-center gap-2 mb-2 pb-2 border-b border-slate-200">
+                          <button type="button" onClick={() => duplicateRow(row.id)} className="text-xs font-medium text-slate-600 hover:text-slate-800 border border-slate-300 rounded px-2 py-1 bg-white">
+                            复制本行
+                          </button>
+                          <button type="button" onClick={() => removeRow(row.id)} className="text-xs font-medium text-red-600 hover:text-red-800 border border-red-200 rounded px-2 py-1 bg-red-50">
+                            删除本行
+                          </button>
+                        </div>
                         {/* Label + Type */}
                         <div className="ptb-field-row">
                           <div className="ptb-field">
