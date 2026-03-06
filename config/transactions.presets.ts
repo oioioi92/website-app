@@ -2,7 +2,7 @@ export type TxPreset = {
   key: string;
   label: string;
   tooltip?: string;
-  defaultFilters: Record<string, unknown>;
+  defaultFilters: Record<string, any>;
 };
 
 export const TX_PRESETS: TxPreset[] = [

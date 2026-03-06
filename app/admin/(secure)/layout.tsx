@@ -14,5 +14,5 @@ export default async function AdminSecureLayout({
     redirect("/admin/login?next=" + encodeURIComponent("/admin"));
   }
 
-  return <AdminShell user={{ id: user.id, email: user.email, role: user.role }}>{children}</AdminShell>;
+  return <AdminShell>{children}</AdminShell>;
 }
