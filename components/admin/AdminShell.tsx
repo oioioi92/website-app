@@ -18,7 +18,7 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
   const [collapsed, setCollapsed] = useState(true);
 
   useEffect(() => {
-    const m = typeof window !== "undefined" && window.matchMedia("(max-width: 768px)");
+    const m = typeof window !== "undefined" ? window.matchMedia("(max-width: 768px)") : null;
     if (m?.matches) setCollapsed(false);
   }, []);
   return (
