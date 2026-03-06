@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminUser } from "@/lib/admin-user-context";
+import { can } from "@/lib/rbac-client";
 import { SETTINGS_NAV } from "@/config/settings-nav";
 
 export default function SettingsLayout({
@@ -12,6 +14,16 @@ export default function SettingsLayout({
 }) {
   const pathname = usePathname() ?? "";
   const { t } = useLocale();
+  const user = useAdminUser();
+
+  const filteredNav = user
+    ? SETTINGS_NAV.map((group) => ({
+        ...group,
+        children: (group.children ?? []).filter(
+          (item) => can(user.role, item.permission ?? "settings")
+        ),
+      })).filter((group) => group.children.length > 0)
+    : SETTINGS_NAV;
 
   return (
     <div className="flex min-h-0 flex-1 gap-6">
@@ -23,7 +35,7 @@ export default function SettingsLayout({
           >
             ← {t("admin.settingsNav.backToSettings")}
           </Link>
-          {SETTINGS_NAV.map((group) => (
+          {filteredNav.map((group) => (
             <div key={group.key} className="space-y-0.5">
               <div className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500">
                 {group.titleKey ? t(group.titleKey as "admin.settingsNav.frontend") : group.label}

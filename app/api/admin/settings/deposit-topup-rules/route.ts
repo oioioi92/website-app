@@ -2,45 +2,45 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
 import { canAccessSettings } from "@/lib/rbac";
 import { db } from "@/lib/db";
+import { DEPOSIT_TOPUP_RULES_KEY, type DepositTopupRules } from "@/lib/deposit-topup-rules";
 
 export const dynamic = "force-dynamic";
 
-const KEY = "site_allowed_domains";
+type Payload = { enabled?: boolean; maxBalanceForTopup?: number | null };
 
-/** GET: 读取允许的域名列表（可为空数组） */
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   if (!canAccessSettings(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
-
-  const row = await db.siteSetting.findUnique({ where: { key: KEY }, select: { valueJson: true } });
-  const value = row?.valueJson;
-  const list = Array.isArray(value) ? (value as string[]).filter((d) => typeof d === "string" && d.trim() !== "") : [];
-  return NextResponse.json({ domains: list }, { headers: { "Cache-Control": "no-store" } });
+  const { getDepositTopupRules } = await import("@/lib/deposit-topup-rules");
+  const rules = await getDepositTopupRules();
+  return NextResponse.json(rules, { headers: { "Cache-Control": "no-store, max-age=0" } });
 }
 
-/** PUT: 保存允许的域名列表（允许空数组） */
 export async function PUT(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   if (!canAccessSettings(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
-
-  let body: { domains?: unknown };
+  let body: Payload;
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "INVALID_JSON" }, { status: 400 });
   }
-
-  const raw = body.domains;
-  const list = Array.isArray(raw)
-    ? (raw as unknown[]).map((d) => (typeof d === "string" ? d.trim() : "")).filter((d) => d !== "")
-    : [];
-
+  const valueJson: DepositTopupRules = {
+    enabled: Boolean(body.enabled),
+    maxBalanceForTopup:
+      typeof body.maxBalanceForTopup === "number" && body.maxBalanceForTopup >= 0
+        ? body.maxBalanceForTopup
+        : body.maxBalanceForTopup === null || body.maxBalanceForTopup === undefined
+          ? null
+          : null,
+    includeGameBalance: false,
+  };
   await db.siteSetting.upsert({
-    where: { key: KEY },
-    create: { key: KEY, valueJson: list as unknown as object },
-    update: { valueJson: list as unknown as object },
+    where: { key: DEPOSIT_TOPUP_RULES_KEY },
+    create: { key: DEPOSIT_TOPUP_RULES_KEY, valueJson: valueJson as object },
+    update: { valueJson: valueJson as object },
   });
   return NextResponse.json({ ok: true });
 }
