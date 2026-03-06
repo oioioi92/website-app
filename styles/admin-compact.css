@@ -1483,6 +1483,8 @@
   overflow: hidden;
   background: var(--admin-bg);
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ── Header ── */
@@ -1629,11 +1631,21 @@
 .ptb-controls::-webkit-scrollbar { width: 4px; }
 .ptb-controls::-webkit-scrollbar-thumb { background: var(--admin-border); border-radius: 2px; }
 
-/* 电话版：取消嵌套滚动，整页统一滚动，避免卡顿 */
+/* 电话版：取消嵌套滚动，整页统一滚动，设置区可操作、不撑破页面 */
 @media (max-width: 780px) {
+  .ptb-split {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+  .ptb-controls,
+  .ptb-preview {
+    min-width: 0;
+    max-width: 100%;
+  }
   .ptb-controls {
     max-height: none;
     overflow-y: visible;
+    overflow-x: hidden;
   }
   .ptb-preview {
     overflow: visible;
@@ -1643,6 +1655,48 @@
     overflow-y: visible;
     flex: none;
     min-height: 320px;
+  }
+  /* 条款行每行可横向滑动，保证按钮都能点到 */
+  .ptb-row-head {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+  .ptb-row-left-chip,
+  .ptb-row-right-chip {
+    max-width: 80px;
+  }
+  /* 页脚工具栏换行、不撑破 */
+  .ptb-footer-toolbar {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  .ptb-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ptb-header-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* 电话版：promotion 编辑页整页不横向溢出，滑动顺畅 */
+@media (max-width: 780px) {
+  .promo-admin-edit {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+/* 电话版：避免输入框聚焦时页面被放大（iOS 小于 16px 会缩放宽口），滑动更顺畅 */
+@media (max-width: 768px) {
+  .admin-shell .admin-page input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]),
+  .admin-shell .admin-page textarea,
+  .admin-shell .admin-page select {
+    font-size: 16px;
   }
 }
 
