@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { ThemeConfig, ThemeBanner } from "@/lib/public/theme";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 
 const inputClass =
   "admin-compact-input w-full rounded-lg border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] px-3 text-[var(--compact-text)] placeholder-[var(--compact-muted)] focus:border-[var(--compact-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--compact-primary)]";
@@ -23,6 +24,7 @@ const emptyBanner: ThemeBanner = { imageUrl: "", linkUrl: null, title: null };
 
 export function ThemeSettingsClient() {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [theme, setTheme] = useState<ThemeConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -30,15 +32,16 @@ export function ThemeSettingsClient() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/theme")
+    fetch("/api/admin/theme", { credentials: "include" })
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) throw new Error("admin.site.fetchError");
         return r.json();
       })
       .then((d: { theme: ThemeConfig }) => setTheme(d.theme))
       .catch(() => setError("admin.site.fetchError"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setForbidden]);
 
   function patch(partial: Partial<ThemeConfig>) {
     if (!theme) return;
@@ -77,10 +80,12 @@ export function ThemeSettingsClient() {
     setSaved(false);
     fetch("/api/admin/theme", {
       method: "PUT",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(theme)
     })
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) throw new Error("admin.site.saveError");
         setSaved(true);
       })

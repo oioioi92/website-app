@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
 import { canAccessSettings } from "@/lib/rbac";
+import { writeAuditLog } from "@/lib/audit";
 import { db } from "@/lib/db";
 import { DEPOSIT_TOPUP_RULES_KEY, type DepositTopupRules } from "@/lib/deposit-topup-rules";
 
@@ -41,6 +42,14 @@ export async function PUT(req: NextRequest) {
     where: { key: DEPOSIT_TOPUP_RULES_KEY },
     create: { key: DEPOSIT_TOPUP_RULES_KEY, valueJson: valueJson as object },
     update: { valueJson: valueJson as object },
+  });
+  await writeAuditLog({
+    actorId: user.id,
+    action: "SETTINGS_DEPOSIT_TOPUP_RULES_SAVE",
+    entityType: "SiteSetting",
+    entityId: DEPOSIT_TOPUP_RULES_KEY,
+    diffJson: { enabled: valueJson.enabled },
+    req,
   });
   return NextResponse.json({ ok: true });
 }

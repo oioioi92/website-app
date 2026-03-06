@@ -9,6 +9,7 @@ import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useLocale } from "@/lib/i18n/context";
 import { AdminUserProvider } from "@/lib/admin-user-context";
 import { AdminApiProvider, AdminForbiddenBanner } from "@/lib/admin-api-context";
+import { AdminErrorBoundary } from "@/components/admin/AdminErrorBoundary";
 
 type AdminUser = { id: string; email: string; role: string };
 
@@ -50,7 +51,9 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
         <AdminQuickActionBar />
         <AdminTopbarMenus />
       </header>
-      <main className="admin-page">{children}</main>
+      <main className="admin-page">
+        <AdminErrorBoundary>{children}</AdminErrorBoundary>
+      </main>
     </div>
     </AdminApiProvider>
     </AdminUserProvider>

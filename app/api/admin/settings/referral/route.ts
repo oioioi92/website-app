@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
 import { canAccessSettings } from "@/lib/rbac";
+import { writeAuditLog } from "@/lib/audit";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -67,6 +68,14 @@ export async function PUT(req: NextRequest) {
       where: { key: KEY },
       create: { key: KEY, valueJson: { maxGenerations, sharePlatforms } as object },
       update: { valueJson: { maxGenerations, sharePlatforms } as object },
+    });
+    await writeAuditLog({
+      actorId: user.id,
+      action: "SETTINGS_REFERRAL_SAVE",
+      entityType: "SiteSetting",
+      entityId: KEY,
+      diffJson: { maxGenerations, sharePlatforms },
+      req,
     });
     return NextResponse.json({ ok: true });
   } catch (e) {

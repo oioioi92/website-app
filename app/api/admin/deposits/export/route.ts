@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canApproveDeposit } from "@/lib/rbac";
 import { db } from "@/lib/db";
 import { formatInBackofficeTz } from "@/lib/backoffice/timezone";
 
@@ -14,6 +15,7 @@ function escapeCsv(s: string): string {
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canApproveDeposit(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const sp = req.nextUrl.searchParams;
   const status = sp.get("status") ?? "ALL";

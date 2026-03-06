@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
 import { canAccessSettings } from "@/lib/rbac";
+import { writeAuditLog } from "@/lib/audit";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -63,6 +64,14 @@ export async function PUT(req: NextRequest) {
     where: { key: KEY },
     create: { key: KEY, valueJson: valueJson as object },
     update: { valueJson: valueJson as object }
+  });
+  await writeAuditLog({
+    actorId: user.id,
+    action: "SETTINGS_PAYMENT_GATEWAY_SAVE",
+    entityType: "SiteSetting",
+    entityId: KEY,
+    diffJson: { gatewayName: valueJson.gatewayName },
+    req,
   });
   return NextResponse.json({ ok: true });
 }
