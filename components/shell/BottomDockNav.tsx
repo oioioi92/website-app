@@ -20,20 +20,18 @@ export function BottomDockNav() {
       aria-label="Bottom navigation"
     >
       <div className="mx-auto grid w-full max-w-[1280px] grid-cols-6 items-center gap-1 px-2 sm:px-4">
-        {items.map((item) => {
-          return (
+        {items.map((item) => (
           <Link
             key={item.href}
             href={item.href}
+            aria-label={item.label}
+            data-nav-item={item.href === "/chat" ? "live-chat" : undefined}
             className="flex min-w-0 flex-col items-center gap-1 rounded-[14px] px-2 py-2 text-[var(--desk-text-muted)] transition hover:bg-white/10 hover:text-[var(--desk-text)]"
           >
-            <span className="text-lg" aria-hidden>
-              {item.icon}
-            </span>
+            <span className="text-lg" aria-hidden>{item.icon}</span>
             <span className="truncate text-[10px] font-medium">{item.label}</span>
           </Link>
-          );
-        })}
+        ))}
       </div>
     </nav>
   );
