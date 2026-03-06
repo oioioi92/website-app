@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAdminApiContext } from "@/lib/admin-api-context";
 import type { ReferralConfig } from "@/app/api/admin/settings/referral/route";
