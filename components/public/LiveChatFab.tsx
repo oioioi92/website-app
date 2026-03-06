@@ -34,11 +34,13 @@ function BrandFabIcon({
 export function LiveChatFab({
   chatUrl,
   uiText,
-  socialLinks
+  socialLinks,
+  fabBg = null,
 }: {
   chatUrl: string;
   uiText?: Record<string, string>;
   socialLinks?: Array<{ label: string; url: string }>;
+  fabBg?: string | null;
 }) {
   const t = uiText ?? {};
   void chatUrl;
@@ -194,13 +196,14 @@ export function LiveChatFab({
 
   const fullScreenPanel = open ? (
     <section
-      className="fixed left-0 right-0 z-[9999] flex flex-col bg-[#080808] lg:!hidden"
+      className="fixed left-0 right-0 z-[9999] flex flex-col lg:!hidden"
       style={{
         top: mobilePanelTop,
         paddingTop: "env(safe-area-inset-top)",
         paddingBottom: "env(safe-area-inset-bottom)",
         height: mobilePanelHeight ?? "100dvh",
         minHeight: mobilePanelHeight ?? "100dvh",
+        backgroundColor: fabBg ?? "#080808",
       }}
     >
           <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2.5">
@@ -266,7 +269,8 @@ export function LiveChatFab({
       <div className="fixed right-3 top-1/2 z-50 -translate-y-1/2">
         {open ? (
           <section
-            className="hidden flex-1 flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#080808]/98 shadow-[0_18px_44px_rgba(0,0,0,0.6)] lg:flex lg:mb-2 lg:w-[320px] lg:max-w-[calc(100vw-24px)]"
+            className="hidden flex-1 flex-col overflow-hidden rounded-2xl border border-white/15 shadow-[0_18px_44px_rgba(0,0,0,0.6)] lg:flex lg:mb-2 lg:w-[320px] lg:max-w-[calc(100vw-24px)]"
+            style={{ backgroundColor: fabBg ?? "rgba(8,8,8,0.98)" }}
             aria-hidden
           >
             <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-3 py-2.5">

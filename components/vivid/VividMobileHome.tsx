@@ -84,7 +84,7 @@ export function VividMobileHome({
         <span style={{
           fontSize: 17,
           fontWeight: 800,
-          background: "linear-gradient(90deg,#a855f7,#6366f1)",
+          background: "linear-gradient(90deg,var(--vp-accent),var(--vp-accent2))",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
           backgroundClip: "text",
@@ -115,7 +115,7 @@ export function VividMobileHome({
               height: 34,
               padding: "0 16px",
               borderRadius: 10,
-              background: "linear-gradient(135deg,#a855f7,#6366f1)",
+              background: "linear-gradient(135deg,var(--vp-accent),var(--vp-accent2))",
               color: "#fff",
               display: "flex",
               alignItems: "center",
@@ -148,7 +148,7 @@ export function VividMobileHome({
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)",
-            borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "#a855f7",
+            borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "var(--vp-accent)",
             marginBottom: 10,
           }}>
             {t("public.vivid.hero.badge")}
@@ -209,7 +209,7 @@ export function VividMobileHome({
         {topPromos.length > 0 && (
           <div>
             <p style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "var(--vp-text)", display: "flex", alignItems: "center", gap: 6 }}>
-              <span style={{ width: 3, height: 16, borderRadius: 2, background: "linear-gradient(#a855f7,#6366f1)", display: "inline-block" }} />
+              <span style={{ width: 3, height: 16, borderRadius: 2, background: "linear-gradient(var(--vp-accent),var(--vp-accent2))", display: "inline-block" }} />
               {t("public.vivid.section.promos")}
             </p>
             <div className="scroll-touch-horizontal" style={{ display: "flex", gap: 10, paddingBottom: 4 }}>
@@ -277,8 +277,8 @@ export function VividMobileHome({
           <LiveTransactionTable
             internalTestMode={internalTestMode}
             variant="v3"
-            depositColor="#1e3a5f"
-            withdrawColor="#e6b800"
+            depositColor={theme.livetxDepositColor ?? "#1e3a5f"}
+            withdrawColor={theme.livetxWithdrawColor ?? "#e6b800"}
             title={t("public.vivid.liveTable.title")}
             depositLabel={t("public.vivid.liveTable.deposit")}
             withdrawLabel={t("public.vivid.liveTable.withdraw")}
@@ -289,12 +289,12 @@ export function VividMobileHome({
         </div>
 
         {/* ── 推荐：分享/复制链接/查看下线（Live Transaction 下方）── */}
-        <ReferralBlock registerPath={theme.registerUrl ?? "/register-wa"} loginPath={theme.loginUrl ?? "/login"} />
+        <ReferralBlock registerPath={theme.registerUrl ?? "/register-wa"} loginPath={theme.loginUrl ?? "/login"} blockBg={theme.referralBlockBg} blockBorder={theme.referralBlockBorder} />
 
         {/* ── Games Section ── */}
         <div>
           <p style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "var(--vp-text)", display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ width: 3, height: 16, borderRadius: 2, background: "linear-gradient(#a855f7,#6366f1)", display: "inline-block" }} />
+            <span style={{ width: 3, height: 16, borderRadius: 2, background: "linear-gradient(var(--vp-accent),var(--vp-accent2))", display: "inline-block" }} />
             {t("public.vivid.section.games")}
           </p>
 
@@ -311,9 +311,9 @@ export function VividMobileHome({
                     flexShrink: 0,
                     padding: "6px 16px",
                     borderRadius: 999,
-                    border: active ? "1.5px solid #a855f7" : "1.5px solid rgba(120,80,255,0.25)",
+                    border: active ? "1.5px solid var(--vp-accent)" : "1.5px solid rgba(120,80,255,0.25)",
                     background: active ? "rgba(168,85,247,0.2)" : "transparent",
-                    color: active ? "#a855f7" : "rgba(157,149,201,0.8)",
+                    color: active ? "var(--vp-accent)" : "rgba(157,149,201,0.8)",
                     fontSize: 12,
                     fontWeight: 600,
                     cursor: "pointer",

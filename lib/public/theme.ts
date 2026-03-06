@@ -30,8 +30,10 @@ export type ThemeRoutes = {
 export type ThemeBottomNavItem = {
   href: string;
   label: string;
-  /** Optional fallback text when no icon asset found */
+  /** Optional fallback text/emoji when no iconUrl */
   icon: string | null;
+  /** 可选图片 URL，有则前台用照片代替 emoji/文字 */
+  iconUrl: string | null;
   badge: string | null;
 };
 
@@ -80,6 +82,7 @@ export type ThemeConfig = {
     url: string;
     variant: "subscribe" | "complain";
     iconKey: string | null;
+    iconUrl: string | null;
   }>;
   depositUrl: string | null;
   withdrawUrl: string | null;
@@ -119,6 +122,48 @@ export type ThemeConfig = {
   pageBackgroundUrl: string | null;
   /** 前台整页背景色（CSS 合法值，如 #0a0a0a） */
   pageBackgroundColor: string | null;
+  /** 主题主色（如 #a855f7），用于按钮、高亮、底部导航等；不设则用默认紫 */
+  themePrimaryColor: string | null;
+  /** 主题强调色（如 #6366f1），用于渐变第二色；不设则用默认 */
+  themeAccentColor: string | null;
+  /** Vivid 背景/卡片/边框/文字（不设则用 CSS 默认） */
+  vividBg: string | null;
+  vividCard: string | null;
+  vividCard2: string | null;
+  vividBorder: string | null;
+  vividText: string | null;
+  vividMuted: string | null;
+  vividGreen: string | null;
+  vividRed: string | null;
+  vividGold: string | null;
+  /** Desktop 背景/面板/强调色 */
+  deskBg: string | null;
+  deskPanel: string | null;
+  deskAccent: string | null;
+  /** 流水表 Deposit/Withdraw 列颜色 */
+  livetxDepositColor: string | null;
+  livetxWithdrawColor: string | null;
+  /** 字体（如 15px、1.5rem） */
+  fontFamily: string | null;
+  fontSize: string | null;
+  /** Vivid 圆角/间距/最大宽度（如 16px、24px、1100px） */
+  vpRadiusCard: string | null;
+  vpRadiusBtn: string | null;
+  vpGap: string | null;
+  vpMaxWidth: string | null;
+  /** Desktop 容器宽度/Banner 高度 */
+  deskContainer: string | null;
+  deskBannerH: string | null;
+  /** 推荐区块背景/边框 */
+  referralBlockBg: string | null;
+  referralBlockBorder: string | null;
+  /** 客服悬浮按钮背景 */
+  chatFabBg: string | null;
+  /** 前台通用语义色 */
+  frontAccent: string | null;
+  frontSuccess: string | null;
+  frontDanger: string | null;
+  frontGold: string | null;
   /** P0: 首页模块标题（前台不再写死） */
   sectionTitles: ThemeSectionTitles;
   /** P0: 前台主要入口路由（/bonus、/promotion 等） */
@@ -207,6 +252,37 @@ const defaults: ThemeConfig = {
   liveTxBgImageUrl: null,
   pageBackgroundUrl: null,
   pageBackgroundColor: null,
+  themePrimaryColor: null,
+  themeAccentColor: null,
+  vividBg: null,
+  vividCard: null,
+  vividCard2: null,
+  vividBorder: null,
+  vividText: null,
+  vividMuted: null,
+  vividGreen: null,
+  vividRed: null,
+  vividGold: null,
+  deskBg: null,
+  deskPanel: null,
+  deskAccent: null,
+  livetxDepositColor: null,
+  livetxWithdrawColor: null,
+  fontFamily: null,
+  fontSize: null,
+  vpRadiusCard: null,
+  vpRadiusBtn: null,
+  vpGap: null,
+  vpMaxWidth: null,
+  deskContainer: null,
+  deskBannerH: null,
+  referralBlockBg: null,
+  referralBlockBorder: null,
+  chatFabBg: null,
+  frontAccent: null,
+  frontSuccess: null,
+  frontDanger: null,
+  frontGold: null,
   sectionTitles: {
     quickActions: "QUICK ACTIONS",
     liveTransaction: "LIVE TRANSACTION",
@@ -220,12 +296,12 @@ const defaults: ThemeConfig = {
   promotionPattern: "classic",
   promotionFontPreset: "default",
   bottomNav: [
-    { href: "/", label: "HOME", icon: "H", badge: null },
-    { href: "/games", label: "GAMES", icon: "G", badge: null },
-    { href: "/promotion", label: "PROMO", icon: "P", badge: null },
-    { href: "/history", label: "HISTORY", icon: "H", badge: null },
-    { href: "/chat", label: "LIVE CHAT", icon: "C", badge: null },
-    { href: "/settings", label: "SETTINGS", icon: "S", badge: null }
+    { href: "/", label: "HOME", icon: "H", iconUrl: null, badge: null },
+    { href: "/games", label: "GAMES", icon: "G", iconUrl: null, badge: null },
+    { href: "/promotion", label: "PROMO", icon: "P", iconUrl: null, badge: null },
+    { href: "/history", label: "HISTORY", icon: "H", iconUrl: null, badge: null },
+    { href: "/chat", label: "LIVE CHAT", icon: "C", iconUrl: null, badge: null },
+    { href: "/settings", label: "SETTINGS", icon: "S", iconUrl: null, badge: null }
   ],
   uiGameCategories: ["Casino", "Sportbook", "Slots", "E-Sports", "Poker", "Fishing"],
   categoryPills: [
@@ -293,6 +369,18 @@ function sanitizeText(raw: unknown, maxLen: number): string {
   return cleaned.length > maxLen ? cleaned.slice(0, maxLen) : cleaned;
 }
 
+/** 仅允许合法 CSS 颜色值，避免注入 */
+function sanitizeCssColor(s: string | null | undefined): string | null {
+  if (!s || typeof s !== "string") return null;
+  const t = s.trim().slice(0, 60);
+  if (!t) return null;
+  if (/^#[0-9a-fA-F]{3}$/.test(t) || /^#[0-9a-fA-F]{6}$/.test(t)) return t;
+  if (/^rgb\s*\([^)]*\)$/.test(t) || /^rgba\s*\([^)]*\)$/.test(t)) return t;
+  if (/^hsl\s*\([^)]*\)$/.test(t) || /^hsla\s*\([^)]*\)$/.test(t)) return t;
+  if (/^[a-zA-Z][a-zA-Z0-9-]*$/.test(t)) return t;
+  return null;
+}
+
 /**
  * Server-side sanitizer for theme_json writes.
  * - No <script>/<iframe> (we strip angle brackets and reject scriptable URL schemes)
@@ -320,6 +408,37 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
     liveTxBgImageUrl: normalizeUrlForUi(t.liveTxBgImageUrl),
     pageBackgroundUrl: normalizeUrlForUi(t.pageBackgroundUrl),
     pageBackgroundColor: sanitizeText(t.pageBackgroundColor, 60) || null,
+    themePrimaryColor: sanitizeCssColor(sanitizeText(t.themePrimaryColor, 60)),
+    themeAccentColor: sanitizeCssColor(sanitizeText(t.themeAccentColor, 60)),
+    vividBg: sanitizeCssColor(sanitizeText(t.vividBg, 60)),
+    vividCard: sanitizeCssColor(sanitizeText(t.vividCard, 60)),
+    vividCard2: sanitizeCssColor(sanitizeText(t.vividCard2, 60)),
+    vividBorder: sanitizeCssColor(sanitizeText(t.vividBorder, 100)) || sanitizeText(t.vividBorder, 100) || null,
+    vividText: sanitizeCssColor(sanitizeText(t.vividText, 60)),
+    vividMuted: sanitizeCssColor(sanitizeText(t.vividMuted, 60)),
+    vividGreen: sanitizeCssColor(sanitizeText(t.vividGreen, 60)),
+    vividRed: sanitizeCssColor(sanitizeText(t.vividRed, 60)),
+    vividGold: sanitizeCssColor(sanitizeText(t.vividGold, 60)),
+    deskBg: sanitizeCssColor(sanitizeText(t.deskBg, 60)),
+    deskPanel: sanitizeCssColor(sanitizeText(t.deskPanel, 60)),
+    deskAccent: sanitizeCssColor(sanitizeText(t.deskAccent, 60)),
+    livetxDepositColor: sanitizeCssColor(sanitizeText(t.livetxDepositColor, 60)),
+    livetxWithdrawColor: sanitizeCssColor(sanitizeText(t.livetxWithdrawColor, 60)),
+    fontFamily: sanitizeText(t.fontFamily, 80) || null,
+    fontSize: sanitizeText(t.fontSize, 20) || null,
+    vpRadiusCard: sanitizeText(t.vpRadiusCard, 20) || null,
+    vpRadiusBtn: sanitizeText(t.vpRadiusBtn, 20) || null,
+    vpGap: sanitizeText(t.vpGap, 20) || null,
+    vpMaxWidth: sanitizeText(t.vpMaxWidth, 20) || null,
+    deskContainer: sanitizeText(t.deskContainer, 20) || null,
+    deskBannerH: sanitizeText(t.deskBannerH, 20) || null,
+    referralBlockBg: sanitizeCssColor(sanitizeText(t.referralBlockBg, 100)) || sanitizeText(t.referralBlockBg, 100) || null,
+    referralBlockBorder: sanitizeCssColor(sanitizeText(t.referralBlockBorder, 100)) || sanitizeText(t.referralBlockBorder, 100) || null,
+    chatFabBg: sanitizeCssColor(sanitizeText(t.chatFabBg, 60)),
+    frontAccent: sanitizeCssColor(sanitizeText(t.frontAccent, 60)),
+    frontSuccess: sanitizeCssColor(sanitizeText(t.frontSuccess, 60)),
+    frontDanger: sanitizeCssColor(sanitizeText(t.frontDanger, 60)),
+    frontGold: sanitizeCssColor(sanitizeText(t.frontGold, 60)),
     actionBarDepositColor: sanitizeText(t.actionBarDepositColor, 60) || null,
     actionBarWithdrawColor: sanitizeText(t.actionBarWithdrawColor, 60) || null,
     actionBarButtonImages: {
@@ -457,7 +576,8 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
             label: sanitizeText(a.label, 60),
             url: normalizeUrlForUi(a.url) ?? "",
             variant: (a.variant === "complain" ? "complain" : "subscribe") as "complain" | "subscribe",
-            iconKey: a.iconKey ? sanitizeText(a.iconKey, 40) : null
+            iconKey: a.iconKey ? sanitizeText(a.iconKey, 40) : null,
+            iconUrl: normalizeUrlForUi(a.iconUrl)
           }))
           .filter((a) => Boolean(a.label) && Boolean(a.url))
           .slice(0, 6)
@@ -468,6 +588,7 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
             href: sanitizeText(x.href, 200),
             label: sanitizeText(x.label, 30),
             icon: x.icon ? sanitizeText(x.icon, 10) : null,
+            iconUrl: normalizeUrlForUi(x.iconUrl),
             badge: x.badge ? sanitizeText(x.badge, 20) : null
           }))
           .filter((x) => Boolean(x.href) && Boolean(x.label))
@@ -596,7 +717,8 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
             label,
             url,
             variant: asString(row.variant)?.toLowerCase() === "complain" ? "complain" : "subscribe",
-            iconKey: asString(row.iconKey)
+            iconKey: asString(row.iconKey),
+            iconUrl: normalizeUrlForUi(row.iconUrl)
           } satisfies ThemeConfig["floatingActions"][number];
         })
         .filter((v): v is ThemeConfig["floatingActions"][number] => Boolean(v))
@@ -650,6 +772,7 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
               href,
               label,
               icon: asString(row.icon),
+              iconUrl: normalizeUrlForUi(row.iconUrl),
               badge: asString(row.badge)
             } satisfies ThemeBottomNavItem;
           })
@@ -778,6 +901,37 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
     liveTxBgImageUrl: normalizeUrlForUi(obj.liveTxBgImageUrl),
     pageBackgroundUrl: normalizeUrlForUi(obj.pageBackgroundUrl),
     pageBackgroundColor: asString(obj.pageBackgroundColor),
+    themePrimaryColor: sanitizeCssColor(asString(obj.themePrimaryColor)),
+    themeAccentColor: sanitizeCssColor(asString(obj.themeAccentColor)),
+    vividBg: sanitizeCssColor(asString(obj.vividBg)),
+    vividCard: sanitizeCssColor(asString(obj.vividCard)),
+    vividCard2: sanitizeCssColor(asString(obj.vividCard2)),
+    vividBorder: sanitizeCssColor(asString(obj.vividBorder)) || asString(obj.vividBorder),
+    vividText: sanitizeCssColor(asString(obj.vividText)),
+    vividMuted: sanitizeCssColor(asString(obj.vividMuted)),
+    vividGreen: sanitizeCssColor(asString(obj.vividGreen)),
+    vividRed: sanitizeCssColor(asString(obj.vividRed)),
+    vividGold: sanitizeCssColor(asString(obj.vividGold)),
+    deskBg: sanitizeCssColor(asString(obj.deskBg)),
+    deskPanel: sanitizeCssColor(asString(obj.deskPanel)),
+    deskAccent: sanitizeCssColor(asString(obj.deskAccent)),
+    livetxDepositColor: sanitizeCssColor(asString(obj.livetxDepositColor)),
+    livetxWithdrawColor: sanitizeCssColor(asString(obj.livetxWithdrawColor)),
+    fontFamily: asString(obj.fontFamily),
+    fontSize: asString(obj.fontSize),
+    vpRadiusCard: asString(obj.vpRadiusCard),
+    vpRadiusBtn: asString(obj.vpRadiusBtn),
+    vpGap: asString(obj.vpGap),
+    vpMaxWidth: asString(obj.vpMaxWidth),
+    deskContainer: asString(obj.deskContainer),
+    deskBannerH: asString(obj.deskBannerH),
+    referralBlockBg: sanitizeCssColor(asString(obj.referralBlockBg)) || asString(obj.referralBlockBg),
+    referralBlockBorder: sanitizeCssColor(asString(obj.referralBlockBorder)) || asString(obj.referralBlockBorder),
+    chatFabBg: sanitizeCssColor(asString(obj.chatFabBg)),
+    frontAccent: sanitizeCssColor(asString(obj.frontAccent)),
+    frontSuccess: sanitizeCssColor(asString(obj.frontSuccess)),
+    frontDanger: sanitizeCssColor(asString(obj.frontDanger)),
+    frontGold: sanitizeCssColor(asString(obj.frontGold)),
     sectionTitles,
     routes,
     promotionPattern,

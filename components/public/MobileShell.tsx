@@ -50,8 +50,8 @@ export function MobileShell({
       <div data-mobile-shell-content className={contentClass}>{children}</div>
       <AgeGateModal ageGate={theme.ageGate} uiText={t} />
       <DownloadAppBar theme={theme} />
-      {!useVividPortal && <LiveChatFab chatUrl={chatUrl} uiText={t} socialLinks={socialLinks ?? []} />}
-      <UnifiedBottomNav variant={useVividPortal ? "vivid" : "default"} />
+      {!useVividPortal && <LiveChatFab chatUrl={chatUrl} uiText={t} socialLinks={socialLinks ?? []} fabBg={theme.chatFabBg} />}
+      <UnifiedBottomNav theme={theme} variant={useVividPortal ? "vivid" : "default"} />
     </div>
   );
 }

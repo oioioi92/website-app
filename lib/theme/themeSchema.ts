@@ -98,7 +98,8 @@ const floatingActionSchema = z.object({
   label: safeText(60),
   url: z.string().max(500).transform((s) => normalizeUrl(s) ?? "").refine((s) => !!s, "URL_REQUIRED"),
   variant: z.enum(["subscribe", "complain"]).default("subscribe"),
-  iconKey: optionalText(40)
+  iconKey: optionalText(40),
+  iconUrl: urlAllowRelativeOrHttps({ forbidSvg: true })
 });
 
 const sectionTitlesSchema = z.object({
@@ -117,6 +118,7 @@ const bottomNavItemSchema = z.object({
   href: z.string().max(200).transform((s) => normalizeUrl(s) ?? ""),
   label: safeText(30),
   icon: optionalText(10),
+  iconUrl: urlAllowRelativeOrHttps({ forbidSvg: true }),
   badge: optionalText(20)
 });
 
@@ -206,6 +208,36 @@ export const themeSchema = z.object({
   pageBackgroundColor: optionalText(60),
   themePrimaryColor: optionalText(60),
   themeAccentColor: optionalText(60),
+
+  vividBg: optionalText(60),
+  vividCard: optionalText(60),
+  vividCard2: optionalText(60),
+  vividBorder: optionalText(100),
+  vividText: optionalText(60),
+  vividMuted: optionalText(60),
+  vividGreen: optionalText(60),
+  vividRed: optionalText(60),
+  vividGold: optionalText(60),
+  deskBg: optionalText(60),
+  deskPanel: optionalText(60),
+  deskAccent: optionalText(60),
+  livetxDepositColor: optionalText(60),
+  livetxWithdrawColor: optionalText(60),
+  fontFamily: optionalText(80),
+  fontSize: optionalText(20),
+  vpRadiusCard: optionalText(20),
+  vpRadiusBtn: optionalText(20),
+  vpGap: optionalText(20),
+  vpMaxWidth: optionalText(20),
+  deskContainer: optionalText(20),
+  deskBannerH: optionalText(20),
+  referralBlockBg: optionalText(100),
+  referralBlockBorder: optionalText(100),
+  chatFabBg: optionalText(60),
+  frontAccent: optionalText(60),
+  frontSuccess: optionalText(60),
+  frontDanger: optionalText(60),
+  frontGold: optionalText(60),
 
   sectionTitles: sectionTitlesSchema.default({
     quickActions: "QUICK ACTIONS",

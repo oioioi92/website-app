@@ -59,6 +59,8 @@ export function DesktopThreeColumnShell({
           <LiveTransactionTable
             internalTestMode={internalTestMode}
             title={theme.sectionTitles.liveTransaction}
+            depositColor={theme.livetxDepositColor ?? undefined}
+            withdrawColor={theme.livetxWithdrawColor ?? undefined}
             loadingText={t.livetxloadingtext ?? undefined}
             depositLabel={t.depositlabel ?? undefined}
             withdrawLabel={t.withdrawlabel ?? undefined}

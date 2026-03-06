@@ -9,9 +9,13 @@ type Member = { id: string; userRef: string; displayName?: string | null; referr
 export function ReferralBlock({
   registerPath = "/register-wa",
   loginPath = "/login",
+  blockBg = null,
+  blockBorder = null,
 }: {
   registerPath?: string;
   loginPath?: string;
+  blockBg?: string | null;
+  blockBorder?: string | null;
 }) {
   const { t } = useLocale();
   const [member, setMember] = useState<Member | null | undefined>(undefined);
@@ -63,8 +67,8 @@ export function ReferralBlock({
       style={{
         marginTop: 12,
         padding: "14px 16px",
-        background: "rgba(120, 80, 255, 0.08)",
-        border: "1px solid rgba(120, 80, 255, 0.25)",
+        background: blockBg ?? "rgba(120, 80, 255, 0.08)",
+        border: blockBorder ? `1px solid ${blockBorder}` : "1px solid rgba(120, 80, 255, 0.25)",
         borderRadius: 12,
       }}
     >

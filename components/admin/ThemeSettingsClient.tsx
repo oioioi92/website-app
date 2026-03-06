@@ -73,6 +73,21 @@ export function ThemeSettingsClient() {
     setTheme({ ...theme, actionBarLimits: { ...theme.actionBarLimits, ...partial } });
   }
 
+  function patchActionBarButtonImages(partial: Partial<ThemeConfig["actionBarButtonImages"]>) {
+    if (!theme) return;
+    setTheme({ ...theme, actionBarButtonImages: { ...theme.actionBarButtonImages, ...partial } });
+  }
+
+  function patchQuickActions(list: ThemeConfig["quickActions"]) {
+    if (!theme) return;
+    setTheme({ ...theme, quickActions: list });
+  }
+
+  function patchBottomNav(list: ThemeConfig["bottomNav"]) {
+    if (!theme) return;
+    setTheme({ ...theme, bottomNav: list });
+  }
+
   function save() {
     if (!theme) return;
     setSaving(true);
@@ -263,6 +278,15 @@ export function ThemeSettingsClient() {
             <input type="text" value={theme.actionBarLimits?.maxWithdraw ?? ""} onChange={(e) => patchActionBarLimits({ maxWithdraw: e.target.value || null })} className={inputClass} placeholder={t("admin.site.placeholderMax100k")} />
           </div>
         </div>
+        <p className="mt-4 text-xs text-[var(--compact-muted)]">{t("admin.site.actionBarButtonImagesDesc") ?? "以下为 Action Bar 按钮图片 URL，有则前台用照片代替文字按钮。"}</p>
+        <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {(["login", "register", "deposit", "withdraw", "refresh", "signout"] as const).map((key) => (
+            <div key={key}>
+              <label className={labelClass}>{key === "login" ? (t("admin.site.actionBarImgLogin") ?? "Login 图") : key === "register" ? (t("admin.site.actionBarImgRegister") ?? "Register 图") : key === "deposit" ? (t("admin.site.actionBarImgDeposit") ?? "Deposit 图") : key === "withdraw" ? (t("admin.site.actionBarImgWithdraw") ?? "Withdraw 图") : key === "refresh" ? (t("admin.site.actionBarImgRefresh") ?? "Refresh 图") : (t("admin.site.actionBarImgSignout") ?? "Signout 图")}</label>
+              <input type="text" value={theme.actionBarButtonImages?.[key] ?? ""} onChange={(e) => patchActionBarButtonImages({ [key]: e.target.value || null })} className={inputClass} placeholder="https://..." />
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="admin-card p-6 space-y-6">
@@ -374,6 +398,71 @@ export function ThemeSettingsClient() {
       </div>
 
       <div className="admin-card p-6 space-y-6">
+        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionQuickActions") ?? "Quick Actions（快捷入口）"}</h2>
+        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.quickActionsDesc") ?? "每项可填 iconUrl，前台即用照片代替图标/文字。"}</p>
+        {(theme.quickActions ?? []).concat({ label: "", url: "", iconUrl: null, iconKey: null, style: "gold" }).slice(0, 8).map((a, i) => (
+          <div key={i} className="grid gap-3 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <label className={labelClass}>{t("admin.site.quickActionLabel") ?? "Label"}</label>
+              <input type="text" value={a.label} onChange={(e) => { const next = [...(theme.quickActions ?? [])]; while (next.length <= i) next.push({ label: "", url: "", iconUrl: null, iconKey: null, style: "gold" }); next[i] = { ...next[i], label: e.target.value }; patchQuickActions(next.slice(0, 8)); }} className={inputClass} placeholder="e.g. DEPOSIT" />
+            </div>
+            <div>
+              <label className={labelClass}>{t("admin.site.quickActionUrl") ?? "URL"}</label>
+              <input type="text" value={a.url} onChange={(e) => { const next = [...(theme.quickActions ?? [])]; while (next.length <= i) next.push({ label: "", url: "", iconUrl: null, iconKey: null, style: "gold" }); next[i] = { ...next[i], url: e.target.value }; patchQuickActions(next.slice(0, 8)); }} className={inputClass} placeholder="/deposit" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelClass}>{t("admin.site.imageUrl")}（{t("admin.site.optional") ?? "可选"}）</label>
+              <input type="text" value={a.iconUrl ?? ""} onChange={(e) => { const next = [...(theme.quickActions ?? [])]; while (next.length <= i) next.push({ label: "", url: "", iconUrl: null, iconKey: null, style: "gold" }); next[i] = { ...next[i], iconUrl: e.target.value || null }; patchQuickActions(next.slice(0, 8)); }} className={inputClass} placeholder="https://... 有则用图代替" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="admin-card p-6 space-y-6">
+        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionBottomNav") ?? "Bottom Nav（底部导航）"}</h2>
+        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.bottomNavDesc") ?? "每项可填 iconUrl，前台底部导航即用照片代替 emoji。"}</p>
+        {(() => {
+          const defaultSix: ThemeConfig["bottomNav"] = [
+            { href: "/", label: "HOME", icon: "🏠", iconUrl: null, badge: null },
+            { href: "/games", label: "GAMES", icon: "🎮", iconUrl: null, badge: null },
+            { href: "/promotion", label: "PROMO", icon: "🎁", iconUrl: null, badge: null },
+            { href: "/history", label: "HISTORY", icon: "📜", iconUrl: null, badge: null },
+            { href: "/chat", label: "LIVE CHAT", icon: "💬", iconUrl: null, badge: null },
+            { href: "/settings", label: "SETTINGS", icon: "⚙️", iconUrl: null, badge: null }
+          ];
+          const list = (theme.bottomNav ?? []).length >= 6 ? theme.bottomNav! : defaultSix;
+          return ["/", "/games", "/promotion", "/history", "/chat", "/settings"].map((href, i) => {
+            const item = list[i] ?? defaultSix[i]!;
+            const upd = (field: "label" | "icon" | "iconUrl", value: string | null) => {
+              const next = list.length >= 6 ? [...list] : [...defaultSix];
+              next[i] = { ...(next[i] ?? defaultSix[i]!), [field]: value };
+              patchBottomNav(next);
+            };
+            return (
+              <div key={href} className="grid gap-3 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <label className={labelClass}>{t("admin.site.bnHref") ?? "href"}</label>
+                  <input type="text" value={item.href} readOnly className={inputClass + " opacity-70"} />
+                </div>
+                <div>
+                  <label className={labelClass}>{t("admin.site.bnLabel") ?? "Label"}</label>
+                  <input type="text" value={item.label} onChange={(e) => upd("label", e.target.value)} className={inputClass} placeholder="HOME" />
+                </div>
+                <div>
+                  <label className={labelClass}>{t("admin.site.bnIcon") ?? "icon (emoji)"}</label>
+                  <input type="text" value={item.icon ?? ""} onChange={(e) => upd("icon", e.target.value || null)} className={inputClass} placeholder="🏠" />
+                </div>
+                <div>
+                  <label className={labelClass}>{t("admin.site.imageUrl")}（{t("admin.site.optional") ?? "可选"}）</label>
+                  <input type="text" value={item.iconUrl ?? ""} onChange={(e) => upd("iconUrl", e.target.value || null)} className={inputClass} placeholder="https://... 有则用图代替" />
+                </div>
+              </div>
+            );
+          });
+        })()}
+      </div>
+
+      <div className="admin-card p-6 space-y-6">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionImages")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -405,6 +494,17 @@ export function ThemeSettingsClient() {
 
       <div className="admin-card p-6 space-y-6">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionDisplay")}</h2>
+        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.themeColorsDesc") ?? "主题主色/强调色：不填则使用默认紫色；填了则全站按钮、高亮、底栏等改用该颜色。"}</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={labelClass}>{t("admin.site.themePrimaryColor") ?? "主题主色"}</label>
+            <input type="text" value={theme.themePrimaryColor ?? ""} onChange={(e) => patch({ themePrimaryColor: e.target.value || null })} className={inputClass} placeholder="#a855f7 或留空用默认紫" />
+          </div>
+          <div>
+            <label className={labelClass}>{t("admin.site.themeAccentColor") ?? "主题强调色"}</label>
+            <input type="text" value={theme.themeAccentColor ?? ""} onChange={(e) => patch({ themeAccentColor: e.target.value || null })} className={inputClass} placeholder="#6366f1 或留空" />
+          </div>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>{t("admin.site.promotionPattern")}</label>
@@ -429,6 +529,89 @@ export function ThemeSettingsClient() {
               <option value="bold">bold</option>
             </select>
           </div>
+        </div>
+      </div>
+
+      <div className="admin-card p-6 space-y-6">
+        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionVividColors") ?? "Vivid 颜色与尺寸"}</h2>
+        <p className="text-[13px] text-[var(--compact-muted)]">留空则用默认；填了则覆盖 .vp-shell 的 CSS 变量。</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { key: "vividBg", label: "Vivid 背景", ph: "#080810" },
+            { key: "vividCard", label: "卡片背景", ph: "#13132a" },
+            { key: "vividCard2", label: "卡片背景 2", ph: "#1c1c38" },
+            { key: "vividBorder", label: "边框", ph: "rgba(150,80,255,0.3)" },
+            { key: "vividText", label: "主文字色", ph: "#ffffff" },
+            { key: "vividMuted", label: "次要文字", ph: "#b8aee8" },
+            { key: "vividGreen", label: "成功色", ph: "#22c55e" },
+            { key: "vividRed", label: "错误色", ph: "#ef4444" },
+            { key: "vividGold", label: "金色", ph: "#f59e0b" },
+            { key: "vpRadiusCard", label: "卡片圆角", ph: "16px" },
+            { key: "vpRadiusBtn", label: "按钮圆角", ph: "12px" },
+            { key: "vpGap", label: "间距", ph: "24px" },
+            { key: "vpMaxWidth", label: "最大宽度", ph: "1100px" },
+          ].map(({ key, label, ph }) => (
+            <div key={key}>
+              <label className={labelClass}>{label}</label>
+              <input type="text" value={String((theme as unknown as Record<string, string | null | undefined>)[key] ?? "")} onChange={(e) => patch({ [key]: e.target.value || null } as Partial<ThemeConfig>)} className={inputClass} placeholder={ph} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="admin-card p-6 space-y-6">
+        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionDeskColors") ?? "Desktop 颜色与尺寸"}</h2>
+        <p className="text-[13px] text-[var(--compact-muted)]">桌面版 .public-desktop-shell 的 CSS 变量。</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { key: "deskBg", label: "桌面背景", ph: "#0E1014" },
+            { key: "deskPanel", label: "面板色", ph: "#232630" },
+            { key: "deskAccent", label: "桌面强调色", ph: "#E8C85A" },
+            { key: "deskContainer", label: "容器宽度", ph: "1560px" },
+            { key: "deskBannerH", label: "Banner 高度", ph: "300px" },
+          ].map(({ key, label, ph }) => (
+            <div key={key}>
+              <label className={labelClass}>{label}</label>
+              <input type="text" value={String((theme as unknown as Record<string, string | null | undefined>)[key] ?? "")} onChange={(e) => patch({ [key]: e.target.value || null } as Partial<ThemeConfig>)} className={inputClass} placeholder={ph} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="admin-card p-6 space-y-6">
+        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionLivetxReferralChat") ?? "流水表 / 推荐区块 / 客服栏"}</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { key: "livetxDepositColor", label: "流水表 Deposit 列色", ph: "#1e3a5f" },
+            { key: "livetxWithdrawColor", label: "流水表 Withdraw 列色", ph: "#e6b800" },
+            { key: "referralBlockBg", label: "推荐区块背景", ph: "rgba(120,80,255,0.08)" },
+            { key: "referralBlockBorder", label: "推荐区块边框", ph: "rgba(120,80,255,0.25)" },
+            { key: "chatFabBg", label: "客服悬浮栏背景", ph: "#080808" },
+          ].map(({ key, label, ph }) => (
+            <div key={key}>
+              <label className={labelClass}>{label}</label>
+              <input type="text" value={String((theme as unknown as Record<string, string | null | undefined>)[key] ?? "")} onChange={(e) => patch({ [key]: e.target.value || null } as Partial<ThemeConfig>)} className={inputClass} placeholder={ph} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="admin-card p-6 space-y-6">
+        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionFrontSemanticFont") ?? "前台通用语义色与字体"}</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { key: "frontAccent", label: "前台强调色", ph: "#06b6d4" },
+            { key: "frontSuccess", label: "成功色", ph: "#10b981" },
+            { key: "frontDanger", label: "危险色", ph: "#f43f5e" },
+            { key: "frontGold", label: "金色", ph: "#f59e0b" },
+            { key: "fontFamily", label: "字体", ph: "-apple-system, BlinkMacSystemFont, Segoe UI" },
+            { key: "fontSize", label: "基础字号", ph: "15px" },
+          ].map(({ key, label, ph }) => (
+            <div key={key}>
+              <label className={labelClass}>{label}</label>
+              <input type="text" value={String((theme as unknown as Record<string, string | null | undefined>)[key] ?? "")} onChange={(e) => patch({ [key]: e.target.value || null } as Partial<ThemeConfig>)} className={inputClass} placeholder={ph} />
+            </div>
+          ))}
         </div>
       </div>
 
