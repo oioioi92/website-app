@@ -63,13 +63,13 @@ export function ReportPlaceholder({
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-slate-500">{t("admin.txReport.display")}</label>
-            <div className="flex rounded-lg border border-slate-200 bg-slate-50/80 p-0.5">
+            <div className="grid grid-cols-3 rounded-lg border border-slate-200 bg-slate-50/80 p-0.5 min-w-0">
               {DISPLAY_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
                   onClick={() => setGroupBy(opt.value as "daily" | "monthly" | "yearly")}
-                  className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-md px-2 sm:px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap min-w-0 ${
                     groupBy === opt.value ? "bg-indigo-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                   }`}
                 >
