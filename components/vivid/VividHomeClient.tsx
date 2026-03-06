@@ -106,11 +106,11 @@ export function VividHomeClient({
           <div className="flex flex-col gap-4">
             {topPromos.length > 0 ? (
               topPromos.map((p) => (
-                <div key={p.id} className="vp-promo-card flex-row overflow-hidden" style={{ borderRadius: 14 }}>
+                <div key={p.id} className="vp-promo-card vp-promo-card-row overflow-hidden" style={{ borderRadius: 14 }}>
                   <div style={{ display: "flex", flex: 1, gap: 0, overflow: "hidden", borderRadius: "inherit" }}>
                     {p.coverUrl && (
-                      <div style={{ width: 100, flexShrink: 0, background: "var(--vp-card2)" }}>
-                        <FallbackImage src={p.coverUrl} alt={p.title} className="h-full w-full object-cover" />
+                      <div className="vp-promo-row-img" style={{ flexShrink: 0 }}>
+                        <FallbackImage src={p.coverUrl} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
                       </div>
                     )}
                     <div className="vp-promo-body">
