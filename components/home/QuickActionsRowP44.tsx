@@ -5,7 +5,7 @@ const actions = [
   { label: "Deposit", href: "/deposit" },
   { label: "Withdraw", href: "/withdraw" },
   { label: "Transfer", href: "/deposit" },
-  { label: "Support", href: "/live-chat" },
+  { label: "Support", href: "/chat" },
 ];
 
 export function QuickActionsRowP44() {

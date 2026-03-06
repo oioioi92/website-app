@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canAccessSettings } from "@/lib/rbac";
+import { writeAuditLog } from "@/lib/audit";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +19,7 @@ type WhatsappPayload = {
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canAccessSettings(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const row = await db.siteSetting.findUnique({ where: { key: KEY }, select: { valueJson: true } });
   const value = (row?.valueJson as WhatsappPayload | null) ?? {};
@@ -41,6 +44,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canAccessSettings(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   let body: WhatsappPayload;
   try {
@@ -58,6 +62,14 @@ export async function PUT(req: NextRequest) {
     where: { key: KEY },
     create: { key: KEY, valueJson: valueJson as object },
     update: { valueJson: valueJson as object }
+  });
+  await writeAuditLog({
+    actorId: user.id,
+    action: "SETTINGS_WHATSAPP_SAVE",
+    entityType: "SiteSetting",
+    entityId: KEY,
+    diffJson: { enabled: valueJson.enabled },
+    req,
   });
   return NextResponse.json({ ok: true });
 }

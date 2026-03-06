@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { JSX } from "react";
 import Link from "next/link";
-import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 
 type SummaryData = {
   newRegistration: number;
@@ -26,7 +26,7 @@ function toDateInputValue(d: Date): string {
 }
 
 export function AdminDashboardSummary() {
-  const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [data, setData] = useState<SummaryData | null>(null);
@@ -39,8 +39,11 @@ export function AdminDashboardSummary() {
     const sp = new URLSearchParams();
     sp.set("dateFrom", from);
     sp.set("dateTo", to);
-    fetch(`/api/admin/summary?${sp}`)
-      .then((r) => r.json())
+    fetch(`/api/admin/summary?${sp}`, { credentials: "include" })
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.json();
+      })
       .then((d) => setData(d))
       .catch(() => setData(null))
       .finally(() => setLoading(false));
@@ -54,12 +57,15 @@ export function AdminDashboardSummary() {
     const sp = new URLSearchParams();
     sp.set("dateFrom", today);
     sp.set("dateTo", today);
-    fetch(`/api/admin/summary?${sp}`)
-      .then((r) => r.json())
+    fetch(`/api/admin/summary?${sp}`, { credentials: "include" })
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.json();
+      })
       .then((d) => setData(d))
       .catch(() => setData(null))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setForbidden]);
 
   const runSearch = () => load();
 
@@ -77,31 +83,31 @@ export function AdminDashboardSummary() {
           className="admin-dashboard-input"
           suppressHydrationWarning
         />
-        <span className="admin-dashboard-label text-slate-600">To</span>
+        <span className="text-sm text-slate-600">To</span>
         <input
           type="date"
           value={dateTo}
           onChange={(e) => setDateTo(e.target.value)}
-          className="admin-dashboard-input"
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
           suppressHydrationWarning
         />
         <button
           type="button"
           onClick={runSearch}
-          className="admin-dashboard-btn"
+          className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white hover:bg-sky-600"
         >
           Search
         </button>
       </div>
 
       {loading ? (
-        <div className="admin-dashboard-grid grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-lg border border-slate-200 bg-slate-100" />
+            <div key={i} className="h-24 animate-pulse rounded-xl border border-slate-200 bg-slate-100" />
           ))}
         </div>
       ) : data ? (
-        <div className="admin-dashboard-grid grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryCard title="New Registration" value={`${data.newRegistration} ppl`} linkLabel="VIEW →" href="/admin/players" color="purple" icon="person" />
           <SummaryCard title="Total Deposit" value={`RM ${fmt(data.totalDeposit)}`} linkLabel="SUMMARY →" href={`/admin/deposits${depParams}`} color="green" icon="deposit" />
           <SummaryCard title="Total Withdraw" value={`RM ${fmt(data.totalWithdraw)}`} linkLabel="VIEW →" href="/admin/withdrawals" color="red" icon="withdraw" />
@@ -116,7 +122,7 @@ export function AdminDashboardSummary() {
           <SummaryCard title="Manual ADD" value={`RM ${fmt(data.manualAdd)}`} color="green" icon="plus" />
         </div>
       ) : (
-        <p className="text-slate-500">{t("admin.dashboard.loadError")}</p>
+        <p className="text-slate-500">无法加载汇总数据</p>
       )}
     </div>
   );
@@ -156,17 +162,17 @@ function SummaryCard({ title, value, linkLabel, href, color = "blue", icon = "ch
 }) {
   const c = COLOR_MAP[color] ?? COLOR_MAP.blue;
   return (
-    <div className={`admin-dashboard-card flex rounded-lg border ${c.border} ${c.bg} p-3 shadow-sm hover:shadow-md transition-shadow`}>
-      <div className={`mr-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${c.icon}`}>
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className={`flex rounded-xl border ${c.border} ${c.bg} p-4 shadow-sm hover:shadow-md transition-shadow`}>
+      <div className={`mr-4 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${c.icon}`}>
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           {ICON_SVG[icon] ?? ICON_SVG.chart}
         </svg>
       </div>
       <div className="min-w-0 flex-1">
-        <p className="admin-dashboard-card-title">{title}</p>
-        <p className={`admin-dashboard-card-value mt-0.5 ${c.text}`}>{value}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
+        <p className={`mt-0.5 text-lg font-bold ${c.text}`}>{value}</p>
         {linkLabel && href && (
-          <Link href={href} className="admin-dashboard-card-link mt-0.5 inline-block text-slate-400 hover:text-slate-600">
+          <Link href={href} className="mt-0.5 inline-block text-[11px] font-medium text-slate-400 hover:text-slate-600">
             {linkLabel}
           </Link>
         )}

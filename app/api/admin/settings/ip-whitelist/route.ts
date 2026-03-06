@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canManageAdmins } from "@/lib/rbac";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,7 @@ const KEY = "settings_ip_whitelist";
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canManageAdmins(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
   const row = await db.siteSetting.findUnique({ where: { key: KEY }, select: { valueJson: true } });
   const value = row?.valueJson;
   const text = typeof value === "string" ? value : Array.isArray(value) ? (value as string[]).join("\n") : "";
@@ -18,6 +20,7 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canManageAdmins(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
   let body: { whitelist?: string };
   try {
     body = await req.json();

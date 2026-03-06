@@ -78,10 +78,10 @@ export async function PUT(req: NextRequest) {
       actorId: user.id,
       action: "THEME_SAVE",
       entityType: "Theme",
-      entityId: existing?.id ?? "new",
-      diffJson: {},
+      entityId: THEME_KEY,
+      diffJson: { version: existing?.version ?? 0 },
       req,
-    }).catch(() => undefined);
+    });
     return NextResponse.json({ ok: true });
   } catch (e) {
     try {

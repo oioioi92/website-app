@@ -1,11 +1,5 @@
-"use client";
-
-import { SecurityPageClient } from "@/components/admin/SecurityPageClient";
+import { redirect } from "next/navigation";
 
 export default function AdminSecurityPage() {
-  return (
-    <div>
-      <SecurityPageClient />
-    </div>
-  );
+  redirect("/admin/settings/account/security");
 }

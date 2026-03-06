@@ -6,16 +6,18 @@
 body:has(.vp-shell) [data-frontedit="header"]       { display: none !important; }
 body:has(.vp-shell) [data-frontedit="marquee"]      { display: none !important; }
 body:has(.vp-shell) [data-mobile-shell-nav]         { display: none !important; }
+/* 页面自绘底部栏时隐藏 layout 的底栏，避免双栏 */
+body:has([data-page-has-bottom-nav="true"]) nav[data-from-layout="true"] { display: none !important; }
 /* 移除 MobileShell children 的底部 padding（为 MobileBottomNav 留的）*/
 body:has(.vp-shell) [data-mobile-shell-content]     { padding-bottom: 0 !important; }
 /* 当 layout 统一渲染 Vivid 底部 bar 时，内容区需留出底部空间，避免被 bar 遮挡 */
 body:has(.vp-shell) .vivid-nav-spacer {
   padding-bottom: max(5rem, calc(5rem + env(safe-area-inset-bottom))) !important;
 }
-/* 覆盖 MobileShell 外层背景为黑色；若后台设置了页面背景色/图则保留（不覆盖） */
-body:has(.vp-shell) .min-h-screen:not([data-page-bg="custom"]) { background: #080810 !important; }
+/* 覆盖 MobileShell 的灰色外层背景为黑色 */
+body:has(.vp-shell) .min-h-screen                   { background: #080810 !important; }
 
-/* ---- Tokens（主色/强调色可由后台 Theme 设置，通过 --theme-primary / --theme-accent 注入）---- */
+/* ---- Tokens ---- */
 .vp-shell {
   /* 背景：纯黑 */
   --vp-bg:        #080810;
@@ -23,15 +25,15 @@ body:has(.vp-shell) .min-h-screen:not([data-page-bg="custom"]) { background: #08
   /* 卡片：深黑紫 */
   --vp-card:      #13132a;
   --vp-card2:     #1c1c38;
-  /* 主色 / 强调色：优先用后台配置 */
-  --vp-accent:    var(--theme-primary, #b060ff);
-  --vp-accent2:   var(--theme-accent, #7c6cfc);
-  /* 边框 / 光晕：基于主色 */
+  /* 边框：紫色半透明 */
   --vp-border:    rgba(150, 80, 255, 0.30);
   --vp-glow:      rgba(168, 85, 247, 0.65);
   /* 文字：纯白 */
   --vp-text:      #ffffff;
   --vp-muted:     #b8aee8;
+  /* 主色：亮紫 */
+  --vp-accent:    #b060ff;
+  --vp-accent2:   #7c6cfc;
   --vp-green:     #22c55e;
   --vp-red:       #ef4444;
   --vp-gold:      #f59e0b;

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 import { DEPOSIT_STATUS_OPTIONS } from "@/lib/backoffice/filter-options";
 
 type Row = {
@@ -22,6 +23,7 @@ type Row = {
 
 export function AdminDepositListClient() {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [items, setItems] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -39,7 +41,10 @@ export function AdminDepositListClient() {
     if (dateFrom) sp.set("dateFrom", dateFrom);
     if (dateTo) sp.set("dateTo", dateTo);
     fetch(`/api/admin/deposits?${sp}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.json();
+      })
       .then((d) => {
         setItems(d.items ?? []);
         setTotal(d.total ?? 0);

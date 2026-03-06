@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 import type { ReportApiResponse, ReportColumn } from "@/lib/backoffice/report-api-types";
 import { getReportFilterSchema, isRecordsReport } from "@/lib/backoffice/report-filters-schema";
 import { RECORDS_STATUS_OPTIONS, TX_TYPE_ALL_OPTIONS, TX_TYPE_LEDGER_OPTIONS } from "@/lib/backoffice/filter-options";
@@ -18,15 +19,11 @@ type ReportTableFromApiProps = {
   extraParams?: Record<string, string>;
 };
 
-const SUPPORTED_KEYS = [
-  "all-transactions", "ledger-transactions", "hourly-sales", "winloss-by-game", "winloss-by-player",
-  "bonus-cost", "user-kpi", "gateway-search", "reconciliation", "top-referrer",
-  "transaction-report", "promotion-report", "commission", "staff", "activity-log", "rebate-angpao",
-  "manual", "feedback", "leaderboard", "referrer-click", "lucky-number", "lucky-draw-4d",
-];
+const SUPPORTED_KEYS = ["all-transactions", "ledger-transactions", "hourly-sales", "winloss-by-game", "winloss-by-player", "bonus-cost", "user-kpi", "gateway-search", "reconciliation", "top-referrer"];
 
 export function ReportTableFromApi({ reportKey, title, description, extraParams = {} }: ReportTableFromApiProps) {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [data, setData] = useState<ReportApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,11 +45,12 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
   const [page, setPage] = useState(1);
   const pageSize = 20;
   const [exporting, setExporting] = useState(false);
-  const [exportMessage, setExportMessage] = useState<"success" | "error" | null>(null);
+  const [exportStatus, setExportStatus] = useState<"idle" | "success" | "error">("idle");
 
-  function buildQueryParams(overrides?: { txType?: string; forCsv?: boolean }) {
+  function buildQueryParams(overrides?: { txType?: string; forCsv?: boolean; page?: number }) {
     const sp = new URLSearchParams(extraParams);
-    sp.set("page", overrides?.forCsv ? "1" : String(page));
+    const currentPage = overrides?.page ?? page;
+    sp.set("page", overrides?.forCsv ? "1" : String(currentPage));
     sp.set("pageSize", overrides?.forCsv ? "5000" : String(pageSize));
     if (dateFrom) sp.set("dateFrom", dateFrom);
     if (dateTo) sp.set("dateTo", dateTo);
@@ -75,26 +73,33 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
     return sp;
   }
 
-  function load(overrides?: { txType?: string }) {
+  function load(overrides?: { txType?: string; page?: number }) {
     setLoading(true);
     setError(null);
     const sp = buildQueryParams(overrides);
     fetch(`/api/admin/reports/query/${reportKey}?${sp}`)
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) throw new Error(r.status === 404 ? t("admin.reports.reportNotFound") : t("admin.reports.requestFailed"));
         return r.json();
       })
       .then((d: ReportApiResponse) => setData(d))
-      .catch((e) => setError(e.message))
+      .catch((e) => setError(e.message ?? String(e)))
       .finally(() => setLoading(false));
+  }
+
+  function goToPage(nextPage: number) {
+    setPage(nextPage);
+    load({ page: nextPage });
   }
 
   function exportCsv() {
     setExporting(true);
-    setExportMessage(null);
+    setExportStatus("idle");
     const sp = buildQueryParams({ forCsv: true });
     fetch(`/api/admin/reports/query/${reportKey}?${sp}`, { credentials: "include" })
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) throw new Error("Export failed");
         return r.blob();
       })
@@ -105,13 +110,13 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
         a.download = `${reportKey}-${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
         URL.revokeObjectURL(url);
-        setExportMessage("success");
-        setTimeout(() => setExportMessage(null), 3000);
+        setExportStatus("success");
+        setTimeout(() => setExportStatus("idle"), 3000);
       })
       .catch(() => {
-        setExportMessage("error");
+        setExportStatus("error");
         setError(t("admin.reports.exportCsvFailed"));
-        setTimeout(() => setExportMessage(null), 3000);
+        setTimeout(() => setExportStatus("idle"), 3000);
       })
       .finally(() => setExporting(false));
   }
@@ -182,7 +187,7 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
               <label className={labelClass}>{t("admin.reports.date")}</label>
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={`${inputClass} [color-scheme:light]`} />
             </div>
-            <button type="button" onClick={() => load()} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
+            <button type="button" onClick={() => { setPage(1); load({ page: 1 }); }} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
           </div>
         )}
         {isSimpleRange && (
@@ -213,7 +218,7 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
                 <input type="text" value={userId} onChange={(e) => setUserId(e.target.value)} placeholder={t("admin.reports.userId")} className={inputClass} />
               </div>
             )}
-            <button type="button" onClick={() => load()} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
+            <button type="button" onClick={() => { setPage(1); load({ page: 1 }); }} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
           </div>
         )}
         {isGatewaySearch && (
@@ -222,7 +227,7 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
               <label className={labelClass}>{t("admin.reports.reference")}</label>
               <input type="text" value={externalRef} onChange={(e) => setExternalRef(e.target.value)} placeholder={t("admin.reports.reference")} className={inputClass} />
             </div>
-            <button type="button" onClick={() => load()} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
+            <button type="button" onClick={() => { setPage(1); load({ page: 1 }); }} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
           </div>
         )}
         {isReconciliation && (
@@ -235,17 +240,12 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
               <label className={labelClass}>{t("admin.reports.to")}</label>
               <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className={`${inputClass} [color-scheme:light]`} />
             </div>
-            <button type="button" onClick={() => load()} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
-          </div>
-        )}
-        {!isLedgerOrAll && !isHourly && !isSimpleRange && !isGatewaySearch && !isReconciliation && (
-          <div className="flex flex-wrap items-end gap-3">
-            <button type="button" onClick={() => load()} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
+            <button type="button" onClick={() => { setPage(1); load({ page: 1 }); }} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
           </div>
         )}
         {isLedgerOrAll && (
           <div className="mt-3">
-            <button type="button" onClick={() => load()} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
+            <button type="button" onClick={() => { setPage(1); load({ page: 1 }); }} className="admin-compact-btn admin-compact-btn-primary">{t("admin.common.search")}</button>
           </div>
         )}
       </section>
@@ -261,48 +261,21 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
       )}
 
       <section className="admin-card overflow-x-auto">
-        <div className="border-b border-[var(--compact-table-border)] px-4 py-2 flex flex-wrap items-center justify-between gap-2 bg-[var(--compact-table-header)]">
+        <div className="border-b border-[var(--compact-table-border)] px-4 py-2 flex items-center justify-between bg-[var(--compact-table-header)]">
           <span className="text-[13px] font-semibold text-[var(--compact-text)]">{title}</span>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            {data && data.rows.length > 0 && (
+              <button type="button" onClick={exportCsv} disabled={exporting} className="admin-compact-btn admin-compact-btn-ghost text-xs disabled:opacity-60">
+                {exporting ? (t("admin.reports.exporting") ?? "导出中…") : t("admin.reports.exportCsv")}
+              </button>
+            )}
+            {exportStatus === "success" && <span className="text-xs text-emerald-600">{t("admin.reports.exportSuccess") ?? "导出成功"}</span>}
+            {exportStatus === "error" && <span className="text-xs text-red-600">{t("admin.reports.exportCsvFailed")}</span>}
             {data && (
-              <>
-                <button
-                  type="button"
-                  onClick={exportCsv}
-                  disabled={exporting || data.rows.length === 0}
-                  className="admin-compact-btn admin-compact-btn-ghost text-xs disabled:opacity-50"
-                >
-                  {exporting ? (t("admin.reports.exporting") ?? "导出中…") : t("admin.reports.exportCsv")}
-                </button>
-                {exportMessage === "success" && <span className="text-xs text-emerald-600">{t("admin.reports.exportSuccess") ?? "已导出"}</span>}
-                {exportMessage === "error" && <span className="text-xs text-red-600">{t("admin.reports.exportCsvFailed")}</span>}
-                <span className="text-xs text-[var(--compact-muted)]">
-                  {t("admin.transactions.totalCountPage").replace("{n}", String((data.summary as { total_count?: number })?.total_count ?? data.rows.length))}
-                  {typeof (data.summary as { pageSize?: number })?.pageSize === "number" && (
-                    <> · {t("admin.reports.page") ?? "页"} {(data.summary as { page?: number }).page ?? 1}</>
-                  )}
-                </span>
-                {typeof (data.summary as { total_count?: number })?.total_count === "number" && (data.summary as { total_count: number }).total_count > pageSize && (
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      disabled={page <= 1 || loading}
-                      onClick={() => { setPage((p) => Math.max(1, p - 1)); load(); }}
-                      className="admin-compact-btn admin-compact-btn-ghost text-xs py-1 px-2 disabled:opacity-40"
-                    >
-                      {t("admin.reports.prev") ?? "上一页"}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={data.rows.length < pageSize || loading}
-                      onClick={() => { setPage((p) => p + 1); load(); }}
-                      className="admin-compact-btn admin-compact-btn-ghost text-xs py-1 px-2 disabled:opacity-40"
-                    >
-                      {t("admin.reports.next") ?? "下一页"}
-                    </button>
-                  </div>
-                )}
-              </>
+              <span className="text-xs text-[var(--compact-muted)]">
+                {t("admin.transactions.totalCountPage").replace("{n}", String(data.rows.length))}
+                {typeof data.summary?.total_count === "number" && ` / ${(t("admin.reports.totalRecords") ?? "共 {n} 条").replace("{n}", String(data.summary.total_count))}`}
+              </span>
             )}
           </div>
         </div>
@@ -350,6 +323,21 @@ export function ReportTableFromApi({ reportKey, title, description, extraParams 
             </tbody>
           </table>
         )}
+        {data && data.rows.length > 0 && typeof data.summary?.total_count === "number" && data.summary.total_count > pageSize && (
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-[var(--compact-table-border)] bg-[var(--compact-table-header)]">
+            <span className="text-xs text-[var(--compact-muted)]">
+              {t("admin.common.pageOfTotal")?.replace("{n}", String(page)).replace("{m}", String(Math.ceil((data.summary.total_count as number) / pageSize))) ?? `第 ${page} 页，共 ${Math.ceil((data.summary.total_count as number) / pageSize)} 页`}
+            </span>
+            <div className="flex gap-1">
+              <button type="button" disabled={page <= 1} onClick={() => goToPage(page - 1)} className="admin-compact-btn admin-compact-btn-ghost text-xs disabled:opacity-50">
+                {t("admin.common.prevPage")}
+              </button>
+              <button type="button" disabled={page >= Math.ceil((data.summary.total_count as number) / pageSize)} onClick={() => goToPage(page + 1)} className="admin-compact-btn admin-compact-btn-ghost text-xs disabled:opacity-50">
+                {t("admin.common.nextPage")}
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );
@@ -359,7 +347,7 @@ function formatCell(value: unknown, key: string): string {
   if (value == null) return "—";
   if (typeof value === "number") return key === "amount" || key.endsWith("_total") || key.endsWith("_count") ? value.toFixed(2) : String(value);
   if (typeof value === "string") {
-    const dateKeys = ["created_at", "effective_at", "hour_start", "report_date", "claimed_at", "clicked_at", "start_at", "end_at"];
+    const dateKeys = ["created_at", "effective_at", "hour_start", "report_date"];
     if (dateKeys.includes(key)) {
       try {
         const d = new Date(value);

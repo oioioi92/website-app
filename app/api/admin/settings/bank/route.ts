@@ -1,68 +1,92 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canAccessSettings } from "@/lib/rbac";
+import { writeAuditLog } from "@/lib/audit";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 const KEY = "settings_bank";
+const KEY_LIST = "settings_bank_list";
 
-type BankPayload = {
-  bankName?: string;
-  bankCode?: string;
-  accountName?: string;
-  accountNumber?: string;
-  dailyLimit?: string;
-  singleLimit?: string;
-  maintenanceMode?: boolean;
+export type BankItem = {
+  id: string;
+  bankName: string;
+  bankCode: string;
+  accountName: string;
+  accountNumber: string;
+  dailyLimit: string;
+  singleLimit: string;
+  maintenanceMode: boolean;
 };
 
-/** GET: 读取出款银行配置 */
+function normalizeItem(raw: Record<string, unknown>): BankItem {
+  return {
+    id: typeof raw.id === "string" ? raw.id : randomUUID(),
+    bankName: String(raw.bankName ?? ""),
+    bankCode: String(raw.bankCode ?? ""),
+    accountName: String(raw.accountName ?? ""),
+    accountNumber: String(raw.accountNumber ?? ""),
+    dailyLimit: String(raw.dailyLimit ?? ""),
+    singleLimit: String(raw.singleLimit ?? ""),
+    maintenanceMode: Boolean(raw.maintenanceMode),
+  };
+}
+
+/** GET: 读取出款银行列表（多条），兼容旧单条配置迁移 */
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canAccessSettings(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
-  const row = await db.siteSetting.findUnique({ where: { key: KEY }, select: { valueJson: true } });
-  const value = (row?.valueJson as BankPayload | null) ?? {};
-  return NextResponse.json(
-    {
-    bankName: value.bankName ?? "",
-    bankCode: value.bankCode ?? "",
-    accountName: value.accountName ?? "",
-    accountNumber: value.accountNumber ?? "",
-    dailyLimit: value.dailyLimit ?? "",
-    singleLimit: value.singleLimit ?? "",
-    maintenanceMode: value.maintenanceMode ?? false
-  },
-    { headers: { "Cache-Control": "no-store, max-age=0" } }
-  );
+  const listRow = await db.siteSetting.findUnique({ where: { key: KEY_LIST }, select: { valueJson: true } });
+  const rawList = listRow?.valueJson;
+  if (Array.isArray(rawList) && rawList.length > 0) {
+    const items = rawList.map((r) => normalizeItem(r as Record<string, unknown>));
+    return NextResponse.json({ items }, { headers: { "Cache-Control": "no-store, max-age=0" } });
+  }
+
+  const legacyRow = await db.siteSetting.findUnique({ where: { key: KEY }, select: { valueJson: true } });
+  const legacy = legacyRow?.valueJson as Record<string, unknown> | null;
+  if (legacy && (legacy.bankName ?? legacy.accountNumber ?? legacy.accountName)) {
+    const single = normalizeItem(legacy);
+    return NextResponse.json({ items: [single] }, { headers: { "Cache-Control": "no-store, max-age=0" } });
+  }
+
+  return NextResponse.json({ items: [] }, { headers: { "Cache-Control": "no-store, max-age=0" } });
 }
 
-/** PUT: 保存出款银行配置 */
+/** PUT: 保存出款银行列表（整表替换），前端传 items[] */
 export async function PUT(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canAccessSettings(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
-  let body: BankPayload;
+  let body: { items?: unknown[] };
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "INVALID_JSON" }, { status: 400 });
   }
 
-  const valueJson = {
-    bankName: String(body.bankName ?? ""),
-    bankCode: String(body.bankCode ?? ""),
-    accountName: String(body.accountName ?? ""),
-    accountNumber: String(body.accountNumber ?? ""),
-    dailyLimit: String(body.dailyLimit ?? ""),
-    singleLimit: String(body.singleLimit ?? ""),
-    maintenanceMode: Boolean(body.maintenanceMode)
-  };
+  const rawItems = Array.isArray(body.items) ? body.items : [];
+  const items = rawItems.map((r) => normalizeItem(r as Record<string, unknown>));
 
   await db.siteSetting.upsert({
-    where: { key: KEY },
-    create: { key: KEY, valueJson: valueJson as object },
-    update: { valueJson: valueJson as object }
+    where: { key: KEY_LIST },
+    create: { key: KEY_LIST, valueJson: items as object },
+    update: { valueJson: items as object },
   });
+
+  await writeAuditLog({
+    actorId: user.id,
+    action: "SETTINGS_BANK_SAVE",
+    entityType: "SiteSetting",
+    entityId: KEY_LIST,
+    diffJson: { count: items.length },
+    req,
+  });
+
   return NextResponse.json({ ok: true });
 }

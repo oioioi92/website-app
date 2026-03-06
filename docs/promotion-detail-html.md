@@ -2,11 +2,11 @@
 
 前台「优惠活动」点击某条 promotion 后，弹窗里就是 **一个容器** 做成的详情 UI：
 
-## Rollover 与 Turnover（两样不同设定）
+## 流水 / Rollover 公式（业务含义）
 
-- **Rollover** 与 **Turnover** 是不同设定，请分开理解与配置。
-- **Turnover（流水倍数）**：公式 **(Deposit + Bonus) × Turnover = 游戏里必须有的金额才能洗**。例：Deposit RM10 + Bonus RM5，Turnover 填 **3** → 游戏里必须有 **(10+5)×3 = 45** 块才能洗。
-- **Rollover**：单独设定，是否允许 Rollover（allowed / not allowed），与上述 Turnover 流水倍数无关。
+- **Turnover（流水倍数）**：后台填的数字表示「倍数」。公式：**(Deposit + Bonus) × Turnover = 须完成的投注额**。
+- 例：Deposit RM10 + Bonus RM5，Turnover 填 **20** → 须投注 **(10+5)×20 = 300** 的分数/金额才算完成流水。
+- **Rollover**：是否「允许/要求」流水——allowed = 有流水要求（按上面倍数算）；not allowed = 无流水要求。
 
 - **只写字体**：后台只配「容器字体」，可随意改，整块详情区都用这个字体。
 - **要什么就改什么**：容器里用你的 HTML 画格子、改版式——画格子用 `table` 或 `div`，改样式用 class，要什么就写什么。

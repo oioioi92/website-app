@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 
 type Row = {
   id: string;
@@ -18,7 +18,7 @@ type Row = {
 };
 
 export function AdminWithdrawalListClient() {
-  const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [items, setItems] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -36,7 +36,10 @@ export function AdminWithdrawalListClient() {
     if (dateFrom) sp.set("dateFrom", dateFrom);
     if (dateTo) sp.set("dateTo", dateTo);
     fetch(`/api/admin/withdrawals?${sp}`)
-      .then((r) => r.json())
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.json();
+      })
       .then((d) => {
         setItems(d.items ?? []);
         setTotal(d.total ?? 0);
@@ -92,7 +95,7 @@ export function AdminWithdrawalListClient() {
       {loading ? (
         <p className="text-slate-500">{t("admin.common.loading")}</p>
       ) : items.length === 0 ? (
-        <p className="text-slate-500">{t("admin.common.noRecords")}</p>
+        <p className="text-slate-500">无记录</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-sm">

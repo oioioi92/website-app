@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 import { PromotionEditFormLines } from "@/components/admin/PromotionEditFormLines";
 
 const inputClass =
-  "admin-compact-input w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-2.5 py-1.5 text-[var(--admin-text)] placeholder-[var(--admin-muted2)] focus:border-[var(--admin-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-primary)]";
+  "admin-compact-input w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-2 text-[13px] text-[var(--admin-text)] placeholder-[var(--admin-muted2)] focus:border-[var(--admin-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--admin-primary)]";
 const labelClass = "block text-[12px] font-medium text-[var(--admin-muted)] mb-1";
 
 /** 鍚庡彴鎻掑叆鐢細瀹屾暣鏉℃寮圭獥 HTML 妯℃澘锛堜袱鏍忚〃銆佽鍛婃绛夛級锛岄【瀹㈠彲鏀瑰瓧鍗冲彲鐢?*/
@@ -66,31 +67,23 @@ function fromDatetimeLocal(s: string): string | null {
 }
 
 type RuleJson = {
-  limits?: { perDay?: number; perWeek?: number; perLifetime?: number; perHour?: number; perMonth?: number };
-  claimReset?: "NONE" | "HOURLY" | "DAILY" | "WEEKLY" | "MONTHLY";
+  limits?: { perDay?: number; perWeek?: number; perLifetime?: number };
   eligible?: { minDeposit?: number };
-  grant?: { mode?: "PERCENT" | "FIXED" | "RANDOM"; percent?: number; fixedAmount?: number; capAmount?: number; randMin?: number; randMax?: number };
+  grant?: { mode?: "PERCENT" | "FIXED"; percent?: number; fixedAmount?: number; capAmount?: number };
   turnover?: number;
   rollover?: boolean | string;
-  rolloverMultiplier?: number;
   groupLabel?: string;
   onlyPayGame?: string;
   notAllowedTo?: string;
   bannedGameLink?: string;
   warningText?: string;
-  display?: { detailType?: "promo_table" | "set2" | "blocks" | "html" | "terms"; fontFamily?: string; customClass?: string; popupStyle?: "premium" | "light" };
+  display?: { detailType?: "promo_table" | "blocks" | "html" | "terms"; fontFamily?: string; customClass?: string };
 };
 
 type Form = {
   title: string;
   subtitle: string;
   coverUrl: string;
-  coverUrlMobilePromo: string;
-  coverUrlDesktopHome: string;
-  coverUrlMobileHome: string;
-  popupCoverUrl: string;
-  popupTextBelow: string;
-  promoLink: string;
   /** 璇︽儏绫诲瀷涓?HTML 鏃剁敤杩欎釜锛岀洿鎺ュ啓 HTML 涓嶇敤 JSON */
   detailHtml: string;
   /** 璇︽儏绫诲瀷涓?Blocks 鏃剁敤杩欎釜锛圝SON 瀛楃涓诧級*/
@@ -120,39 +113,30 @@ function parseRuleJson(raw: unknown): RuleJson {
   const eligible = o.eligible && typeof o.eligible === "object" && !Array.isArray(o.eligible) ? (o.eligible as Record<string, unknown>) : {};
   const grant = o.grant && typeof o.grant === "object" && !Array.isArray(o.grant) ? (o.grant as Record<string, unknown>) : {};
   const display = o.display && typeof o.display === "object" && !Array.isArray(o.display) ? (o.display as Record<string, unknown>) : {};
-  const claimResetVal = o.claimReset;
-  const claimReset = claimResetVal === "HOURLY" || claimResetVal === "DAILY" || claimResetVal === "WEEKLY" || claimResetVal === "MONTHLY" || claimResetVal === "NONE" ? claimResetVal : undefined;
   return {
     limits: {
       perDay: Number(limits.perDay) || undefined,
       perWeek: Number(limits.perWeek) || undefined,
-      perLifetime: Number(limits.perLifetime) || undefined,
-      perHour: Number(limits.perHour) || undefined,
-      perMonth: Number(limits.perMonth) || undefined
+      perLifetime: Number(limits.perLifetime) || undefined
     },
-    claimReset,
     eligible: { minDeposit: Number(eligible.minDeposit) || undefined },
     grant: {
-      mode: grant.mode === "FIXED" ? "FIXED" : grant.mode === "RANDOM" ? "RANDOM" : "PERCENT",
-      percent: (() => { const n = Number(grant.percent); return Number.isFinite(n) && n >= 0 ? n : undefined; })(),
+      mode: grant.mode === "FIXED" ? "FIXED" : "PERCENT",
+      percent: Number(grant.percent) || undefined,
       fixedAmount: Number(grant.fixedAmount) || undefined,
-      capAmount: Number(grant.capAmount) || undefined,
-      randMin: grant.randMin != null ? Number(grant.randMin) : undefined,
-      randMax: grant.randMax != null ? Number(grant.randMax) : undefined,
+      capAmount: Number(grant.capAmount) || undefined
     },
     turnover: Number(o.turnover) || undefined,
     rollover: o.rollover === true || o.rollover === "allowed" ? true : o.rollover === false || o.rollover === "not_allowed" ? false : undefined,
-    rolloverMultiplier: Number(o.rolloverMultiplier) || undefined,
     groupLabel: typeof o.groupLabel === "string" ? o.groupLabel : undefined,
     onlyPayGame: typeof o.onlyPayGame === "string" ? o.onlyPayGame : undefined,
     notAllowedTo: typeof o.notAllowedTo === "string" ? o.notAllowedTo : undefined,
     bannedGameLink: typeof o.bannedGameLink === "string" ? o.bannedGameLink : undefined,
     warningText: typeof o.warningText === "string" ? o.warningText : undefined,
     display: {
-      detailType: display.detailType === "html" ? "html" : display.detailType === "terms" ? "terms" : display.detailType === "promo_table" ? "promo_table" : display.detailType === "set2" ? "set2" : "blocks",
+      detailType: display.detailType === "html" ? "html" : display.detailType === "terms" ? "terms" : display.detailType === "promo_table" ? "promo_table" : "blocks",
       fontFamily: typeof display.fontFamily === "string" ? display.fontFamily : undefined,
-      customClass: typeof display.customClass === "string" ? display.customClass : undefined,
-      popupStyle: display.popupStyle === "light" ? "light" : "premium"
+      customClass: typeof display.customClass === "string" ? display.customClass : undefined
     }
   };
 }
@@ -161,12 +145,6 @@ const emptyForm: Form = {
   title: "",
   subtitle: "",
   coverUrl: "",
-  coverUrlMobilePromo: "",
-  coverUrlDesktopHome: "",
-  coverUrlMobileHome: "",
-  popupCoverUrl: "",
-  popupTextBelow: "",
-  promoLink: "",
   detailHtml: "",
   detailJson: "{}",
   percent: 0,
@@ -182,6 +160,7 @@ const emptyForm: Form = {
 
 export function PromotionEditClient({ id }: { id?: string }) {
   const router = useRouter();
+  const { setForbidden } = useAdminApiContext();
   const isCreate = id == null;
   const [loading, setLoading] = useState(!isCreate);
   const [saving, setSaving] = useState(false);
@@ -193,6 +172,7 @@ export function PromotionEditClient({ id }: { id?: string }) {
     if (isCreate) return;
     fetch(`/api/admin/promotions/${id}`, { credentials: "include" })
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (r.status === 404) throw new Error("Not found");
         if (!r.ok) throw new Error("Load failed");
         return r.json();
@@ -201,31 +181,17 @@ export function PromotionEditClient({ id }: { id?: string }) {
         const raw = data.detailJson;
         const hasHtml = raw && typeof raw === "object" && "html" in raw && typeof (raw as { html?: string }).html === "string";
         const hasBlocks = raw && typeof raw === "object" && "blocks" in raw;
-        const parsedRule = parseRuleJson(data.ruleJson);
-        const fallbackPercent = Number(data.percent) || 0;
-        const percentFromRule = parsedRule.grant?.mode !== "FIXED" && parsedRule.grant?.percent != null && Number.isFinite(Number(parsedRule.grant.percent))
-          ? Number(parsedRule.grant.percent)
-          : fallbackPercent;
-        if (parsedRule.grant && parsedRule.grant.mode !== "FIXED" && parsedRule.grant.percent == null && fallbackPercent !== 0) {
-          parsedRule.grant = { ...parsedRule.grant, percent: fallbackPercent };
-        }
         setForm({
           title: data.title ?? "",
           subtitle: data.subtitle ?? "",
           coverUrl: data.coverUrl ?? "",
-          coverUrlMobilePromo: data.coverUrlMobilePromo ?? "",
-          coverUrlDesktopHome: data.coverUrlDesktopHome ?? "",
-          coverUrlMobileHome: data.coverUrlMobileHome ?? "",
-          popupCoverUrl: (data.detailJson && typeof data.detailJson === "object" && !Array.isArray(data.detailJson) && typeof (data.detailJson as Record<string,unknown>).popupCoverUrl === "string") ? String((data.detailJson as Record<string,unknown>).popupCoverUrl) : "",
-          popupTextBelow: (data.detailJson && typeof data.detailJson === "object" && !Array.isArray(data.detailJson) && typeof (data.detailJson as Record<string,unknown>).popupTextBelow === "string") ? String((data.detailJson as Record<string,unknown>).popupTextBelow) : "",
-          promoLink: data.promoLink ?? "",
           detailHtml: hasHtml ? (raw as { html: string }).html : "",
           detailJson: hasHtml ? "{}" : typeof data.detailJson === "string" ? data.detailJson : JSON.stringify(data.detailJson ?? {}, null, 2),
-          percent: percentFromRule,
+          percent: Number(data.percent) || 0,
           startAt: toDatetimeLocal(data.startAt),
           endAt: toDatetimeLocal(data.endAt),
           isClaimable: data.isClaimable !== false,
-          ruleJson: parsedRule,
+          ruleJson: parseRuleJson(data.ruleJson),
           ctaLabel: data.ctaLabel ?? "",
           ctaUrl: data.ctaUrl ?? "",
           isActive: data.isActive ?? true,
@@ -234,7 +200,7 @@ export function PromotionEditClient({ id }: { id?: string }) {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [id, isCreate]);
+  }, [id, isCreate, setForbidden]);
 
   function patch(partial: Partial<Form>) {
     setForm((prev) => ({ ...prev, ...partial }));
@@ -272,37 +238,23 @@ export function PromotionEditClient({ id }: { id?: string }) {
         return null;
       }
     }
-    // 弹窗：顶部照片 + 信息下方文字 注入到 detailJson
-    const popupUrl = (form.popupCoverUrl ?? "").trim();
-    const popupText = (form.popupTextBelow ?? "").trim();
-    const dj = { ...(detailJson as Record<string, unknown>) };
-    if (popupUrl) dj.popupCoverUrl = popupUrl; else delete dj.popupCoverUrl;
-    if (popupText) dj.popupTextBelow = popupText; else delete dj.popupTextBelow;
-    detailJson = dj;
     const r = form.ruleJson;
     const grant = r.grant;
     const grantPayload =
-      grant && (grant.percent != null || grant.fixedAmount != null || grant.randMin != null || grant.mode)
+      grant && (grant.percent != null || grant.fixedAmount != null || grant.mode)
         ? {
             ...grant,
-            mode: grant.mode === "FIXED" ? "FIXED" : grant.mode === "RANDOM" ? "RANDOM" : "PERCENT",
-            percent: grant.mode === "FIXED" || grant.mode === "RANDOM" ? grant.percent : (grant.percent ?? form.percent),
-            fixedAmount: grant.fixedAmount,
-            capAmount: grant.capAmount,
-            randMin: grant.randMin,
-            randMax: grant.randMax,
+            percent: grant.mode === "FIXED" ? grant.percent : (grant.percent ?? form.percent)
           }
         : undefined;
     const rulePayload: Record<string, unknown> = {
       limits: r.limits && Object.keys(r.limits).length ? r.limits : undefined,
-      claimReset: r.claimReset || undefined,
       eligible: r.eligible?.minDeposit != null ? { minDeposit: r.eligible.minDeposit } : undefined,
       grant: grantPayload,
       turnover: r.turnover != null && r.turnover > 0 ? r.turnover : undefined,
       rollover: r.rollover === true ? true : r.rollover === false ? false : undefined,
-      rolloverMultiplier: r.rollover === true && r.rolloverMultiplier != null && r.rolloverMultiplier > 0 ? r.rolloverMultiplier : undefined,
       groupLabel: r.groupLabel || undefined,
-      onlyPayGame: (r.onlyPayGame ?? "").trim() || undefined,
+      onlyPayGame: r.onlyPayGame || undefined,
       notAllowedTo: r.notAllowedTo || undefined,
       bannedGameLink: r.bannedGameLink || undefined,
       warningText: r.warningText || undefined,
@@ -313,10 +265,6 @@ export function PromotionEditClient({ id }: { id?: string }) {
       title: form.title,
       subtitle: form.subtitle || null,
       coverUrl: form.coverUrl || null,
-      coverUrlMobilePromo: form.coverUrlMobilePromo || null,
-      coverUrlDesktopHome: form.coverUrlDesktopHome || null,
-      coverUrlMobileHome: form.coverUrlMobileHome || null,
-      promoLink: form.promoLink?.trim() || null,
       detailJson,
       percent: form.percent,
       startAt: fromDatetimeLocal(form.startAt),
@@ -352,6 +300,7 @@ export function PromotionEditClient({ id }: { id?: string }) {
         body: JSON.stringify(payload)
       })
         .then(async (r) => {
+          if (r.status === 403) setForbidden(true);
           if (!r.ok) {
             const msg = await r.json().then((d: { error?: string }) => d.error).catch(() => "");
             if (r.status === 401) throw new Error("Unauthorized or session expired, please login");
@@ -374,12 +323,12 @@ export function PromotionEditClient({ id }: { id?: string }) {
       body: JSON.stringify(payload)
     })
       .then(async (r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) {
-          const data = await r.json().catch(() => ({}));
-          const msg = (data as { error?: string; message?: string }).message ?? (data as { error?: string }).error ?? "";
+          const msg = await r.json().then((d: { error?: string }) => d.error).catch(() => "");
           if (r.status === 401) throw new Error("Unauthorized or session expired, please login");
           if (r.status === 400 && msg) throw new Error(String(msg));
-          throw new Error(msg || "Save failed");
+          throw new Error("Save failed");
         }
         return r.json();
       })

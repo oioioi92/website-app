@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 
 type TransferItem = {
   id: string;
@@ -21,6 +22,7 @@ type TransfersResponse = {
 
 export function TransfersPageClient() {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [data, setData] = useState<TransfersResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,15 +30,16 @@ export function TransfersPageClient() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch("/api/admin/transfers")
+    fetch("/api/admin/transfers", { credentials: "include" })
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) throw new Error(t("admin.transfers.requestError"));
         return r.json();
       })
       .then((d: TransfersResponse) => setData(d))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t, setForbidden]);
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;

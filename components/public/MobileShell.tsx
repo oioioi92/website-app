@@ -4,8 +4,7 @@ import { AgeGateModal } from "@/components/public/AgeGateModal";
 import { DownloadAppBar } from "@/components/public/DownloadAppBar";
 import { LiveChatFab } from "@/components/public/LiveChatFab";
 import { MobileTopBar } from "@/components/public/MobileTopBar";
-import { MobileBottomNav } from "@/components/public/MobileBottomNav";
-import { VividBottomNav } from "@/components/vivid/VividBottomNav";
+import { UnifiedBottomNav } from "@/components/public/UnifiedBottomNav";
 import type { ThemeConfig } from "@/lib/public/theme";
 
 export function MobileShell({
@@ -26,22 +25,18 @@ export function MobileShell({
   const contentClass =
     "w-full min-w-0 pb-[max(7rem,calc(7rem+env(safe-area-inset-bottom,0px)))] md:pb-8" +
     (useVividPortal ? " vivid-nav-spacer" : "");
-  const rootStyle: React.CSSProperties & Record<string, string> = {};
-  if (theme.pageBackgroundColor) rootStyle.backgroundColor = theme.pageBackgroundColor;
+  const bgStyle: React.CSSProperties = {};
+  if (theme.pageBackgroundColor) bgStyle.backgroundColor = theme.pageBackgroundColor;
   if (theme.pageBackgroundUrl) {
-    rootStyle.backgroundImage = `url(${theme.pageBackgroundUrl})`;
-    rootStyle.backgroundSize = "cover";
-    rootStyle.backgroundPosition = "center";
-    rootStyle.backgroundAttachment = "fixed";
+    bgStyle.backgroundImage = `url(${theme.pageBackgroundUrl})`;
+    bgStyle.backgroundSize = "cover";
+    bgStyle.backgroundPosition = "center";
+    bgStyle.backgroundAttachment = "fixed";
   }
-  if (theme.themePrimaryColor) rootStyle["--theme-primary"] = theme.themePrimaryColor;
-  if (theme.themeAccentColor) rootStyle["--theme-accent"] = theme.themeAccentColor;
-  const hasCustomPageBg = Boolean(theme.pageBackgroundUrl || theme.pageBackgroundColor);
   return (
     <div
-      className={`min-h-screen w-full min-w-0 text-white ${!hasCustomPageBg ? "bg-[color:var(--p44-grey-bg)]" : ""}`}
-      style={Object.keys(rootStyle).length > 0 ? rootStyle : undefined}
-      data-page-bg={hasCustomPageBg ? "custom" : undefined}
+      className="min-h-screen w-full min-w-0 text-white"
+      style={Object.keys(bgStyle).length > 0 ? { ...bgStyle } : { backgroundColor: "var(--p44-grey-bg)" }}
     >
       <div data-frontedit="header">
         <MobileTopBar logoUrl={theme.logoUrl} partnershipBadgeUrl={theme.partnershipBadgeUrl} siteName={theme.siteName} />
@@ -56,7 +51,7 @@ export function MobileShell({
       <AgeGateModal ageGate={theme.ageGate} uiText={t} />
       <DownloadAppBar theme={theme} />
       {!useVividPortal && <LiveChatFab chatUrl={chatUrl} uiText={t} socialLinks={socialLinks ?? []} />}
-      {useVividPortal ? <VividBottomNav /> : <MobileBottomNav chatUrl={chatUrl} theme={theme} />}
+      <UnifiedBottomNav variant={useVividPortal ? "vivid" : "default"} />
     </div>
   );
 }

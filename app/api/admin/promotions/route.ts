@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canEditContent } from "@/lib/rbac";
 import { db } from "@/lib/db";
 import { invalidateHomeCache } from "@/lib/public-home-cache";
 
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canEditContent(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   let body: {
     title: string;
@@ -50,7 +52,7 @@ export async function POST(req: NextRequest) {
       startAt,
       endAt,
       isClaimable: body.isClaimable !== false,
-      ruleJson: ruleJson === null ? Prisma.JsonNull : (ruleJson as Prisma.InputJsonValue),
+      ruleJson: ruleJson === null ? null : (ruleJson as object),
       ctaLabel: body.ctaLabel ?? null,
       ctaUrl: body.ctaUrl ?? null,
       isActive: body.isActive !== false,
@@ -66,6 +68,7 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canEditContent(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const sp = req.nextUrl.searchParams;
   const page = Math.max(1, parseInt(sp.get("page") ?? "1", 10));
@@ -90,8 +93,7 @@ export async function GET(req: NextRequest) {
         isActive: true,
         sortOrder: true,
         ruleJson: true,
-        createdAt: true,
-        updatedAt: true
+        createdAt: true
       }
     }),
     db.promotion.count({ where })
@@ -110,8 +112,7 @@ export async function GET(req: NextRequest) {
         isActive: p.isActive,
         sortOrder: p.sortOrder,
         ruleJson: p.ruleJson ?? null,
-        createdAt: p.createdAt.toISOString(),
-        updatedAt: p.updatedAt.toISOString()
+        createdAt: p.createdAt.toISOString()
       })),
       total,
       page,

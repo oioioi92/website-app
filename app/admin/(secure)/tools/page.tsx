@@ -15,7 +15,7 @@ export default function AdminToolsPage() {
       </div>
       <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
         <h2 className="mb-1 text-sm font-semibold uppercase tracking-wider text-slate-500">Image To URL</h2>
-        <p className="mb-4 text-xs text-slate-500">JPG / PNG / WEBP / GIF，单张最大 5MB。上传后获得可填到后台的图片链接。</p>
+        <p className="mb-4 text-xs text-slate-500">建议图片宽度不超过 1500px 以保证前台展示效果。上传后获得可填到后台各处的图片链接。</p>
         <AdminImageToUrlClient />
       </section>
     </div>

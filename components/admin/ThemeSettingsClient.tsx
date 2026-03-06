@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 import type { ThemeConfig, ThemeBanner } from "@/lib/public/theme";
 import { useLocale } from "@/lib/i18n/context";
-import { PhotoUploadField } from "@/components/admin/PhotoUploadField";
-import { UI_GAME_CATEGORIES } from "@/lib/public/uiGameCategories";
-import { StickySaveBar } from "@/components/admin/StickySaveBar";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 
 const inputClass =
   "admin-compact-input w-full rounded-lg border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] px-3 text-[var(--compact-text)] placeholder-[var(--compact-muted)] focus:border-[var(--compact-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--compact-primary)]";
@@ -24,11 +22,9 @@ function SizeBadge({ size, note }: { size: string; note?: string }) {
 
 const emptyBanner: ThemeBanner = { imageUrl: "", linkUrl: null, title: null };
 
-export type ThemeSettingsSections = "full" | "homeMedia";
-
-export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: ThemeSettingsSections }) {
+export function ThemeSettingsClient() {
   const { t } = useLocale();
-  const isHomeMediaOnly = onlySections === "homeMedia";
+  const { setForbidden } = useAdminApiContext();
   const [theme, setTheme] = useState<ThemeConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -36,15 +32,16 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/theme")
+    fetch("/api/admin/theme", { credentials: "include" })
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) throw new Error("admin.site.fetchError");
         return r.json();
       })
       .then((d: { theme: ThemeConfig }) => setTheme(d.theme))
       .catch(() => setError("admin.site.fetchError"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setForbidden]);
 
   function patch(partial: Partial<ThemeConfig>) {
     if (!theme) return;
@@ -83,10 +80,12 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
     setSaved(false);
     fetch("/api/admin/theme", {
       method: "PUT",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(theme)
     })
       .then((r) => {
+        if (r.status === 403) setForbidden(true);
         if (!r.ok) throw new Error("admin.site.saveError");
         setSaved(true);
       })
@@ -100,20 +99,16 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
 
   return (
     <div className="theme-settings-page space-y-8 [&_.admin-card]:rounded-2xl [&_.admin-card]:shadow-md [&_.admin-card]:border-slate-200/80">
-      {!isHomeMediaOnly && (
-        <div className="flex flex-wrap items-center gap-3">
-          <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary">
-            {saving ? t("admin.site.saving") : t("admin.site.saveConfig")}
-          </button>
-          {saved && <span className="text-[13px] text-[var(--compact-success)]">{t("admin.site.saved")}</span>}
-          <a href="/" target="_blank" rel="noreferrer" className="admin-compact-btn admin-compact-btn-ghost text-[13px]">
-            {t("admin.site.openFrontLink")}
-          </a>
-        </div>
-      )}
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary">
+          {saving ? t("admin.site.saving") : t("admin.site.saveConfig")}
+        </button>
+        {saved && <span className="text-[13px] text-[var(--compact-success)]">{t("admin.site.saved")}</span>}
+        <a href="/" target="_blank" rel="noreferrer" className="admin-compact-btn admin-compact-btn-ghost text-[13px]">
+          {t("admin.site.openFrontLink")}
+        </a>
+      </div>
 
-      {!isHomeMediaOnly && (
-      <>
       <div className="admin-card p-6 space-y-6">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionEntry")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -122,12 +117,8 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
             <input type="text" value={theme.siteName ?? ""} onChange={(e) => patch({ siteName: e.target.value })} className={inputClass} placeholder="Site" />
           </div>
           <div>
-            <PhotoUploadField
-              label={`${t("admin.site.logoUrl")} `}
-              hint="200×50 PNG/SVG 透明底，可粘贴 URL 或上传"
-              value={theme.logoUrl ?? ""}
-              onChange={(url) => patch({ logoUrl: url || null })}
-            />
+            <label className={labelClass}>{t("admin.site.logoUrl")} <SizeBadge size="200×50" note="PNG/SVG 透明底" /></label>
+            <input type="text" value={theme.logoUrl ?? ""} onChange={(e) => patch({ logoUrl: e.target.value || null })} className={inputClass} placeholder="https://..." />
           </div>
           <div>
             <label className={labelClass}>{t("admin.site.loginUrl")}</label>
@@ -151,83 +142,6 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
           </div>
         </div>
       </div>
-
-      {!isHomeMediaOnly && (
-      <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionPageAndHeader")}</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <PhotoUploadField
-              label={t("admin.site.pageBackgroundImage")}
-              hint={t("admin.site.pageBackgroundImageHint")}
-              value={theme.pageBackgroundUrl ?? ""}
-              onChange={(url) => patch({ pageBackgroundUrl: url || null })}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>{t("admin.site.pageBackgroundColor")}</label>
-            <input type="text" value={theme.pageBackgroundColor ?? ""} onChange={(e) => patch({ pageBackgroundColor: e.target.value || null })} className={inputClass} placeholder="#1f2937" />
-          </div>
-          <div className="sm:col-span-2">
-            <p className="mb-2 text-[11px] font-medium text-[var(--compact-muted)]">{t("admin.site.themeColorsTitle")}</p>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <label className="text-xs text-[var(--compact-muted)]">{t("admin.site.themePrimaryColor")}</label>
-                <input type="text" value={theme.themePrimaryColor ?? ""} onChange={(e) => patch({ themePrimaryColor: e.target.value || null })} className={inputClass + " w-28"} placeholder="#a855f7" />
-              </div>
-              <div className="flex items-center gap-2">
-                <label className="text-xs text-[var(--compact-muted)]">{t("admin.site.themeAccentColor")}</label>
-                <input type="text" value={theme.themeAccentColor ?? ""} onChange={(e) => patch({ themeAccentColor: e.target.value || null })} className={inputClass + " w-28"} placeholder="#6366f1" />
-              </div>
-            </div>
-            <p className="mt-1 text-[11px] text-[var(--compact-muted)]">{t("admin.site.themeColorsHint")}</p>
-          </div>
-        </div>
-        <div>
-          <h3 className="mb-2 text-xs font-semibold text-[var(--compact-muted)]">{t("admin.site.quickActionsButtons")}</h3>
-          <p className="mb-3 text-[11px] text-[var(--compact-muted)]">{t("admin.site.quickActionsButtonsHint")}</p>
-          <div className="space-y-3">
-            {(theme.quickActions ?? []).map((qa, i) => (
-              <div key={i} className="grid gap-2 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass}>{t("admin.site.quickActionLabel")}</label>
-                  <input type="text" value={qa.label} onChange={(e) => { const next = [...(theme.quickActions ?? [])]; next[i] = { ...next[i], label: e.target.value }; patch({ quickActions: next }); }} className={inputClass} placeholder="Deposit" />
-                </div>
-                <div>
-                  <label className={labelClass}>URL</label>
-                  <input type="text" value={qa.url} onChange={(e) => { const next = [...(theme.quickActions ?? [])]; next[i] = { ...next[i], url: e.target.value }; patch({ quickActions: next }); }} className={inputClass} placeholder="/deposit" />
-                </div>
-                <div className="sm:col-span-2">
-                  <PhotoUploadField label={t("admin.site.quickActionIcon")} hint="可选" value={qa.iconUrl ?? ""} onChange={(url) => { const next = [...(theme.quickActions ?? [])]; next[i] = { ...next[i], iconUrl: url || null }; patch({ quickActions: next }); }} />
-                </div>
-                <div className="sm:col-span-2 flex justify-end">
-                  <button type="button" onClick={() => patch({ quickActions: (theme.quickActions ?? []).filter((_, j) => j !== i) })} className="admin-compact-btn admin-compact-btn-ghost text-red-600 text-xs">{t("admin.common.remove")}</button>
-                </div>
-              </div>
-            ))}
-            {(theme.quickActions ?? []).length < 6 && (
-              <button type="button" onClick={() => patch({ quickActions: [...(theme.quickActions ?? []), { label: "", url: "/", iconUrl: null, iconKey: null, style: "gold" }] })} className="admin-compact-btn admin-compact-btn-ghost text-xs">+ {t("admin.site.addQuickAction")}</button>
-            )}
-          </div>
-        </div>
-        <div>
-          <h3 className="mb-2 text-xs font-semibold text-[var(--compact-muted)]">{t("admin.site.gameCategoriesTitle")}</h3>
-          <p className="mb-2 text-[11px] text-[var(--compact-muted)]">{t("admin.site.gameCategoriesHint")}</p>
-          <div className="flex flex-wrap gap-2">
-            {UI_GAME_CATEGORIES.map((cat) => {
-              const selected = (theme.uiGameCategories ?? []).includes(cat);
-              return (
-                <label key={cat} className="inline-flex items-center gap-2 rounded-lg border border-[var(--compact-card-border)] px-3 py-2 cursor-pointer hover:bg-[var(--compact-card-bg)]">
-                  <input type="checkbox" checked={selected} onChange={(e) => { const current = theme.uiGameCategories ?? []; const next = e.target.checked ? [...current, cat] : current.filter((c) => c !== cat); patch({ uiGameCategories: next }); }} className="rounded" />
-                  <span className="text-xs font-medium text-[var(--compact-text)]">{cat}</span>
-                </label>
-              );
-            })}
-          </div>
-          <p className="mt-2 text-[11px] text-[var(--compact-muted)]">{t("admin.site.gameCategoriesOrderNote")}</p>
-        </div>
-      </div>
-      )}
 
       <div className="admin-card p-6 space-y-6">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionMarquee")}</h2>
@@ -315,12 +229,8 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
             <input type="text" value={theme.downloadBar?.ctaUrl ?? ""} onChange={(e) => patchDownloadBar({ ctaUrl: e.target.value || null })} className={inputClass} placeholder="https://..." />
           </div>
           <div>
-            <PhotoUploadField
-              label={t("admin.site.imageUrl")}
-              hint="200×200 App图标"
-              value={theme.downloadBar?.imageUrl ?? ""}
-              onChange={(url) => patchDownloadBar({ imageUrl: url || null })}
-            />
+            <label className={labelClass}>{t("admin.site.imageUrl")} <SizeBadge size="200×200" note="App图标" /></label>
+            <input type="text" value={theme.downloadBar?.imageUrl ?? ""} onChange={(e) => patchDownloadBar({ imageUrl: e.target.value || null })} className={inputClass} placeholder="https://..." />
           </div>
         </div>
       </div>
@@ -354,41 +264,25 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
           </div>
         </div>
       </div>
-      </>
-      )}
 
       <div className="admin-card p-6 space-y-6">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionHeroBanners")}</h2>
         <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.heroBannersDesc")}</p>
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <button
-            type="button"
-            onClick={() => patch({ heroBanners: [...(theme.heroBanners ?? []), { ...emptyBanner }] })}
-            className="admin-compact-btn admin-compact-btn-ghost text-xs py-1.5 px-3"
-          >
-            + {t("admin.site.addBanner")}
-          </button>
-        </div>
-        {((theme.heroBanners ?? []).length === 0 ? (
-          <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.noBannersYet")}</p>
-        ) : null)}
-        {(theme.heroBanners ?? []).map((b, i) => (
-          <div key={i} className="grid gap-3 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-3 relative">
-            <div className="sm:col-span-3 flex flex-wrap gap-2 justify-end absolute top-2 right-2">
-              <button type="button" onClick={() => { const list = [...(theme.heroBanners ?? [])]; const up = list[i - 1]; if (up) { list[i - 1] = list[i]; list[i] = up; patch({ heroBanners: list }); } }} disabled={i === 0} className="admin-compact-btn admin-compact-btn-ghost text-[10px] py-1 px-2 opacity-80">↑</button>
-              <button type="button" onClick={() => { const list = [...(theme.heroBanners ?? [])]; const down = list[i + 1]; if (down) { list[i + 1] = list[i]; list[i] = down; patch({ heroBanners: list }); } }} disabled={i === (theme.heroBanners ?? []).length - 1} className="admin-compact-btn admin-compact-btn-ghost text-[10px] py-1 px-2 opacity-80">↓</button>
-              <button type="button" onClick={() => patch({ heroBanners: (theme.heroBanners ?? []).filter((_, j) => j !== i) })} className="admin-compact-btn admin-compact-btn-ghost text-[10px] py-1 px-2 text-red-600 hover:bg-red-50">{t("admin.common.remove")}</button>
-            </div>
+        {(theme.heroBanners ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner).slice(0, 5).map((b, i) => (
+          <div key={i} className="grid gap-3 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-3">
             <div>
-              <PhotoUploadField
-                label={`${t("admin.site.imageUrl")} ${i + 1}`}
-                hint="1200×450 推荐16:6"
+              <label className={labelClass}>{t("admin.site.imageUrl")} <SizeBadge size="1200×450" note="横幅 推荐16:6" /></label>
+              <input
+                type="text"
                 value={b.imageUrl ?? ""}
-                onChange={(url) => {
+                onChange={(e) => {
                   const next = [...(theme.heroBanners ?? [])];
-                  next[i] = { ...next[i], imageUrl: url };
-                  patch({ heroBanners: next });
+                  while (next.length <= i) next.push({ ...emptyBanner });
+                  next[i] = { ...next[i], imageUrl: e.target.value };
+                  patch({ heroBanners: next.slice(0, 5) });
                 }}
+                className={inputClass}
+                placeholder="https://..."
               />
             </div>
             <div>
@@ -398,8 +292,9 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
                 value={b.linkUrl ?? ""}
                 onChange={(e) => {
                   const next = [...(theme.heroBanners ?? [])];
+                  while (next.length <= i) next.push({ ...emptyBanner });
                   next[i] = { ...next[i], linkUrl: e.target.value || null };
-                  patch({ heroBanners: next });
+                  patch({ heroBanners: next.slice(0, 5) });
                 }}
                 className={inputClass}
                 placeholder={t("admin.site.placeholderBonusUrl")}
@@ -412,8 +307,9 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
                 value={b.title ?? ""}
                 onChange={(e) => {
                   const next = [...(theme.heroBanners ?? [])];
+                  while (next.length <= i) next.push({ ...emptyBanner });
                   next[i] = { ...next[i], title: e.target.value || null };
-                  patch({ heroBanners: next });
+                  patch({ heroBanners: next.slice(0, 5) });
                 }}
                 className={inputClass}
                 placeholder={t("admin.site.placeholderOptional")}
@@ -426,35 +322,21 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
       <div className="admin-card p-6 space-y-6">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionSubsidiaries")}</h2>
         <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.subsidiariesDesc")}</p>
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <button
-            type="button"
-            onClick={() => patch({ subsidiaries: [...(theme.subsidiaries ?? []), { ...emptyBanner }] })}
-            className="admin-compact-btn admin-compact-btn-ghost text-xs py-1.5 px-3"
-          >
-            + {t("admin.site.addSubsidiary")}
-          </button>
-        </div>
-        {((theme.subsidiaries ?? []).length === 0 ? (
-          <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.noSubsidiariesYet")}</p>
-        ) : null)}
-        {(theme.subsidiaries ?? []).map((b, i) => (
-          <div key={i} className="grid gap-3 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-3 relative">
-            <div className="sm:col-span-3 flex flex-wrap gap-2 justify-end absolute top-2 right-2">
-              <button type="button" onClick={() => { const list = [...(theme.subsidiaries ?? [])]; const up = list[i - 1]; if (up) { list[i - 1] = list[i]; list[i] = up; patch({ subsidiaries: list }); } }} disabled={i === 0} className="admin-compact-btn admin-compact-btn-ghost text-[10px] py-1 px-2 opacity-80">↑</button>
-              <button type="button" onClick={() => { const list = [...(theme.subsidiaries ?? [])]; const down = list[i + 1]; if (down) { list[i + 1] = list[i]; list[i] = down; patch({ subsidiaries: list }); } }} disabled={i === (theme.subsidiaries ?? []).length - 1} className="admin-compact-btn admin-compact-btn-ghost text-[10px] py-1 px-2 opacity-80">↓</button>
-              <button type="button" onClick={() => patch({ subsidiaries: (theme.subsidiaries ?? []).filter((_, j) => j !== i) })} className="admin-compact-btn admin-compact-btn-ghost text-[10px] py-1 px-2 text-red-600 hover:bg-red-50">{t("admin.common.remove")}</button>
-            </div>
+        {(theme.subsidiaries ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner).slice(0, 5).map((b, i) => (
+          <div key={i} className="grid gap-3 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-3">
             <div>
-              <PhotoUploadField
-                label={`${t("admin.site.imageUrl")} ${i + 1}`}
-                hint="300×150 Logo/品牌"
+              <label className={labelClass}>{t("admin.site.imageUrl")} <SizeBadge size="300×150" note="Logo/品牌" /></label>
+              <input
+                type="text"
                 value={b.imageUrl ?? ""}
-                onChange={(url) => {
+                onChange={(e) => {
                   const next = [...(theme.subsidiaries ?? [])];
-                  next[i] = { ...next[i], imageUrl: url };
-                  patch({ subsidiaries: next });
+                  while (next.length <= i) next.push({ ...emptyBanner });
+                  next[i] = { ...next[i], imageUrl: e.target.value };
+                  patch({ subsidiaries: next.slice(0, 5) });
                 }}
+                className={inputClass}
+                placeholder="https://..."
               />
             </div>
             <div>
@@ -464,8 +346,9 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
                 value={b.linkUrl ?? ""}
                 onChange={(e) => {
                   const next = [...(theme.subsidiaries ?? [])];
+                  while (next.length <= i) next.push({ ...emptyBanner });
                   next[i] = { ...next[i], linkUrl: e.target.value || null };
-                  patch({ subsidiaries: next });
+                  patch({ subsidiaries: next.slice(0, 5) });
                 }}
                 className={inputClass}
                 placeholder={t("admin.site.placeholderRootUrl")}
@@ -478,8 +361,9 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
                 value={b.title ?? ""}
                 onChange={(e) => {
                   const next = [...(theme.subsidiaries ?? [])];
+                  while (next.length <= i) next.push({ ...emptyBanner });
                   next[i] = { ...next[i], title: e.target.value || null };
-                  patch({ subsidiaries: next });
+                  patch({ subsidiaries: next.slice(0, 5) });
                 }}
                 className={inputClass}
                 placeholder={t("admin.site.placeholderOptional")}
@@ -493,42 +377,32 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionImages")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <PhotoUploadField
-              label={t("admin.site.partnershipBadge")}
-              hint="600×120 长条徽章"
-              value={theme.partnershipBadgeUrl ?? ""}
-              onChange={(url) => patch({ partnershipBadgeUrl: url || null })}
-            />
+            <label className={labelClass}>{t("admin.site.partnershipBadge")} <SizeBadge size="600×120" note="长条徽章" /></label>
+            <input type="text" value={theme.partnershipBadgeUrl ?? ""} onChange={(e) => patch({ partnershipBadgeUrl: e.target.value || null })} className={inputClass} placeholder="https://..." />
           </div>
           <div>
-            <PhotoUploadField
-              label={t("admin.site.centerSlot")}
-              hint="400×300 中间插槽"
-              value={theme.centerSlotImageUrl ?? ""}
-              onChange={(url) => patch({ centerSlotImageUrl: url || null })}
-            />
+            <label className={labelClass}>{t("admin.site.centerSlot")} <SizeBadge size="400×300" note="中间插槽" /></label>
+            <input type="text" value={theme.centerSlotImageUrl ?? ""} onChange={(e) => patch({ centerSlotImageUrl: e.target.value || null })} className={inputClass} placeholder="https://..." />
           </div>
           <div>
-            <PhotoUploadField
-              label={t("admin.site.secondaryBanner")}
-              hint="1200×300 次级横幅"
-              value={theme.secondaryBannerUrl ?? ""}
-              onChange={(url) => patch({ secondaryBannerUrl: url || null })}
-            />
+            <label className={labelClass}>{t("admin.site.secondaryBanner")} <SizeBadge size="1200×300" note="次级横幅" /></label>
+            <input type="text" value={theme.secondaryBannerUrl ?? ""} onChange={(e) => patch({ secondaryBannerUrl: e.target.value || null })} className={inputClass} placeholder="https://..." />
           </div>
           <div>
-            <PhotoUploadField
-              label={t("admin.site.liveTxBg")}
-              hint="800×200 背景图"
-              value={theme.liveTxBgImageUrl ?? ""}
-              onChange={(url) => patch({ liveTxBgImageUrl: url || null })}
-            />
+            <label className={labelClass}>{t("admin.site.liveTxBg")} <SizeBadge size="800×200" note="背景图" /></label>
+            <input type="text" value={theme.liveTxBgImageUrl ?? ""} onChange={(e) => patch({ liveTxBgImageUrl: e.target.value || null })} className={inputClass} placeholder="https://..." />
+          </div>
+          <div>
+            <label className={labelClass}>{t("admin.site.pageBackgroundUrl") ?? "整页背景图"}</label>
+            <input type="text" value={theme.pageBackgroundUrl ?? ""} onChange={(e) => patch({ pageBackgroundUrl: e.target.value || null })} className={inputClass} placeholder="https://..." />
+          </div>
+          <div>
+            <label className={labelClass}>{t("admin.site.pageBackgroundColor") ?? "整页背景色"}</label>
+            <input type="text" value={theme.pageBackgroundColor ?? ""} onChange={(e) => patch({ pageBackgroundColor: e.target.value || null })} className={inputClass} placeholder="#0a0a0a" />
           </div>
         </div>
       </div>
 
-      {!isHomeMediaOnly && (
-      <>
       <div className="admin-card p-6 space-y-6">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionDisplay")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -636,15 +510,6 @@ export function ThemeSettingsClient({ onlySections = "full" }: { onlySections?: 
           {t("admin.site.connectedNote")}
         </p>
       </div>
-      </>
-      )}
-      <StickySaveBar
-        onSave={save}
-        saving={saving}
-        success={saved}
-        error={!!error}
-        message={saved ? t("admin.site.saved") : error ? t(error) : undefined}
-      />
     </div>
   );
 }

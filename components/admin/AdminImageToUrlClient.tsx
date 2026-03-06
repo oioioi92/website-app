@@ -37,13 +37,15 @@ export function AdminImageToUrlClient() {
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(
-          json.error === "INVALID_TYPE"
-            ? "仅支持 JPG/PNG/WEBP/GIF"
-            : json.error === "FILE_TOO_LARGE"
-              ? `文件超过 ${MAX_MB}MB 限制`
-              : json.error === "UNAUTHORIZED"
-                ? "请重新登录"
-                : json.error ? String(json.error) : `上传失败（${res.status}）`
+          res.status === 503 || json.error === "R2_NOT_CONFIGURED"
+            ? "存储未配置（请配置 R2 环境变量）"
+            : json.error === "INVALID_TYPE"
+              ? "仅支持 JPG/PNG/WEBP/GIF"
+              : json.error === "FILE_TOO_LARGE"
+                ? `文件超过 ${MAX_MB}MB 限制`
+                : json.error === "UNAUTHORIZED"
+                  ? "请重新登录"
+                  : json.error ? String(json.error) : `上传失败（${res.status}）`
         );
         return;
       }
@@ -69,7 +71,9 @@ export function AdminImageToUrlClient() {
     );
   }
 
-  const fullUrl = result && typeof window !== "undefined" ? `${window.location.origin}${result.url}` : null;
+  const fullUrl = result && typeof window !== "undefined"
+    ? (result.url.startsWith("http") ? result.url : `${window.location.origin}${result.url.startsWith("/") ? "" : "/"}${result.url}`)
+    : null;
 
   return (
     <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-panel)] p-6 max-w-2xl">

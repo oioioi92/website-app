@@ -2,16 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "@/lib/i18n/context";
-import { ActivityLogClient } from "@/components/admin/ActivityLogClient";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 import { LoginHistoryClient } from "@/components/admin/LoginHistoryClient";
-import { AdminUsersClient } from "@/components/admin/AdminUsersClient";
-import { TwoFactorSettingsClient } from "@/components/admin/TwoFactorSettingsClient";
-import { StickySaveBar } from "@/components/admin/StickySaveBar";
 
-const TIP_KEYS = ["tip1", "tip2", "tip3", "tip4", "tip5", "tip6", "tip7"] as const;
+const TIPS = [
+  "Make sure all IP addresses belong to your staff.",
+  "Set all unused staff or agent accounts to inactive.",
+  "Use strong password and change password frequently.",
+  "Please update your PC and browser to the latest version.",
+  "Recommend to turn on Hide Mobile function.",
+  "Recommend to turn on 2FA passcode.",
+  "Recommend to restrict IP that allow to access your backend system.",
+];
 
 export function SecurityPageClient() {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [whitelist, setWhitelist] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -19,11 +25,14 @@ export function SecurityPageClient() {
 
   useEffect(() => {
     fetch("/api/admin/settings/ip-whitelist", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.ok ? r.json() : Promise.reject();
+      })
       .then((d: { whitelist?: string }) => setWhitelist(d.whitelist ?? ""))
       .catch(() => setWhitelist(""))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setForbidden]);
 
   function saveWhitelist() {
     setSaving(true);
@@ -34,114 +43,67 @@ export function SecurityPageClient() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ whitelist }),
     })
-      .then((r) => (r.ok ? setSaveMsg("success") : Promise.reject()))
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.ok ? setSaveMsg("success") : Promise.reject();
+      })
       .catch(() => setSaveMsg("error"))
       .finally(() => setSaving(false));
   }
 
   return (
     <div className="max-w-4xl space-y-8">
-      <header className="admin-page-title">
-        <h1>{t("admin.security.pageTitle")}</h1>
-        <p>{t("admin.security.pageSubtitle")}</p>
-      </header>
+      <div>
+        <h1 className="text-xl font-bold text-slate-800">Security</h1>
+        <p className="mt-1 text-sm text-slate-500">Security tips, IP whitelist, activity log</p>
+      </div>
 
-      <section className="admin-card rounded-xl border-amber-200/80 bg-amber-50/80 p-5">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-amber-800">
-          {t("admin.security.tipsTitle")}
-        </h2>
+      <section className="rounded-xl border border-amber-200 bg-amber-50/90 p-5 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-amber-800">Security Tips</h2>
         <ul className="list-inside list-disc space-y-1.5 text-sm text-amber-900">
-          {TIP_KEYS.map((key) => (
-            <li key={key}>{t(`admin.security.${key}`)}</li>
+          {TIPS.map((tip, i) => (
+            <li key={i}>{tip}</li>
           ))}
         </ul>
       </section>
 
-      <section className="admin-card p-5">
-        <h2 className="mb-2 text-sm font-semibold text-[var(--admin-text)]">
-          {t("admin.security.whitelistTitle")}
-        </h2>
-        <p className="mb-3 text-xs text-[var(--admin-muted)]">
-          {t("admin.security.whitelistDesc")}
+      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-2 text-sm font-semibold text-slate-800">Whitelist IP address</h2>
+        <p className="mb-3 text-xs text-slate-500">
+          Whitelist IP addresses that are allowed to access your backend system. Leave empty if you do not want to restrict any IP address.
         </p>
         {loading ? (
-          <p className="text-sm text-[var(--admin-muted)]">{t("admin.common.loading")}</p>
+          <p className="text-sm text-slate-500">Loading…</p>
         ) : (
           <>
             <textarea
               value={whitelist}
               onChange={(e) => setWhitelist(e.target.value)}
-              placeholder={t("admin.security.whitelistPlaceholder")}
+              placeholder="1.1.1.1&#10;0.0.0.0"
               rows={4}
-              className="w-full rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-2 text-sm text-[var(--admin-text)] placeholder-[var(--admin-muted)] focus:border-[var(--admin-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--admin-primary)]/20"
+              className="w-full rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/20"
             />
             <div className="mt-3 flex items-center gap-3">
               <button
                 type="button"
                 onClick={saveWhitelist}
                 disabled={saving}
-                className="admin-compact-btn admin-compact-btn-primary"
+                className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
               >
-                {saving ? t("admin.security.saving") : t("admin.security.save")}
+                {saving ? "..." : "SAVE"}
               </button>
-              {saveMsg === "success" && (
-                <span className="text-sm text-[var(--admin-success)]">{t("admin.security.saved")}</span>
-              )}
-              {saveMsg === "error" && (
-                <span className="text-sm text-[var(--admin-danger)]">{t("admin.security.saveFailed")}</span>
-              )}
+              {saveMsg === "success" && <span className="text-sm text-emerald-600">Saved.</span>}
+              {saveMsg === "error" && <span className="text-sm text-red-600">Save failed.</span>}
             </div>
           </>
         )}
       </section>
 
-      <section className="admin-card">
-        <TwoFactorSettingsClient />
-      </section>
-
-      <section className="admin-card p-5">
-        <h2 className="mb-2 text-sm font-semibold text-[var(--admin-text)]">
-          {t("admin.security.loginHistoryTitle")}
-        </h2>
-        <p className="mb-4 text-xs text-[var(--admin-muted)]">
-          {t("admin.security.loginHistoryDesc")}
-        </p>
+      <section>
+        <h2 className="mb-3 text-sm font-semibold text-slate-800">Activity Log / Login History</h2>
+        <p className="mb-4 text-xs text-slate-500">Recent admin session logins (time, staff, session expiry).</p>
         <LoginHistoryClient />
       </section>
-
-      <section>
-        <h2 className="mb-2 text-sm font-semibold text-[var(--admin-text)]">
-          {t("admin.security.activityLogTitle")}
-        </h2>
-        <p className="mb-4 text-xs text-[var(--admin-muted)]">
-          {t("admin.security.activityLogDesc")}
-        </p>
-        <ActivityLogClient />
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-sm font-semibold text-[var(--admin-text)]">
-          {t("admin.security.adminUsersTitle")}
-        </h2>
-        <p className="mb-4 text-xs text-[var(--admin-muted)]">
-          {t("admin.security.adminUsersDesc")}
-        </p>
-        <AdminUsersClient />
-      </section>
-
-      <StickySaveBar
-        onSave={saveWhitelist}
-        saving={saving}
-        success={saveMsg === "success"}
-        error={saveMsg === "error"}
-        message={
-          saveMsg === "success"
-            ? t("admin.security.saved")
-            : saveMsg === "error"
-              ? t("admin.security.saveFailed")
-              : undefined
-        }
-      />
     </div>
   );
 }

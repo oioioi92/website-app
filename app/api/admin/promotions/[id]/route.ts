@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canEditContent } from "@/lib/rbac";
 import { db } from "@/lib/db";
 import { invalidateHomeCache } from "@/lib/public-home-cache";
 
@@ -12,6 +13,7 @@ type Params = { params: Promise<{ id: string }> };
 export async function GET(req: NextRequest, { params }: Params) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canEditContent(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const { id } = await params;
   const p = await db.promotion.findUnique({
@@ -24,7 +26,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       coverUrlMobilePromo: true,
       coverUrlDesktopHome: true,
       coverUrlMobileHome: true,
-      promoLink: true,
       detailJson: true,
       percent: true,
       startAt: true,
@@ -47,10 +48,6 @@ export async function GET(req: NextRequest, { params }: Params) {
       title: p.title,
       subtitle: p.subtitle ?? null,
       coverUrl: p.coverUrl ?? null,
-      coverUrlMobilePromo: p.coverUrlMobilePromo ?? null,
-      coverUrlDesktopHome: p.coverUrlDesktopHome ?? null,
-      coverUrlMobileHome: p.coverUrlMobileHome ?? null,
-      promoLink: p.promoLink ?? null,
       detailJson: p.detailJson,
       percent: p.percent != null ? Number(p.percent) : 0,
       startAt: p.startAt?.toISOString() ?? null,
@@ -72,6 +69,7 @@ export async function GET(req: NextRequest, { params }: Params) {
 export async function PUT(req: NextRequest, { params }: Params) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canEditContent(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const { id } = await params;
   const existing = await db.promotion.findUnique({ where: { id }, select: { id: true } });
@@ -81,10 +79,6 @@ export async function PUT(req: NextRequest, { params }: Params) {
     title?: string;
     subtitle?: string | null;
     coverUrl?: string | null;
-    coverUrlMobilePromo?: string | null;
-    coverUrlDesktopHome?: string | null;
-    coverUrlMobileHome?: string | null;
-    promoLink?: string | null;
     detailJson?: unknown;
     percent?: number;
     startAt?: string | null;
@@ -108,34 +102,24 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const startAt = body.startAt !== undefined && body.startAt != null && String(body.startAt).trim() !== "" ? new Date(body.startAt as string) : undefined;
   const endAt = body.endAt !== undefined && body.endAt != null && String(body.endAt).trim() !== "" ? new Date(body.endAt as string) : undefined;
 
-  try {
-    await db.promotion.update({
-      where: { id },
-      data: {
-        ...(body.title !== undefined && { title: String(body.title) }),
-        ...(body.subtitle !== undefined && { subtitle: body.subtitle === null || body.subtitle === "" ? null : String(body.subtitle) }),
-        ...(body.coverUrl !== undefined && { coverUrl: body.coverUrl === null || body.coverUrl === "" ? null : String(body.coverUrl) }),
-        ...(body.coverUrlMobilePromo !== undefined && { coverUrlMobilePromo: body.coverUrlMobilePromo === null || body.coverUrlMobilePromo === "" ? null : String(body.coverUrlMobilePromo) }),
-        ...(body.coverUrlDesktopHome !== undefined && { coverUrlDesktopHome: body.coverUrlDesktopHome === null || body.coverUrlDesktopHome === "" ? null : String(body.coverUrlDesktopHome) }),
-        ...(body.coverUrlMobileHome !== undefined && { coverUrlMobileHome: body.coverUrlMobileHome === null || body.coverUrlMobileHome === "" ? null : String(body.coverUrlMobileHome) }),
-        ...(body.promoLink !== undefined && { promoLink: body.promoLink === null || body.promoLink === "" ? null : String(body.promoLink) }),
-        ...(detailJson !== undefined && { detailJson: (detailJson ?? {}) as object }),
-        ...(body.percent !== undefined && { percent: Number(body.percent) || 0 }),
-        ...(startAt !== undefined && { startAt }),
-        ...(endAt !== undefined && { endAt }),
-        ...(body.isClaimable !== undefined && { isClaimable: Boolean(body.isClaimable) }),
-        ...(ruleJson !== undefined && { ruleJson: ruleJson === null ? Prisma.JsonNull : (ruleJson as object) }),
-        ...(body.ctaLabel !== undefined && { ctaLabel: body.ctaLabel === null || body.ctaLabel === "" ? null : String(body.ctaLabel) }),
-        ...(body.ctaUrl !== undefined && { ctaUrl: body.ctaUrl === null || body.ctaUrl === "" ? null : String(body.ctaUrl) }),
-        ...(body.isActive !== undefined && { isActive: Boolean(body.isActive) }),
-        ...(body.sortOrder !== undefined && { sortOrder: Number(body.sortOrder) || 0 })
-      }
-    });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("[PUT /api/admin/promotions] update failed:", msg);
-    return NextResponse.json({ error: "UPDATE_FAILED", message: msg }, { status: 500 });
-  }
+  await db.promotion.update({
+    where: { id },
+    data: {
+      ...(body.title !== undefined && { title: String(body.title) }),
+      ...(body.subtitle !== undefined && { subtitle: body.subtitle === null || body.subtitle === "" ? null : String(body.subtitle) }),
+      ...(body.coverUrl !== undefined && { coverUrl: body.coverUrl === null || body.coverUrl === "" ? null : String(body.coverUrl) }),
+      ...(detailJson !== undefined && { detailJson: (detailJson ?? {}) as object }),
+      ...(body.percent !== undefined && { percent: Number(body.percent) || 0 }),
+      ...(startAt !== undefined && { startAt }),
+      ...(endAt !== undefined && { endAt }),
+      ...(body.isClaimable !== undefined && { isClaimable: Boolean(body.isClaimable) }),
+      ...(ruleJson !== undefined && { ruleJson: ruleJson === null ? Prisma.JsonNull : (ruleJson as object) }),
+      ...(body.ctaLabel !== undefined && { ctaLabel: body.ctaLabel === null || body.ctaLabel === "" ? null : String(body.ctaLabel) }),
+      ...(body.ctaUrl !== undefined && { ctaUrl: body.ctaUrl === null || body.ctaUrl === "" ? null : String(body.ctaUrl) }),
+      ...(body.isActive !== undefined && { isActive: Boolean(body.isActive) }),
+      ...(body.sortOrder !== undefined && { sortOrder: Number(body.sortOrder) || 0 })
+    }
+  });
   invalidateHomeCache();
   return NextResponse.json({ ok: true });
 }

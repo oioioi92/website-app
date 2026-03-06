@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "@/lib/i18n/context";
-import { StickySaveBar } from "@/components/admin/StickySaveBar";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 
 const inputClass =
   "admin-compact-input w-full rounded-lg border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] px-3 text-[var(--compact-text)] placeholder-[var(--compact-muted)] focus:border-[var(--compact-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--compact-primary)]";
@@ -10,6 +10,7 @@ const labelClass = "mb-0.5 block text-[11px] font-medium text-[var(--compact-mut
 
 export function WhatsappSettingsClient() {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [messageKey, setMessageKey] = useState<string | null>(null);
@@ -17,12 +18,13 @@ export function WhatsappSettingsClient() {
   const [registerTemplate, setRegisterTemplate] = useState("");
   const [hasEnv, setHasEnv] = useState(false);
   const [hasBaileys, setHasBaileys] = useState(false);
-  const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/settings/whatsapp", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("load"))))
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.ok ? r.json() : Promise.reject(new Error("load"));
+      })
       .then((data) => {
         setEnabled(!!data.enabled);
         setRegisterTemplate(data.registerTemplate ?? t("admin.whatsappSettings.registerTemplatePlaceholder"));
@@ -31,7 +33,7 @@ export function WhatsappSettingsClient() {
       })
       .catch(() => setMessageKey("admin.whatsappSettings.loadError"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t, setForbidden]);
 
   function save() {
     setSaving(true);
@@ -51,27 +53,16 @@ export function WhatsappSettingsClient() {
       .finally(() => setSaving(false));
   }
 
-  function testConnection() {
-    setTesting(true);
-    setTestResult(null);
-    fetch("/api/admin/settings/whatsapp/test", { method: "POST", credentials: "include" })
-      .then((r) => r.json())
-      .then((data) => setTestResult({ ok: data.ok ?? false, message: data.message ?? (data.ok ? "OK" : "Failed") }))
-      .catch(() => setTestResult({ ok: false, message: "Request failed" }))
-      .finally(() => setTesting(false));
-  }
-
   if (loading) return <div className="text-[13px] text-[var(--compact-muted)]">{t("admin.whatsappSettings.loading")}</div>;
 
   const isError = messageKey === "admin.whatsappSettings.loadError" || messageKey === "admin.whatsappSettings.saveError";
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <button type="button" onClick={testConnection} disabled={testing} className="admin-compact-btn admin-compact-btn-ghost text-xs py-1.5 px-3">
-          {testing ? "..." : t("admin.settingsGameApi.testConnection")}
+        <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary text-xs py-1.5 px-3">
+          {saving ? t("admin.whatsappSettings.saving") : t("admin.whatsappSettings.save")}
         </button>
-        {testResult && <span className={`text-[12px] ${testResult.ok ? "text-green-600" : "text-red-600"}`}>{testResult.message}</span>}
-        {messageKey === "admin.whatsappSettings.loadError" && <span className="text-[12px] text-[var(--compact-danger)]">{t("admin.whatsappSettings.loadError")}</span>}
+        {messageKey && <span className={`text-[12px] ${isError ? "text-[var(--compact-danger)]" : "text-[var(--compact-muted)]"}`}>{t(messageKey)}</span>}
       </div>
       <div className="admin-card p-4 space-y-3">
         <h2 className="text-xs font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-1.5">{t("admin.whatsappSettings.sendConfig")}</h2>
@@ -111,13 +102,6 @@ export function WhatsappSettingsClient() {
           />
         </div>
       </div>
-      <StickySaveBar
-        onSave={save}
-        saving={saving}
-        success={messageKey === "admin.whatsappSettings.saved"}
-        error={isError}
-        message={messageKey ? t(messageKey) : undefined}
-      />
     </div>
   );
 }

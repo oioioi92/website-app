@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 
 const REFRESH_MS = 30_000;
 
@@ -81,13 +82,17 @@ function QuickLink({ href, label, icon, badge, active }: { href: string; label: 
 
 export function AdminQuickActionBar() {
   const pathname = usePathname() ?? "";
+  const { setForbidden } = useAdminApiContext();
   const [counters, setCounters] = useState<Counter>({ chatUnread: 0, pendingTx: 0 });
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
   const fetchCounters = () => {
     fetch("/api/admin/dashboard-counters", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.ok ? r.json() : null;
+      })
       .then((d) => {
         if (d && typeof d.chatUnread === "number" && typeof d.pendingTx === "number")
           setCounters({ chatUnread: d.chatUnread, pendingTx: d.pendingTx });

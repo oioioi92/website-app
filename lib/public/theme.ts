@@ -119,10 +119,6 @@ export type ThemeConfig = {
   pageBackgroundUrl: string | null;
   /** 前台整页背景色（CSS 合法值，如 #0a0a0a） */
   pageBackgroundColor: string | null;
-  /** 整站主色（按钮、高亮等，如 #a855f7） */
-  themePrimaryColor: string | null;
-  /** 整站强调色（渐变副色，如 #6366f1） */
-  themeAccentColor: string | null;
   /** P0: 首页模块标题（前台不再写死） */
   sectionTitles: ThemeSectionTitles;
   /** P0: 前台主要入口路由（/bonus、/promotion 等） */
@@ -209,10 +205,6 @@ const defaults: ThemeConfig = {
     maxWithdraw: null
   },
   liveTxBgImageUrl: null,
-  pageBackgroundUrl: null,
-  pageBackgroundColor: null,
-  themePrimaryColor: null,
-  themeAccentColor: null,
   sectionTitles: {
     quickActions: "QUICK ACTIONS",
     liveTransaction: "LIVE TRANSACTION",
@@ -227,9 +219,10 @@ const defaults: ThemeConfig = {
   promotionFontPreset: "default",
   bottomNav: [
     { href: "/", label: "HOME", icon: "H", badge: null },
+    { href: "/games", label: "GAMES", icon: "G", badge: null },
+    { href: "/promotion", label: "PROMO", icon: "P", badge: null },
     { href: "/history", label: "HISTORY", icon: "H", badge: null },
-    { href: "/bonus", label: "PROMO", icon: "P", badge: null },
-    { href: "/chat", label: "SUPPORT", icon: "S", badge: null },
+    { href: "/chat", label: "LIVE CHAT", icon: "C", badge: null },
     { href: "/settings", label: "SETTINGS", icon: "S", badge: null }
   ],
   uiGameCategories: ["Casino", "Sportbook", "Slots", "E-Sports", "Poker", "Fishing"],
@@ -323,10 +316,8 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
     partnershipBadgeUrl: normalizeUrlForUi(t.partnershipBadgeUrl),
     centerSlotImageUrl: normalizeUrlForUi(t.centerSlotImageUrl),
     liveTxBgImageUrl: normalizeUrlForUi(t.liveTxBgImageUrl),
-    pageBackgroundUrl: normalizeUrlForUi(t.pageBackgroundUrl) ?? null,
-    pageBackgroundColor: sanitizeText(t.pageBackgroundColor, 40) || null,
-    themePrimaryColor: sanitizeText(t.themePrimaryColor, 40) || null,
-    themeAccentColor: sanitizeText(t.themeAccentColor, 40) || null,
+    pageBackgroundUrl: normalizeUrlForUi(t.pageBackgroundUrl),
+    pageBackgroundColor: sanitizeText(t.pageBackgroundColor, 60) || null,
     actionBarDepositColor: sanitizeText(t.actionBarDepositColor, 60) || null,
     actionBarWithdrawColor: sanitizeText(t.actionBarWithdrawColor, 60) || null,
     actionBarButtonImages: {
@@ -783,10 +774,6 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
       };
     })(),
     liveTxBgImageUrl: normalizeUrlForUi(obj.liveTxBgImageUrl),
-    pageBackgroundUrl: normalizeUrlForUi(obj.pageBackgroundUrl) ?? null,
-    pageBackgroundColor: asString(obj.pageBackgroundColor) || null,
-    themePrimaryColor: asString(obj.themePrimaryColor) || null,
-    themeAccentColor: asString(obj.themeAccentColor) || null,
     sectionTitles,
     routes,
     promotionPattern,

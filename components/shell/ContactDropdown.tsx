@@ -23,7 +23,7 @@ export function ContactDropdown({ links = [] }: { links?: LinkItem[] }) {
       : [
           { label: "Telegram Support", href: "#" },
           { label: "WhatsApp Support", href: "#" },
-          { label: "Live Chat", href: "/live-chat" },
+          { label: "Live Chat", href: "/chat" },
         ];
 
   return (

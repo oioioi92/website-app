@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
-import { canAccessSecuritySettings } from "@/lib/rbac";
+import { canManageAdmins } from "@/lib/rbac";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-/** GET: 管理员登录活动日志（含 IP、User Agent），来自 AuditLog action=LOGIN，仅 admin */
+/** GET: 管理员登录活动日志（含 IP、User Agent），来自 AuditLog action=LOGIN */
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
-  if (!canAccessSecuritySettings(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+  if (!canManageAdmins(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const list = await db.auditLog.findMany({
     where: { action: "LOGIN" },

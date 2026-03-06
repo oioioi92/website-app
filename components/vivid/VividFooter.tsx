@@ -15,7 +15,7 @@ export function VividFooter({ siteName = "KINGDOM888" }: { siteName?: string }) 
           <span>·</span>
           <Link href="/games">{t("public.vivid.footer.games")}</Link>
           <span>·</span>
-          <Link href="/live-chat">{t("public.vivid.footer.support")}</Link>
+          <Link href="/chat">{t("public.vivid.footer.support")}</Link>
           <span>·</span>
           <Link href="/register-wa">{t("public.vivid.footer.register")}</Link>
         </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 
 type RuleJson = {
   limits?: { perDay?: number; perWeek?: number; perLifetime?: number; perHour?: number; perMonth?: number };
@@ -62,7 +63,7 @@ function getClaimLimit(r: RuleJson | null): string {
 }
 
 export function PromotionsPageClient() {
-  const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [data, setData] = useState<Response | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,10 +80,11 @@ export function PromotionsPageClient() {
         body: JSON.stringify({ direction }),
         credentials: "include",
       });
+      if (res.status === 403) setForbidden(true);
       if (!res.ok) throw new Error("reorder failed");
       load();
     } catch {
-      setError(t("admin.promotionsList.reorderFailed"));
+      setError("排序请求失败");
     } finally {
       setMovingId(null);
     }
@@ -93,9 +95,10 @@ export function PromotionsPageClient() {
     setError(null);
     const sp = new URLSearchParams();
     if (activeOnly) sp.set("active", "1");
-    fetch(`/api/admin/promotions?${sp}`)
+    fetch(`/api/admin/promotions?${sp}`, { credentials: "include" })
       .then((r) => {
-        if (!r.ok) throw new Error(t("admin.promotionsList.loadFailed"));
+        if (r.status === 403) setForbidden(true);
+        if (!r.ok) throw new Error("加载失败");
         return r.json();
       })
       .then(setData)
@@ -159,7 +162,7 @@ export function PromotionsPageClient() {
           disabled={loading}
           className="admin-compact-btn admin-compact-btn-ghost text-[13px]"
         >
-          {loading ? t("admin.promotionsList.loading") : t("admin.promotionsList.refresh")}
+          {loading ? "加载中…" : "刷新"}
         </button>
         {data && (
           <span className="text-[12px] text-[var(--admin-muted)]">
@@ -175,11 +178,11 @@ export function PromotionsPageClient() {
             {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} 条</span>}
           </div>
           {loading ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.loading")}</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">加载中…</div>
           ) : error ? (
             <div className="py-16 text-center text-[13px] text-[var(--admin-danger)]">{error}</div>
           ) : items.length === 0 ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions")}</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">暂无优惠活动</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="admin-table">
@@ -251,11 +254,11 @@ export function PromotionsPageClient() {
             {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} 条</span>}
           </div>
           {loading ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.loading")}</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">加载中…</div>
           ) : error ? (
             <div className="py-16 text-center text-[13px] text-[var(--admin-danger)]">{error}</div>
           ) : items.length === 0 ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions")}</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">暂无优惠活动</div>
           ) : (
             <div className="overflow-x-auto">
               {groups.map((groupKey) => {

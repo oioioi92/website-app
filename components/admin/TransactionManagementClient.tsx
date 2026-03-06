@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 import { ReportTableFromApi } from "@/components/admin/ReportTableFromApi";
 import { TX_PRESETS } from "@/config/transactions.presets";
-import type { TxPreset } from "@/config/transactions.presets";
+import { REPORT_CATALOG } from "@/config/reportCatalog.config";
 
 type PendingDeposit = {
   id: string;
@@ -95,11 +96,19 @@ export function TransactionManagementClient() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
+  const { setForbidden } = useAdminApiContext();
+
   function loadPending() {
     setLoading(true);
     setSearched(true);
-    const depPromise = fetch("/api/admin/deposits/pending?page=1&pageSize=500&sortBy=createdAt&sortOrder=asc", { credentials: "include" }).then((r) => r.json());
-    const wdPromise = fetch("/api/admin/withdrawals/pending?page=1&pageSize=500&sortBy=createdAt&sortOrder=asc", { credentials: "include" }).then((r) => r.json());
+    const depPromise = fetch("/api/admin/deposits/pending?page=1&pageSize=500&sortBy=createdAt&sortOrder=asc", { credentials: "include" }).then((r) => {
+      if (r.status === 403) setForbidden(true);
+      return r.json();
+    });
+    const wdPromise = fetch("/api/admin/withdrawals/pending?page=1&pageSize=500&sortBy=createdAt&sortOrder=asc", { credentials: "include" }).then((r) => {
+      if (r.status === 403) setForbidden(true);
+      return r.json();
+    });
     Promise.all([depPromise, wdPromise])
       .then(([depRes, wdRes]) => {
         const depList = (depRes.items ?? []) as PendingDeposit[];
@@ -267,7 +276,7 @@ export function TransactionManagementClient() {
             </select>
           </div>
         </div>
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => (showPendingList ? loadPending() : undefined)}
@@ -275,7 +284,33 @@ export function TransactionManagementClient() {
           >
             SEARCH
           </button>
-          <span className="text-xs text-slate-500">ADVANCED</span>
+        </div>
+
+        {/* 进阶报表：与 All Reports 一致，适合本页的报表入口 */}
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            {t("admin.txMgmt.advancedReports") ?? "进阶报表"}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {REPORT_CATALOG.flatMap((cat) =>
+              cat.cards.map((card) => (
+                <Link
+                  key={card.key}
+                  href={card.href}
+                  className="inline-flex flex-col rounded-lg border border-slate-200 bg-white px-3 py-2 text-left shadow-sm transition hover:border-indigo-300 hover:shadow"
+                >
+                  <span className="text-[13px] font-medium text-slate-800">{card.title}</span>
+                  {card.subtitle && <span className="text-[11px] text-slate-500">{card.subtitle}</span>}
+                </Link>
+              ))
+            )}
+            <Link
+              href="/admin/reports"
+              className="inline-flex items-center rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-[13px] font-medium text-indigo-800 transition hover:bg-indigo-100"
+            >
+              {t("admin.txMgmt.allReports") ?? "All Reports…"}
+            </Link>
+          </div>
         </div>
       </section>
 

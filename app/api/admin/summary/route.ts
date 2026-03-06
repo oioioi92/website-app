@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminUserFromRequest } from "@/lib/auth";
+import { canApproveDeposit } from "@/lib/rbac";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ function parseDateRange(dateFrom?: string | null, dateTo?: string | null) {
 export async function GET(req: NextRequest) {
   const user = await getAdminUserFromRequest(req);
   if (!user) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+  if (!canApproveDeposit(user)) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
   const sp = req.nextUrl.searchParams;
   const dateFrom = sp.get("dateFrom") ?? sp.get("date_from");

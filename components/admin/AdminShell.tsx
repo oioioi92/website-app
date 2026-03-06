@@ -7,6 +7,9 @@ import { AdminQuickActionBar } from "@/components/admin/AdminQuickActionBar";
 import { AdminTopbarMenus } from "@/components/admin/AdminTopbarMenus";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useLocale } from "@/lib/i18n/context";
+import { AdminUserProvider } from "@/lib/admin-user-context";
+import { AdminApiProvider, AdminForbiddenBanner } from "@/lib/admin-api-context";
+import { AdminErrorBoundary } from "@/components/admin/AdminErrorBoundary";
 
 type AdminUser = { id: string; email: string; role: string };
 
@@ -14,7 +17,10 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
   const { t } = useLocale();
   const [collapsed, setCollapsed] = useState(true);
   return (
+    <AdminUserProvider user={user}>
+    <AdminApiProvider>
     <div className={`admin-shell ${collapsed ? "admin-shell--collapsed" : ""}`} data-admin-theme="light">
+      <AdminForbiddenBanner />
       <div
         className="admin-sidebar-backdrop"
         role="button"
@@ -23,7 +29,7 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
         onClick={() => setCollapsed(true)}
         onKeyDown={(e) => e.key === "Enter" && setCollapsed(true)}
       />
-      <Sidebar collapsed={collapsed} onNavigate={() => setCollapsed(true)} user={user} />
+      <Sidebar user={user} collapsed={collapsed} onNavigate={() => setCollapsed(true)} />
       <header className="admin-topbar">
         <div className="flex items-center gap-3 shrink-0">
           <button
@@ -45,7 +51,11 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
         <AdminQuickActionBar />
         <AdminTopbarMenus />
       </header>
-      <main className="admin-page">{children}</main>
+      <main className="admin-page">
+        <AdminErrorBoundary>{children}</AdminErrorBoundary>
+      </main>
     </div>
+    </AdminApiProvider>
+    </AdminUserProvider>
   );
 }

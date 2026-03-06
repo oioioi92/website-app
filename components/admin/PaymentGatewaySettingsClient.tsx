@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "@/lib/i18n/context";
+import { useAdminApiContext } from "@/lib/admin-api-context";
 import { StickySaveBar } from "@/components/admin/StickySaveBar";
 
 const inputClass =
@@ -12,6 +13,7 @@ const defaultForm = { gatewayName: "", apiBaseUrl: "", merchantId: "", apiKey: "
 
 export function PaymentGatewaySettingsClient() {
   const { t } = useLocale();
+  const { setForbidden } = useAdminApiContext();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [messageKey, setMessageKey] = useState<string | null>(null);
@@ -21,11 +23,14 @@ export function PaymentGatewaySettingsClient() {
 
   useEffect(() => {
     fetch("/api/admin/settings/payment-gateway", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("load"))))
+      .then((r) => {
+        if (r.status === 403) setForbidden(true);
+        return r.ok ? r.json() : Promise.reject(new Error("load"));
+      })
       .then((data) => setForm({ ...defaultForm, ...data }))
       .catch(() => setMessageKey("admin.common.loadError"))
       .finally(() => setLoading(false));
-  }, []);
+  }, [setForbidden]);
 
   function patch(partial: Partial<typeof form>) {
     setForm((prev) => ({ ...prev, ...partial }));
@@ -71,11 +76,14 @@ export function PaymentGatewaySettingsClient() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
+        <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary">
+          {saving ? t("admin.site.saving") : t("admin.site.saveConfig")}
+        </button>
         <button type="button" onClick={testConnection} disabled={testing || !form.apiBaseUrl} className="admin-compact-btn admin-compact-btn-ghost">
           {testing ? "..." : t("admin.settingsGameApi.testConnection")}
         </button>
         {testResult && <span className={`text-[13px] ${testResult.ok ? "text-green-600" : "text-red-600"}`}>{testResult.message}</span>}
-        {messageKey === "admin.common.loadError" && <span className="text-[13px] text-[var(--compact-danger)]">{t("admin.common.loadError")}</span>}
+        {messageKey && <span className={`text-[13px] ${isError ? "text-[var(--compact-danger)]" : "text-[var(--compact-muted)]"}`}>{t(messageKey)}</span>}
       </div>
       <div className="admin-card p-6 space-y-4">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">入款支付网关</h2>
@@ -106,13 +114,6 @@ export function PaymentGatewaySettingsClient() {
           </div>
         </div>
       </div>
-      <StickySaveBar
-        onSave={save}
-        saving={saving}
-        success={messageKey === "admin.site.saved"}
-        error={isError}
-        message={messageKey ? t(messageKey) : undefined}
-      />
     </div>
   );
 }
