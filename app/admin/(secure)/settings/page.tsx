@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useAdminUser } from "@/lib/admin-user-context";
 import { can } from "@/lib/rbac-client";
+import { useLocale } from "@/lib/i18n/context";
 import { SETTINGS_NAV } from "@/config/settings-nav";
 
 export default function AdminSettingsPage() {
+  const { t } = useLocale();
   const user = useAdminUser();
   const filteredNav = user
     ? SETTINGS_NAV.map((group) => ({
@@ -18,8 +20,8 @@ export default function AdminSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-[var(--compact-text)]">Settings</h1>
-      <p className="mt-0.5 text-[13px] text-[var(--compact-muted)]">主题、前台、优惠、推荐、财务、集成与账户安全</p>
+      <h1 className="text-lg font-semibold text-[var(--compact-text)]">{t("admin.settingsSection.pageTitle")}</h1>
+      <p className="mt-0.5 text-[13px] text-[var(--compact-muted)]">{t("admin.settingsSection.settingsPageSubtitle")}</p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filteredNav.map((group) => {
           const first = group.children?.[0];

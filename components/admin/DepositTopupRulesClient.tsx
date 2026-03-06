@@ -64,24 +64,22 @@ export function DepositTopupRulesClient() {
       .finally(() => setSaving(false));
   }
 
-  if (loading) return <div className="text-[13px] text-[var(--compact-muted)]">{t("admin.common.loading") ?? "加载中…"}</div>;
+  if (loading) return <div className="text-[13px] text-[var(--compact-muted)]">{t("admin.common.loading") ?? "Loading…"}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary">
-          {saving ? (t("admin.common.saving") ?? "保存中…") : (t("admin.common.save") ?? "保存")}
+          {saving ? (t("admin.common.saving") ?? "Saving…") : (t("admin.common.save") ?? "Save")}
         </button>
-        {message === "saved" && <span className="text-[13px] text-green-600">{t("admin.site.saved") ?? "已保存"}</span>}
-        {message === "error" && <span className="text-[13px] text-[var(--compact-danger)]">{t("admin.common.saveError") ?? "加载或保存失败"}</span>}
+        {message === "saved" && <span className="text-[13px] text-green-600">{t("admin.site.saved") ?? "Saved"}</span>}
+        {message === "error" && <span className="text-[13px] text-[var(--compact-danger)]">{t("admin.common.saveError") ?? "Load or save failed"}</span>}
       </div>
       <div className="admin-card max-w-xl p-6 space-y-4">
         <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">
-          充值 / Topup 限制规则
+          {t("admin.depositTopupRules.title")}
         </h2>
-        <p className="text-[13px] text-[var(--compact-muted)]">
-          当会员的<strong>钱包余额</strong>（及可选游戏余额）达到或超过设定金额时，不允许再充值（deposit/topup）。即：余额低于该金额才可以充值。
-        </p>
+        <p className="text-[13px] text-[var(--compact-muted)]" dangerouslySetInnerHTML={{ __html: t("admin.depositTopupRules.desc") }} />
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -91,13 +89,13 @@ export function DepositTopupRulesClient() {
             className="rounded border-[var(--compact-card-border)]"
           />
           <label htmlFor="topup-rules-enabled" className="text-[13px] text-[var(--compact-text)]">
-            启用「余额高于门槛则不可充值」规则
+            {t("admin.depositTopupRules.enableLabel")}
           </label>
         </div>
         {form.enabled && (
           <div>
             <label className={labelClass}>
-              门槛金额（钱包余额 ≥ 此金额时不可 topup，单位与钱包一致，如 RM）
+              {t("admin.depositTopupRules.thresholdLabel")}
             </label>
             <input
               type="number"
@@ -109,7 +107,7 @@ export function DepositTopupRulesClient() {
               placeholder="e.g. 100"
             />
             <p className="mt-1 text-[12px] text-[var(--compact-muted)]">
-              例：填 100 表示当会员钱包余额 ≥ 100 时，无法再发起充值；需余额低于 100 才能 topup。
+              {t("admin.depositTopupRules.exampleHint")}
             </p>
           </div>
         )}

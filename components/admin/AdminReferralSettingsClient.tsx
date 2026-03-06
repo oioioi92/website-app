@@ -67,7 +67,7 @@ export function AdminReferralSettingsClient() {
   };
 
   if (loading || !config) {
-    return <p className="text-[var(--admin-muted)]">{t("admin.common.loading") ?? "加载中…"}</p>;
+    return <p className="text-[var(--admin-muted)]">{t("admin.common.loading") ?? "Loading…"}</p>;
   }
 
   return (
@@ -75,10 +75,10 @@ export function AdminReferralSettingsClient() {
       <div className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-[var(--admin-text)] mb-2">
-            下线抽成代数 (Max generations for commission)
+            {t("admin.referralGeneral.maxGenerationsLabel")}
           </label>
           <p className="text-[12px] text-[var(--admin-muted)] mb-2">
-            推荐人可以抽下线的佣金算到第几代（1 = 仅直推，2 = 直推+二级，以此类推）。
+            {t("admin.referralGeneral.maxGenerationsHint")}
           </p>
           <select
             value={config.maxGenerations}
@@ -86,17 +86,17 @@ export function AdminReferralSettingsClient() {
             className="w-full max-w-[120px] rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-2 text-[var(--admin-text)]"
           >
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-              <option key={n} value={n}>{n} 代</option>
+              <option key={n} value={n}>{n} {t("admin.referralGeneral.genUnit")}</option>
             ))}
           </select>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-[var(--admin-text)] mb-2">
-            推荐链接可分享至哪些渠道 (Share referral link to)
+            {t("admin.referralGeneral.shareChannelsLabel")}
           </label>
           <p className="text-[12px] text-[var(--admin-muted)] mb-2">
-            前台「分享推荐链接」时，可提供一键分享到以下渠道（勾选即显示）。
+            {t("admin.referralGeneral.shareChannelsHint")}
           </p>
           <div className="flex flex-wrap gap-3">
             {PLATFORMS.map((p) => (
@@ -115,7 +115,7 @@ export function AdminReferralSettingsClient() {
 
         <div className="flex items-center gap-3 pt-2">
           <Link href="/admin/settings" className="admin-compact-btn admin-compact-btn-ghost">
-            {t("admin.settingsSection.backToSettings") ?? "返回设置"}
+            {t("admin.settingsSection.backToSettings") ?? "Back to Settings"}
           </Link>
         </div>
       </div>
@@ -124,7 +124,7 @@ export function AdminReferralSettingsClient() {
         saving={saving}
         success={saveSuccess}
         error={saveError}
-        message={saveSuccess ? (t("admin.site.saved") ?? "已保存") : saveError ? (t("admin.common.saveError") ?? "保存失败") : undefined}
+        message={saveSuccess ? (t("admin.site.saved") ?? "Saved") : saveError ? (t("admin.common.saveError") ?? "Save failed") : undefined}
       />
     </div>
   );

@@ -272,9 +272,9 @@ export function PromotionEditFormLines({
     <div className="promo-admin-edit">
       <div className="flex flex-wrap items-center gap-3 pb-4 border-b border-[var(--admin-border)]">
         <button type="button" onClick={save} disabled={saving} className="admin-compact-btn admin-compact-btn-primary">
-          {saving ? (isCreate ? (t("admin.common.creating") ?? "创建中…") : (t("admin.common.saving") ?? "保存中…")) : isCreate ? (t("admin.common.create") ?? "创建") : (t("admin.common.save") ?? "保存")}
+          {saving ? (isCreate ? (t("admin.common.creating") ?? "Creating…") : (t("admin.common.saving") ?? "Saving…")) : isCreate ? (t("admin.common.create") ?? "Create") : (t("admin.common.save") ?? "Save")}
         </button>
-        <Link href="/admin/promotions" className="admin-compact-btn admin-compact-btn-ghost text-[13px]">{isCreate ? (t("admin.common.cancel") ?? "取消") : (t("admin.promotionsList.backToList") ?? "返回列表")}</Link>
+        <Link href="/admin/promotions" className="admin-compact-btn admin-compact-btn-ghost text-[13px]">{isCreate ? (t("admin.common.cancel") ?? "Cancel") : (t("admin.promotionsList.backToList") ?? "Back to list")}</Link>
         {message && <span className="promo-admin-toast success">{message}</span>}
         {error && <span className="promo-admin-toast error">{error}</span>}
       </div>

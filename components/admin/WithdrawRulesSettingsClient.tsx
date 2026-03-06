@@ -83,7 +83,7 @@ export function WithdrawRulesSettingsClient() {
   }
 
   if (loading)
-    return <div className="text-[13px] text-[var(--compact-muted)]">{t("admin.common.loading") ?? "加载中…"}</div>;
+    return <div className="text-[13px] text-[var(--compact-muted)]">{t("admin.common.loading") ?? "Loading…"}</div>;
 
   return (
     <div className="space-y-6">
@@ -92,7 +92,7 @@ export function WithdrawRulesSettingsClient() {
           {t("admin.settingsWithdrawRules.title") ?? "Withdraw Rules"}
         </h2>
         <p className="text-xs text-[var(--compact-muted)]">
-          {t("admin.settingsWithdrawRules.subtitle") ?? "提现限额与每日次数限制，启用后会员提现需满足以下规则。"}
+          {t("admin.settingsWithdrawRules.subtitle") ?? "Withdrawal limits and daily count; when enabled, members must meet these rules to withdraw."}
         </p>
         <label className="flex items-center gap-2 cursor-pointer">
           <input
@@ -157,11 +157,11 @@ export function WithdrawRulesSettingsClient() {
         error={messageKey === "saveError" || messageKey === "loadError"}
         message={
           messageKey === "saveSuccess"
-            ? (t("admin.settingsWithdrawRules.saveSuccess") ?? t("admin.settingsBank.saveSuccess") ?? "已保存")
+            ? (t("admin.settingsWithdrawRules.saveSuccess") ?? t("admin.settingsBank.saveSuccess") ?? "Saved")
             : messageKey === "saveError"
-              ? (t("admin.settingsWithdrawRules.saveError") ?? "保存失败")
+              ? (t("admin.settingsWithdrawRules.saveError") ?? "Save failed")
               : messageKey === "loadError"
-                ? (t("admin.settingsWithdrawRules.loadError") ?? "加载失败")
+                ? (t("admin.settingsWithdrawRules.loadError") ?? "Load failed")
                 : undefined
         }
       />

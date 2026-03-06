@@ -85,7 +85,7 @@ export function PromotionsPageClient() {
       if (!res.ok) throw new Error("reorder failed");
       load();
     } catch {
-      setError(t("admin.promotionsList.reorderFailed") ?? "排序请求失败");
+      setError(t("admin.promotionsList.reorderFailed") ?? "Reorder request failed");
     } finally {
       setMovingId(null);
     }
@@ -99,7 +99,7 @@ export function PromotionsPageClient() {
     fetch(`/api/admin/promotions?${sp}`, { credentials: "include" })
       .then((r) => {
         if (r.status === 403) setForbidden(true);
-        if (!r.ok) throw new Error("加载失败");
+        if (!r.ok) throw new Error("Load failed");
         return r.json();
       })
       .then(setData)
@@ -138,7 +138,7 @@ export function PromotionsPageClient() {
           href="/admin/promotions/new"
           className="admin-compact-btn admin-compact-btn-primary text-[13px]"
         >
-          新建优惠
+          {t("admin.promotionsList.newPromo")}
         </Link>
         <label className="flex items-center gap-2 text-[13px] text-[var(--admin-text)] cursor-pointer">
           <input
@@ -147,15 +147,15 @@ export function PromotionsPageClient() {
             onChange={(e) => setActiveOnly(e.target.checked)}
             className="rounded border-[var(--admin-border)] text-[var(--admin-primary)] focus:ring-[var(--admin-primary)]"
           />
-          <span>仅显示已启用</span>
+          <span>{t("admin.promotionsList.activeOnly")}</span>
         </label>
         <select
           value={viewMode}
           onChange={(e) => setViewMode(e.target.value as "reference" | "simple")}
           className="admin-compact-input rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-1.5 text-[12px] text-[var(--admin-text)]"
         >
-          <option value="reference">参考站风格（分组+全列）</option>
-          <option value="simple">简洁列表</option>
+          <option value="reference">{t("admin.promotionsList.viewReference")}</option>
+          <option value="simple">{t("admin.promotionsList.viewSimple")}</option>
         </select>
         <button
           type="button"
@@ -163,11 +163,11 @@ export function PromotionsPageClient() {
           disabled={loading}
           className="admin-compact-btn admin-compact-btn-ghost text-[13px]"
         >
-          {loading ? (t("admin.promotionsList.loading") ?? "加载中…") : (t("admin.promotionsList.refresh") ?? "刷新")}
+          {loading ? (t("admin.promotionsList.loading") ?? "Loading…") : (t("admin.promotionsList.refresh") ?? "Refresh")}
         </button>
         {data && (
           <span className="text-[12px] text-[var(--admin-muted)]">
-            共 {total} 条 · 已启用 {activeCount} 条
+            {t("admin.promotionsList.totalCount").replace("{total}", String(total)).replace("{activeCount}", String(activeCount))}
           </span>
         )}
       </div>
@@ -175,27 +175,27 @@ export function PromotionsPageClient() {
       {viewMode === "simple" ? (
         <div className="admin-card overflow-hidden">
           <div className="border-b border-[var(--admin-border)] px-5 py-3 flex items-center justify-between bg-[var(--admin-panel2)]">
-            <span className="text-[13px] font-semibold text-[var(--admin-text)]">优惠列表</span>
-            {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} 条</span>}
+            <span className="text-[13px] font-semibold text-[var(--admin-text)]">{t("admin.promotionsList.listTitle")}</span>
+            {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} {t("admin.promotionsList.itemsUnit")}</span>}
           </div>
           {loading ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.loading") ?? "加载中…"}</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.loading") ?? "Loading…"}</div>
           ) : error ? (
             <div className="py-16 text-center text-[13px] text-[var(--admin-danger)]">{error}</div>
           ) : items.length === 0 ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions") ?? "暂无优惠活动"}</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions") ?? "No promotions yet"}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th className="w-[28%]">标题</th>
-                    <th className="w-[18%]">副标题</th>
+                    <th className="w-[28%]">{t("admin.promotionsList.colTitle")}</th>
+                    <th className="w-[18%]">{t("admin.promotionsList.colSubtitle")}</th>
                     <th className="w-[10%]">CTA</th>
-                    <th className="w-[10%]">状态</th>
-                    <th className="w-[10%] text-right">排序</th>
-                    <th className="w-[14%]">创建时间</th>
-                    <th className="w-[12%] text-right">操作</th>
+                    <th className="w-[10%]">{t("admin.promotionsList.colStatus")}</th>
+                    <th className="w-[10%] text-right">{t("admin.promotionsList.colSort")}</th>
+                    <th className="w-[14%]">{t("admin.promotionsList.colCreatedAt")}</th>
+                    <th className="w-[12%] text-right">{t("admin.promotionsList.colAction")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -206,14 +206,14 @@ export function PromotionsPageClient() {
                       <td className="text-[13px]">{p.ctaLabel ?? "—"}</td>
                       <td>
                         <span className={`promo-admin-badge ${p.isActive ? "promo-admin-badge--on" : "promo-admin-badge--off"}`}>
-                          {p.isActive ? "启用" : "停用"}
+                          {p.isActive ? t("admin.promotionsList.statusOn") : t("admin.promotionsList.statusOff")}
                         </span>
                       </td>
                       <td className="text-right">
                         <div className="flex items-center justify-end gap-0.5">
                           <button
                             type="button"
-                            title="上移"
+                            title={t("admin.promotionsList.moveUp")}
                             disabled={items.findIndex((i) => i.id === p.id) === 0 || movingId === p.id}
                             onClick={() => moveOrder(p.id, "up")}
                             className="promo-order-btn"
@@ -222,7 +222,7 @@ export function PromotionsPageClient() {
                           </button>
                           <button
                             type="button"
-                            title="下移"
+                            title={t("admin.promotionsList.moveDown")}
                             disabled={items.findIndex((i) => i.id === p.id) === items.length - 1 || movingId === p.id}
                             onClick={() => moveOrder(p.id, "down")}
                             className="promo-order-btn"
@@ -236,9 +236,9 @@ export function PromotionsPageClient() {
                       </td>
                       <td className="text-right">
                         <div className="promo-admin-actions justify-end">
-                          <Link href={`/admin/promotions/${p.id}/edit`}>编辑</Link>
+                          <Link href={`/admin/promotions/${p.id}/edit`}>{t("admin.promotionsList.edit")}</Link>
                           <span className="text-[var(--admin-border)]">|</span>
-                          <Link href={`/promotion#${encodeURIComponent(p.id)}`} target="_blank" rel="noreferrer">前台</Link>
+                          <Link href={`/promotion#${encodeURIComponent(p.id)}`} target="_blank" rel="noreferrer">{t("admin.promotionsList.front")}</Link>
                         </div>
                       </td>
                     </tr>
@@ -251,21 +251,21 @@ export function PromotionsPageClient() {
       ) : (
         <div className="admin-card overflow-hidden promo-admin-table-reference">
           <div className="border-b border-[var(--admin-border)] px-5 py-3 flex items-center justify-between bg-[var(--admin-panel2)]">
-            <span className="text-[13px] font-semibold text-[var(--admin-text)]">优惠列表（参考站风格）</span>
-            {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} 条</span>}
+            <span className="text-[13px] font-semibold text-[var(--admin-text)]">{t("admin.promotionsList.listTitle")} (Reference)</span>
+            {data && <span className="text-[12px] text-[var(--admin-muted)] tabular-nums">{total} {t("admin.promotionsList.itemsUnit")}</span>}
           </div>
           {loading ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.loading") ?? "加载中…"}</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.loading") ?? "Loading…"}</div>
           ) : error ? (
             <div className="py-16 text-center text-[13px] text-[var(--admin-danger)]">{error}</div>
           ) : items.length === 0 ? (
-            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions") ?? "暂无优惠活动"}</div>
+            <div className="py-16 text-center text-[13px] text-[var(--admin-muted)]">{t("admin.promotionsList.noPromotions") ?? "No promotions yet"}</div>
           ) : (
             <div className="overflow-x-auto">
               {groups.map((groupKey) => {
                 const groupItems = getItemsInGroup(groupKey);
                 if (groupItems.length === 0) return null;
-                const displayName = groupKey === "OTHER" ? "其他" : groupKey;
+                const displayName = groupKey === "OTHER" ? t("admin.promotionsList.other") : groupKey;
                 return (
                   <div key={groupKey} className="promo-admin-category-block">
                     <div className="promo-admin-category-header">{displayName}</div>
@@ -273,7 +273,7 @@ export function PromotionsPageClient() {
                       <thead>
                         <tr>
                           <th className="promo-admin-th-id">ID</th>
-                          <th className="text-center w-20">排序</th>
+                          <th className="text-center w-20">{t("admin.promotionsList.colSort")}</th>
                           <th>Name</th>
                           <th>Action</th>
                           <th>Claim Condition</th>
@@ -308,7 +308,7 @@ export function PromotionsPageClient() {
                                 <div className="flex items-center justify-center gap-0.5">
                                   <button
                                     type="button"
-                                    title="上移"
+                                    title={t("admin.promotionsList.moveUp")}
                                     disabled={rowIndex <= 0 || movingId === p.id}
                                     onClick={() => moveOrder(p.id, "up")}
                                     className="promo-order-btn"
@@ -317,7 +317,7 @@ export function PromotionsPageClient() {
                                   </button>
                                   <button
                                     type="button"
-                                    title="下移"
+                                    title={t("admin.promotionsList.moveDown")}
                                     disabled={rowIndex >= items.length - 1 || movingId === p.id}
                                     onClick={() => moveOrder(p.id, "down")}
                                     className="promo-order-btn"
