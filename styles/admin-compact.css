@@ -548,13 +548,16 @@
     grid-column: 1;
   }
 
-  /* 窄屏：只显示 Chat / Pending，Players、Reports 进 More 下拉 */
+  /* 窄屏：四个快捷入口都展示（Chat / Pending / Player List / Reports），不再收进 More */
   .admin-quick-action-bar__secondary {
-    display: none !important;
+    display: flex !important;
   }
   .admin-quick-action-bar__more {
-    display: flex !important;
-    align-items: center;
+    display: none !important;
+  }
+  .admin-quick-action-bar {
+    flex-wrap: wrap;
+    gap: 4px;
   }
 
   .admin-shell .admin-page {
