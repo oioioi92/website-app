@@ -44,6 +44,7 @@ export function VividMobileHome({
   games?: Game[];
   internalTestMode?: boolean;
 }) {
+  const pathname = usePathname();
   const { t } = useLocale();
   const siteName = theme.siteName ?? "KINGDOM888";
   const loginUrl = theme.loginUrl ?? "/login";
@@ -78,7 +79,8 @@ export function VividMobileHome({
   return (
     <div
       className="vp-shell lg:hidden"
-      style={{ paddingBottom: 72 }}
+      data-page-has-bottom-nav="true"
+      style={{ paddingBottom: 80 }}
     >
       {/* ── Sticky Top Bar ── */}
       <header style={{
@@ -415,7 +417,50 @@ export function VividMobileHome({
         routeBonus="/bonus"
       />
 
-      {/* ── Fixed Bottom Nav ── */}
+      {/* 本页内嵌底部栏：固定 6 项含 Live Chat，不依赖 layout */}
+      <nav
+        data-bottom-nav-items="6"
+        data-has-live-chat="true"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          background: "rgba(13,13,26,0.97)",
+          borderTop: "1px solid rgba(120,80,255,0.3)",
+          backdropFilter: "blur(12px)",
+          display: "grid",
+          gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
+          paddingBottom: "env(safe-area-inset-bottom, 4px)",
+        }}
+      >
+        {BOTTOM_NAV_DEFS.map((n) => {
+          const isActive = pathname === n.href || (n.href !== "/" && pathname.startsWith(n.href));
+          const label = n.key === "liveChat" ? (t("public.vivid.bottomNav.liveChat") || "Live Chat") : t(`public.vivid.bottomNav.${n.key}`) || n.key;
+          return (
+            <Link
+              key={n.href}
+              href={n.href}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 3,
+                padding: "10px 2px 8px",
+                textDecoration: "none",
+                color: isActive ? "#a855f7" : "rgba(157,149,201,0.75)",
+                fontSize: 10,
+                fontWeight: isActive ? 700 : 500,
+              }}
+            >
+              <span style={{ fontSize: 18 }}>{n.icon}</span>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

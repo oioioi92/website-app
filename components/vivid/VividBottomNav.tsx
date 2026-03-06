@@ -23,6 +23,8 @@ export function VividBottomNav() {
       role="navigation"
       aria-label="Bottom navigation"
       data-bottom-nav-items="6"
+      data-has-live-chat="true"
+      data-from-layout="true"
       style={{
         position: "fixed",
         bottom: 0,
