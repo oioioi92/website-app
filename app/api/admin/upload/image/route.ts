@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     // 使用 API 路径，确保线上由本应用直接提供文件，不依赖 Nginx/静态目录
     const relativeKey = objectKey.replace(/^uploads\/?/, "").replace(/\\/g, "/");
     const apiPath = `/api/public/uploads/${relativeKey}`;
-    const uploadBase = getUploadPublicBaseUrl();
+    const uploadBase = getUploadPublicBaseUrl(req);
     const url = uploadBase ? `${uploadBase}${apiPath}` : apiPath;
     return NextResponse.json({ ok: true, url, filename: file.name, size: file.size });
   } catch (e) {
