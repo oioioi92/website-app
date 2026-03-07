@@ -1056,7 +1056,12 @@ export function ThemeSettingsClient() {
         {error && (
           <span className="text-sm text-[var(--compact-danger)]">{t(error)}</span>
         )}
-        <a href="/" target="_blank" rel="noreferrer" className="admin-compact-btn admin-compact-btn-ghost text-[13px]">
+        <a
+          href={process.env.NEXT_PUBLIC_FRONTEND_URL ?? "/"}
+          target="_blank"
+          rel="noreferrer"
+          className="admin-compact-btn admin-compact-btn-ghost text-[13px]"
+        >
           🔗 查看前台
         </a>
       </div>
