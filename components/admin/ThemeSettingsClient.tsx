@@ -312,15 +312,15 @@ export function ThemeSettingsClient() {
       <div className="admin-card p-6 space-y-6">
         <SectionTitle
           title="🏷️ Logo 与站名"
-          desc="Vivid 新版本顶栏只显示「网站名称」文字，不显示 Logo 图。Logo 图仅桌面/旧版用；旧版显示高度约 40~60px。"
+          desc="Logo 图片将同时显示在桌面版顶栏（高度 64px）和手机版顶栏（高度 58px）。若未上传 Logo，顶栏将显示「网站名称」文字作为备用。"
         />
         <ImageInput
           label="Logo 图片"
           value={theme.logoUrl ?? ""}
           onChange={(v) => patch({ logoUrl: v || null })}
-          size="160×48 或 200×60 透明 PNG（10:3）"
+          size="建议 400×120 以上透明 PNG（10:3）。⚠️ 避免使用黑色背景，深色顶栏上黑底会导致 Logo 内容显得很小。"
           aspectRatio="10/3"
-          hint="仅桌面版/旧版布局显示。Vivid 新版手机端顶栏只显示「网站名称」文字，不显示 Logo 图。"
+          hint="桌面版顶栏显示高度 64px，手机版显示高度 58px，宽度自适应。建议上传透明背景 PNG，确保 Logo 在深色顶栏上清晰显示。"
         />
         <div>
           <label className={labelClass}>网站名称</label>
