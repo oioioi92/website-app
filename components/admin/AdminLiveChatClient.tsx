@@ -872,7 +872,7 @@ export function AdminLiveChatClient() {
                                   <img src={imgUrl} alt="" className="max-w-full max-h-64 rounded-lg object-contain" />
                                 </a>
                               ) : (
-                                <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.bodyText}</p>
+                                <p className={`whitespace-pre-wrap break-words leading-relaxed ${isSystem ? "text-base font-semibold text-amber-900" : "text-sm"}`}>{msg.bodyText}</p>
                               );
                             })()}
                             <p className="text-[10px] text-slate-400 mt-1.5">
