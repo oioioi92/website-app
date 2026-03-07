@@ -74,16 +74,30 @@ export function ReferralBlock({
         overflow: "hidden",
       }}
     >
-      {/* Banner image (optional) */}
-      {bannerImageUrl && (
-        <div style={{ width: "100%", aspectRatio: "16/7", overflow: "hidden", flexShrink: 0 }}>
+      {/* Banner image slot — always shown; placeholder when no image configured */}
+      <div style={{ width: "100%", aspectRatio: "16/7", overflow: "hidden", flexShrink: 0, position: "relative" }}>
+        {bannerImageUrl ? (
           <FallbackImage
             src={bannerImageUrl}
             alt="referral banner"
             style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
           />
-        </div>
-      )}
+        ) : (
+          <div style={{
+            width: "100%", height: "100%",
+            background: "linear-gradient(135deg,rgba(120,60,240,0.18),rgba(60,30,160,0.28))",
+            border: "1.5px dashed rgba(160,100,255,0.35)",
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            gap: 6,
+          }}>
+            <span style={{ fontSize: 28, opacity: 0.45 }}>🖼️</span>
+            <span style={{ fontSize: 11, color: "rgba(200,180,255,0.5)", fontWeight: 600 }}>
+              推荐横幅（后台上传）
+            </span>
+          </div>
+        )}
+      </div>
 
       <div style={{ padding: "14px 16px" }}>
       {member === undefined ? (
