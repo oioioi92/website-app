@@ -53,7 +53,10 @@ export async function POST(req: NextRequest) {
     const fullPath = path.join(publicDir, objectKey);
     mkdirSync(path.dirname(fullPath), { recursive: true });
     writeFileSync(fullPath, body);
-    const url = `/${objectKey.replace(/\\/g, "/")}`;
+    const relativePath = `/${objectKey.replace(/\\/g, "/")}`;
+    // 优先用 NEXT_PUBLIC_APP_URL 生成绝对地址，确保跨域时也能正常加载
+    const appBase = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+    const url = appBase ? `${appBase}${relativePath}` : relativePath;
     return NextResponse.json({ ok: true, url, filename: file.name, size: file.size });
   } catch (e) {
     console.error("[admin/upload/image]", e);

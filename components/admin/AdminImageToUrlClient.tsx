@@ -128,45 +128,53 @@ export function AdminImageToUrlClient() {
       {result && (
         <div className="mt-6 space-y-4">
           <div className="flex items-center gap-2 text-[12px] text-[var(--admin-muted)]">
-            <span>文件名：{result.filename}</span>
+            <span>✅ 上传成功 — {result.filename}</span>
             {result.size > 0 && <span>（{(result.size / 1024).toFixed(1)} KB）</span>}
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-[var(--admin-muted)] mb-1">站内路径（用于后台粘贴）</label>
+          {/* 推荐使用的地址（主要复制入口） */}
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <label className="block text-xs font-semibold text-blue-700 mb-1">
+              📋 图片地址（复制后粘贴到后台各处）
+            </label>
             <div className="flex gap-2">
               <input
                 type="text"
                 readOnly
                 value={result.url}
-                className="flex-1 min-w-0 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-2 text-[13px] text-[var(--admin-text)]"
+                className="flex-1 min-w-0 rounded-lg border border-blue-200 bg-white px-3 py-2 text-[13px] text-slate-800 font-mono"
               />
               <button
                 type="button"
                 onClick={() => copyToClipboard(result.url, "relative")}
-                className="shrink-0 px-4 py-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] text-[13px] text-[var(--admin-text)] hover:bg-[var(--admin-hover)]"
+                className="shrink-0 px-4 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-medium hover:bg-blue-700"
               >
-                {copied === "relative" ? "已复制" : "复制"}
+                {copied === "relative" ? "✓ 已复制" : "复制"}
               </button>
             </div>
+            {result.url.startsWith("/") && (
+              <p className="mt-2 text-[11px] text-blue-600">
+                ⚠️ 此为相对路径，只在同一服务器上有效。若前台与后台在不同域名，建议配置 R2 云存储，或在 .env 中设置 NEXT_PUBLIC_APP_URL。
+              </p>
+            )}
           </div>
 
-          {fullUrl && (
+          {fullUrl && fullUrl !== result.url && (
             <div>
-              <label className="block text-xs font-medium text-[var(--admin-muted)] mb-1">完整网址（用于外部分享）</label>
+              <label className="block text-xs font-medium text-[var(--admin-muted)] mb-1">完整网址（含域名，可用于跨站引用）</label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   readOnly
                   value={fullUrl}
-                  className="flex-1 min-w-0 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-2 text-[13px] text-[var(--admin-text)]"
+                  className="flex-1 min-w-0 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-2 text-[13px] text-[var(--admin-text)] font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => copyToClipboard(fullUrl, "full")}
                   className="shrink-0 px-4 py-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] text-[13px] text-[var(--admin-text)] hover:bg-[var(--admin-hover)]"
                 >
-                  {copied === "full" ? "已复制" : "复制"}
+                  {copied === "full" ? "✓ 已复制" : "复制"}
                 </button>
               </div>
             </div>
