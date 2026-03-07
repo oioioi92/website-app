@@ -251,6 +251,7 @@ export const themeSchema = z.object({
     social: "SOCIAL"
   }),
   routes: routesSchema.default({ promotion: "/promotion", bonus: "/bonus" }),
+  designStyle: z.enum(["default", "minimal", "luxury", "gaming", "soft"]).optional(),
 
   bottomNav: z.array(bottomNavItemSchema).max(10).default([]),
   uiGameCategories: z.array(safeText(30)).max(12).default([]),

@@ -94,7 +94,15 @@ export default async function PublicLayout({ children }: { children: ReactNode }
     ].filter(Boolean);
     if (parts.length) pageBgStyle = `body:has(.vp-shell) .min-h-screen { ${parts.join("; ")} !important; }`;
   }
-  const themeOverrideCss = [rootStyle, vpStyle, deskStyle, pageBgStyle].filter(Boolean).join("\n");
+  // 整体设计风格预设：圆角、主色、氛围一键切换
+  const designPresets: Record<string, string> = {
+    minimal: ".design-style-minimal .vp-shell { --vp-r-card: 8px; --vp-r-btn: 6px; --vp-accent: #94a3b8; --vp-accent2: #64748b; --vp-border: rgba(255,255,255,0.08); --vp-topbar-border: rgba(255,255,255,0.1); }",
+    luxury: ".design-style-luxury .vp-shell { --vp-r-card: 20px; --vp-r-btn: 14px; --vp-accent: #d4af37; --vp-accent2: #f4e4bc; --vp-gold: #d4af37; --vp-border: rgba(212,175,55,0.35); --vp-topbar-border: rgba(212,175,55,0.4); }",
+    gaming: ".design-style-gaming .vp-shell { --vp-r-card: 12px; --vp-r-btn: 10px; --vp-accent: #a855f7; --vp-accent2: #06b6d4; --vp-border: rgba(168,85,247,0.45); --vp-topbar-border: rgba(168,85,247,0.5); }",
+    soft: ".design-style-soft .vp-shell { --vp-r-card: 24px; --vp-r-btn: 16px; --vp-border: rgba(255,255,255,0.12); --vp-topbar-border: rgba(255,255,255,0.15); }",
+  };
+  const designStyleCss = theme?.designStyle && designPresets[theme.designStyle] ? designPresets[theme.designStyle] : "";
+  const themeOverrideCss = [rootStyle, vpStyle, deskStyle, pageBgStyle, designStyleCss].filter(Boolean).join("\n");
   return (
     <MobileShell theme={theme} chatUrl={chatUrl} socialLinks={social} useVividPortal={true}>
       {themeOverrideCss && (

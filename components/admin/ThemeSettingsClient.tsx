@@ -585,6 +585,21 @@ export function ThemeSettingsClient() {
       {/* 12. Theme colors & display */}
       <div className="admin-card p-6 space-y-6">
         <SectionTitle title={t("admin.site.sectionDisplay")} />
+        <div>
+          <label className={labelClass}>{t("admin.site.designStyleLabel")}</label>
+          <select
+            value={theme.designStyle ?? "default"}
+            onChange={(e) => patch({ designStyle: (e.target.value === "default" ? undefined : e.target.value) as ThemeConfig["designStyle"] })}
+            className={inputClass}
+          >
+            <option value="default">{t("admin.site.designStyleDefault")}</option>
+            <option value="minimal">{t("admin.site.designStyleMinimal")}</option>
+            <option value="luxury">{t("admin.site.designStyleLuxury")}</option>
+            <option value="gaming">{t("admin.site.designStyleGaming")}</option>
+            <option value="soft">{t("admin.site.designStyleSoft")}</option>
+          </select>
+          <p className="mt-1 text-[12px] text-[var(--compact-muted)]">{t("admin.site.designStyleHint")}</p>
+        </div>
         <p className="text-[13px] text-[var(--compact-muted)] -mt-2">{t("admin.site.themeColorsDesc")}</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>

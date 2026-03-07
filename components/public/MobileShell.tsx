@@ -33,9 +33,11 @@ export function MobileShell({
     bgStyle.backgroundPosition = "center";
     bgStyle.backgroundAttachment = "fixed";
   }
+  const designStyle = theme.designStyle && ["minimal", "luxury", "gaming", "soft", "default"].includes(theme.designStyle) ? theme.designStyle : undefined;
+  const wrapperClass = ["min-h-screen", "w-full", "min-w-0", "text-white", designStyle ? `design-style-${designStyle}` : ""].filter(Boolean).join(" ");
   return (
     <div
-      className="min-h-screen w-full min-w-0 text-white"
+      className={wrapperClass}
       style={Object.keys(bgStyle).length > 0 ? { ...bgStyle } : { backgroundColor: "var(--p44-grey-bg)" }}
     >
       <div data-frontedit="header">

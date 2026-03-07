@@ -175,6 +175,8 @@ export type ThemeConfig = {
   sectionTitles: ThemeSectionTitles;
   /** P0: 前台主要入口路由（/bonus、/promotion 等） */
   routes: ThemeRoutes;
+  /** 整体设计风格预设：一键切换圆角、阴影、主色氛围等，不单靠颜色 */
+  designStyle?: "default" | "minimal" | "luxury" | "gaming" | "soft";
   /** Bonus/Promotion list visual pattern */
   promotionPattern: "classic" | "image_tiles" | "image_strips";
   /** Bonus/Promotion font preset */
@@ -482,6 +484,7 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
       promotion: sanitizeText(t.routes?.promotion, 120) || "/promotion",
       bonus: sanitizeText(t.routes?.bonus, 120) || "/bonus"
     },
+    designStyle: (t.designStyle === "minimal" || t.designStyle === "luxury" || t.designStyle === "gaming" || t.designStyle === "soft" || t.designStyle === "default") ? t.designStyle : undefined,
     promotionPattern:
       t.promotionPattern === "image_tiles" || t.promotionPattern === "image_strips"
         ? t.promotionPattern
@@ -775,6 +778,11 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
     if (s === "compact" || s === "bold" || s === "default") return s;
     return defaults.promotionFontPreset;
   })();
+  const designStyle = (() => {
+    const s = asString(obj.designStyle);
+    if (s === "minimal" || s === "luxury" || s === "gaming" || s === "soft" || s === "default") return s;
+    return undefined;
+  })();
 
   const bottomNav = (() => {
     const list = Array.isArray(obj.bottomNav)
@@ -956,6 +964,7 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
     marqueeTextColor: sanitizeCssColor(asString(obj.marqueeTextColor)),
     sectionTitles,
     routes,
+    designStyle,
     promotionPattern,
     promotionFontPreset,
     bottomNav,
