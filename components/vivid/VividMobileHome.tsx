@@ -181,6 +181,16 @@ function useLiveTx(internalTestMode: boolean) {
   return items;
 }
 
+// ─── Category icons (emoji placeholder — replace with image URLs) ────────────
+const CAT_ICONS: Record<string, string> = {
+  Casino:    "🎰",
+  Sportbook: "⚽",
+  Slots:     "🎰",
+  "E-Sports": "🕹️",
+  Poker:     "🃏",
+  Fishing:   "🎣",
+};
+
 // ═══════════════════════════════════════════════════════════
 export function VividMobileHome({
   theme,
@@ -433,10 +443,10 @@ export function VividMobileHome({
         <div>
           <SectionHeader title={t("public.vivid.section.games") as string || "热门游戏"} />
 
-          {/* Category chips — horizontal scroll */}
+          {/* Category cards — icon + label, horizontal scroll */}
           <div
             className="scroll-touch-horizontal"
-            style={{ display: "flex", gap: 8, paddingBottom: 12, overflowX: "auto" }}
+            style={{ display: "flex", gap: 10, paddingBottom: 12, overflowX: "auto" }}
           >
             {categories.map((c) => {
               const active = c === activeCat;
@@ -447,20 +457,34 @@ export function VividMobileHome({
                   onClick={() => setActiveCat(c)}
                   style={{
                     flexShrink: 0,
-                    height: 36,
-                    padding: "0 16px",
-                    borderRadius: 9999,
-                    border: active ? "1.5px solid var(--vp-accent)" : "1.5px solid rgba(120,80,255,0.25)",
+                    display: "flex", flexDirection: "column",
+                    alignItems: "center", justifyContent: "center",
+                    gap: 6,
+                    width: 72, height: 72,
+                    borderRadius: 14,
+                    border: active
+                      ? "2px solid var(--vp-accent)"
+                      : "1.5px solid rgba(120,80,255,0.25)",
                     background: active
-                      ? "linear-gradient(135deg,rgba(168,85,247,0.3),rgba(99,102,241,0.3))"
-                      : "transparent",
-                    color: active ? "#e0d0ff" : "rgba(157,149,201,0.7)",
-                    fontSize: 12, fontWeight: 600, cursor: "pointer",
+                      ? "linear-gradient(145deg,rgba(168,85,247,0.35),rgba(99,102,241,0.3))"
+                      : "rgba(19,19,42,0.6)",
+                    color: active ? "#e0d0ff" : "rgba(157,149,201,0.75)",
+                    cursor: "pointer",
                     transition: "all .15s",
-                    whiteSpace: "nowrap",
                   }}
                 >
-                  {t(`public.vivid.games.cat.${c}`) || c}
+                  <span style={{ fontSize: 22, lineHeight: 1 }}>
+                    {CAT_ICONS[c] ?? "🎮"}
+                  </span>
+                  <span style={{
+                    fontSize: 9, fontWeight: 700,
+                    letterSpacing: "0.3px", textTransform: "uppercase",
+                    textAlign: "center", lineHeight: 1.2,
+                    maxWidth: 64, overflow: "hidden",
+                    display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as const,
+                  }}>
+                    {t(`public.vivid.games.cat.${c}`) || c}
+                  </span>
                 </button>
               );
             })}
