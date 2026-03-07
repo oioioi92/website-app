@@ -140,7 +140,6 @@ const SECTIONS = [
   { id: "otherImages", icon: "🗂️",  label: "其他图片" },
   { id: "downloadBar", icon: "📲",  label: "下载 App 条" },
   { id: "marquee",     icon: "📢",  label: "公告滚动" },
-  { id: "links",       icon: "🔗",  label: "链接与路径" },
   { id: "gameCategories", icon: "🎮", label: "游戏分类" },
   { id: "ageGate",     icon: "🔞",  label: "年龄验证" },
   { id: "advanced",    icon: "⚙️",  label: "高级（颜色）" },
@@ -176,14 +175,6 @@ export function ThemeSettingsClient() {
   function patch(partial: Partial<ThemeConfig>) {
     if (!theme) return;
     setTheme({ ...theme, ...partial });
-  }
-  function patchSectionTitles(partial: Partial<ThemeConfig["sectionTitles"]>) {
-    if (!theme) return;
-    setTheme({ ...theme, sectionTitles: { ...theme.sectionTitles, ...partial } });
-  }
-  function patchRoutes(partial: Partial<ThemeConfig["routes"]>) {
-    if (!theme) return;
-    setTheme({ ...theme, routes: { ...theme.routes, ...partial } });
   }
   function patchUiGameCategories(list: string[]) {
     if (!theme) return;
@@ -684,101 +675,6 @@ export function ThemeSettingsClient() {
     );
 
     /* ── 12. 链接与路径 ── */
-    if (activeSection === "links") return (
-      <div className="space-y-5">
-
-        {/* 按钮跳转链接 */}
-        <div className="admin-card p-5 space-y-4">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">🖱️</span>
-            <div>
-              <h3 className="font-bold text-[var(--compact-text)]">按钮跳转链接</h3>
-              <p className="text-[12px] text-[var(--compact-muted)]">前台每个按钮点击后会跳去哪个地址。填你的平台实际地址，例如 <span className="font-mono bg-[var(--compact-card-border)] px-1 rounded">https://xxx.com/login</span></p>
-            </div>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {[
-              { key: "loginUrl" as const,       label: "🔑 登录按钮",  desc: "点击「登录」跳去哪里" },
-              { key: "registerUrl" as const,    label: "✍️ 注册按钮",  desc: "点击「注册」跳去哪里" },
-              { key: "depositUrl" as const,     label: "💰 存款按钮",  desc: "点击「存款」跳去哪里" },
-              { key: "withdrawUrl" as const,    label: "🏧 提款按钮",  desc: "点击「提款」跳去哪里" },
-              { key: "chatDefaultUrl" as const, label: "💬 客服按钮",  desc: "点击「客服」跳去哪里" },
-            ].map(({ key, label, desc }) => (
-              <div key={key} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-3 space-y-2">
-                <div>
-                  <p className="text-sm font-semibold text-[var(--compact-text)]">{label}</p>
-                  <p className="text-[11px] text-[var(--compact-muted)]">{desc}</p>
-                </div>
-                <input
-                  type="text"
-                  value={(theme as Record<string, string | null | undefined>)[key] ?? ""}
-                  onChange={(e) => patch({ [key]: e.target.value || null } as Partial<ThemeConfig>)}
-                  className={inputClass}
-                  placeholder="https://..."
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 首页区块标题文字 */}
-        <div className="admin-card p-5 space-y-4">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">🔤</span>
-            <div>
-              <h3 className="font-bold text-[var(--compact-text)]">首页区块标题文字</h3>
-              <p className="text-[12px] text-[var(--compact-muted)]">首页各区块的大标题。不填则用英文默认值。可以改成中文或你想要的名称。</p>
-            </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[
-              { f: "quickActions" as const,    label: "⚡ 快捷入口区标题",  ph: "QUICK ACTIONS",   desc: "首页快捷按钮区域上方的标题" },
-              { f: "liveTransaction" as const, label: "📋 流水表区标题",    ph: "LIVE TRANSACTION", desc: "实时存提记录区域上方的标题" },
-              { f: "gameZone" as const,        label: "🎮 游戏区标题",      ph: "GAME ZONE",        desc: "游戏列表区域上方的标题" },
-              { f: "social" as const,          label: "📱 社交区标题",      ph: "SOCIAL",           desc: "社交媒体区域上方的标题" },
-            ].map(({ f, label, ph, desc }) => (
-              <div key={f} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-3 space-y-2">
-                <div>
-                  <p className="text-sm font-semibold text-[var(--compact-text)]">{label}</p>
-                  <p className="text-[11px] text-[var(--compact-muted)]">{desc}</p>
-                </div>
-                <input
-                  type="text"
-                  value={theme.sectionTitles?.[f] ?? ""}
-                  onChange={(e) => patchSectionTitles({ [f]: e.target.value })}
-                  className={inputClass}
-                  placeholder={ph}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 页面路径（技术设置） */}
-        <div className="admin-card p-5 space-y-4">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl">🗺️</span>
-            <div>
-              <h3 className="font-bold text-[var(--compact-text)]">页面路径（技术设置）</h3>
-              <p className="text-[12px] text-[var(--compact-muted)]">前台内部页面的路径，一般不需要修改。默认 <span className="font-mono bg-[var(--compact-card-border)] px-1 rounded">/promotion</span> 和 <span className="font-mono bg-[var(--compact-card-border)] px-1 rounded">/bonus</span>。</p>
-            </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-3 space-y-2">
-              <p className="text-sm font-semibold text-[var(--compact-text)]">🎁 促销页面路径</p>
-              <p className="text-[11px] text-[var(--compact-muted)]">促销列表页的网址路径</p>
-              <input type="text" value={theme.routes?.promotion ?? ""} onChange={(e) => patchRoutes({ promotion: e.target.value })} className={inputClass} placeholder="/promotion" />
-            </div>
-            <div className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-3 space-y-2">
-              <p className="text-sm font-semibold text-[var(--compact-text)]">💎 红利页面路径</p>
-              <p className="text-[11px] text-[var(--compact-muted)]">红利领取页的网址路径</p>
-              <input type="text" value={theme.routes?.bonus ?? ""} onChange={(e) => patchRoutes({ bonus: e.target.value })} className={inputClass} placeholder="/bonus" />
-            </div>
-          </div>
-        </div>
-
-      </div>
-    );
 
     /* ── 13. 游戏分类 ── */
     if (activeSection === "gameCategories") return (
