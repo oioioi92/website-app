@@ -42,6 +42,10 @@ export default async function PublicHomePage() {
             marqueeTextColor={theme.marqueeTextColor ?? null}
             livetxDepositColor={theme.livetxDepositColor ?? null}
             livetxWithdrawColor={theme.livetxWithdrawColor ?? null}
+            referralBlockBg={theme.referralBlockBg ?? null}
+            referralBlockBorder={theme.referralBlockBorder ?? null}
+            quickActions={theme.quickActions ?? []}
+            uiGameCategories={theme.uiGameCategories ?? []}
           />
         </div>
         <div className="lg:hidden">
@@ -119,6 +123,10 @@ export default async function PublicHomePage() {
             marqueeTextColor={mockTheme.marqueeTextColor ?? null}
             livetxDepositColor={mockTheme.livetxDepositColor ?? null}
             livetxWithdrawColor={mockTheme.livetxWithdrawColor ?? null}
+            referralBlockBg={mockTheme.referralBlockBg ?? null}
+            referralBlockBorder={mockTheme.referralBlockBorder ?? null}
+            quickActions={mockTheme.quickActions ?? []}
+            uiGameCategories={mockTheme.uiGameCategories ?? []}
           />
         </div>
         <div className="lg:hidden">
