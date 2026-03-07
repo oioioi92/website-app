@@ -165,23 +165,6 @@ export function HeroPromotionSlider({
           </div>
         </div>
       </div>
-      <div className={`flex items-center justify-center gap-1.5 ${compact ? "pb-2 pt-1" : "pb-3"}`}>
-        {list.map((s, i) => (
-          <button
-            key={s.id}
-            type="button"
-            aria-label={`第 ${i + 1} 张幻灯片`}
-            onClick={() => {
-              beginInteraction();
-              const el = scrollerRef.current;
-              if (el && viewportW) el.scrollTo({ left: i * viewportW, behavior: "smooth" });
-              setIndex(i);
-              endInteraction(380);
-            }}
-            className={`h-2 w-2 rounded-full ${i === index ? "bg-[color:var(--front-gold)]" : "bg-white/30"}`}
-          />
-        ))}
-      </div>
     </section>
   );
 }
