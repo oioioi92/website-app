@@ -599,7 +599,7 @@ export function ThemeSettingsClient() {
     /* ── 7. 促销设置 ── */
     if (activeSection === "promos") return (
       <div className="admin-card p-6 space-y-6">
-        <SectionTitle title="🎁 促销设置" desc="促销卡片的显示方式与图片高度。「图片区高度」同时控制手机版首页活动卡的图片高度（默认 140px）与促销列表页卡片高度。" />
+        <SectionTitle title="🎁 促销设置" desc="促销卡片的显示方式与图片高度。手机版首页活动卡图片区为 1:1 比例（居中裁切）；促销列表页使用下方「图片区高度」。" />
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label className={labelClass}>卡片排列方式</label>
@@ -639,7 +639,7 @@ export function ThemeSettingsClient() {
               }}
               className={inputClass}
             />
-            <p className="mt-1 text-[11px] text-[var(--compact-muted)]">80 ~ 600 px；手机首页活动卡建议 130~160，促销列表页建议 160~240</p>
+            <p className="mt-1 text-[11px] text-[var(--compact-muted)]">80 ~ 600 px，促销列表页建议 160~240。手机首页活动卡为 1:1 比例，不受此数值控制。</p>
           </div>
         </div>
         <div>

@@ -84,7 +84,7 @@ export function ReferralBlock({
                 type="button"
                 onClick={handleShare}
                 className="vp-btn vp-btn-primary"
-                style={{ height: 44, fontSize: 13, padding: "0 14px" }}
+                style={{ height: 48, fontSize: 13, padding: "0 14px" }}
               >
                 {t("public.vivid.referral.shareLink")}
               </button>
@@ -92,14 +92,14 @@ export function ReferralBlock({
                 type="button"
                 onClick={handleCopy}
                 className="vp-btn vp-btn-outline"
-                style={{ height: 44, fontSize: 13, padding: "0 14px" }}
+                style={{ height: 48, fontSize: 13, padding: "0 14px" }}
               >
                 {copied ? "✓ " + (t("public.vivid.referral.copied") ?? "Copied") : t("public.vivid.referral.copyLink")}
               </button>
               <Link
                 href="/me/referral"
                 className="vp-btn vp-btn-outline"
-                style={{ gridColumn: "1 / -1", display: "inline-flex", alignItems: "center", justifyContent: "center", height: 44, fontSize: 13, padding: "0 14px", marginTop: 2 }}
+                style={{ gridColumn: "1 / -1", display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, fontSize: 13, padding: "0 14px", marginTop: 2 }}
               >
                 {t("public.vivid.referral.checkDownlines")}
               </Link>
@@ -109,21 +109,21 @@ export function ReferralBlock({
               <Link
                 href={effectiveLoginHref}
                 className="vp-btn vp-btn-primary"
-                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", height: 44, fontSize: 13, padding: "0 14px" }}
+                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, fontSize: 13, padding: "0 14px" }}
               >
                 {t("public.vivid.referral.shareLink")}
               </Link>
               <Link
                 href={effectiveLoginHref}
                 className="vp-btn vp-btn-outline"
-                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", height: 44, fontSize: 13, padding: "0 14px" }}
+                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, fontSize: 13, padding: "0 14px" }}
               >
                 {t("public.vivid.referral.copyLink")}
               </Link>
               <Link
                 href={effectiveLoginHref}
                 className="vp-btn vp-btn-outline"
-                style={{ gridColumn: "1 / -1", display: "inline-flex", alignItems: "center", justifyContent: "center", height: 44, fontSize: 13, padding: "0 14px", marginTop: 2 }}
+                style={{ gridColumn: "1 / -1", display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, fontSize: 13, padding: "0 14px", marginTop: 2 }}
               >
                 {t("public.vivid.referral.checkDownlines")}
               </Link>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import "@/styles/vivid-portal.css";
 import { FallbackImage } from "@/components/FallbackImage";
 import { AnnouncementMarquee } from "@/components/public/AnnouncementMarquee";
@@ -44,6 +44,11 @@ const CARD: React.CSSProperties = {
   borderRadius: 16,
 };
 
+// ─── Live tx row height for vertical ticker ───────────────
+const LIVE_TX_ROW_HEIGHT = 44;
+const LIVE_TX_VISIBLE_ROWS = 3;
+const LIVE_TX_TICKER_INTERVAL_MS = 3000;
+
 // ─── Mobile Live Tx List ─────────────────────────────────
 function MobileLiveList({
   items,
@@ -62,6 +67,72 @@ function MobileLiveList({
   depositColor?: string | null;
   withdrawColor?: string | null;
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const slice = items.slice(0, 6);
+  const displayList = slice.length > 0 ? [...slice, ...slice] : [];
+
+  useEffect(() => {
+    if (slice.length === 0) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const singleSetHeight = slice.length * LIVE_TX_ROW_HEIGHT;
+    const id = window.setInterval(() => {
+      const next = el.scrollTop + LIVE_TX_ROW_HEIGHT;
+      el.scrollTop = next >= singleSetHeight ? 0 : next;
+    }, LIVE_TX_TICKER_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [slice.length]);
+
+  function renderRow(
+    tx: { id: string; userRefMasked: string; amountDisplay: string; kind: "deposit" | "withdraw" },
+    i: number,
+    key: string
+  ) {
+    const isDeposit = tx.kind === "deposit";
+    const dColor = depositColor ?? "#4ade80";
+    const wColor = withdrawColor ?? "#fbbf24";
+    const txColor = isDeposit ? dColor : wColor;
+    return (
+      <div
+        key={key}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          minHeight: LIVE_TX_ROW_HEIGHT,
+          height: LIVE_TX_ROW_HEIGHT,
+          padding: "0 16px",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{
+            fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 999,
+            background: `${txColor}26`,
+            color: txColor,
+            border: `1px solid ${txColor}55`,
+            textTransform: "uppercase",
+            flexShrink: 0,
+          }}>
+            {isDeposit ? depositLabel : withdrawLabel}
+          </span>
+          <span style={{
+            fontSize: 13, fontWeight: 600, letterSpacing: "0.3px",
+            color: "rgba(230,222,255,0.88)",
+            fontFamily: "'tabular-nums', monospace",
+            fontVariantNumeric: "tabular-nums lining-nums",
+          }}>
+            {tx.userRefMasked}
+          </span>
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 700, color: txColor, fontFamily: "monospace" }}>
+          {tx.amountDisplay}
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div style={{ ...CARD, overflow: "hidden" }}>
       {/* Header */}
@@ -76,61 +147,24 @@ function MobileLiveList({
           background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)",
           borderRadius: 999, padding: "3px 10px 3px 8px", fontSize: 10, fontWeight: 700, color: "#f87171",
         }}>
-          {/* animated live dot — ping ring + solid core */}
           <span style={{ position: "relative", width: 8, height: 8, flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-            <span className="animate-ping" style={{
-              position: "absolute", inset: 0, borderRadius: "50%",
-              background: "rgba(239,68,68,0.55)",
-            }} />
+            <span className="animate-ping" style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(239,68,68,0.55)" }} />
             <span style={{ position: "relative", width: 5, height: 5, borderRadius: "50%", background: "#ef4444", boxShadow: "0 0 5px rgba(239,68,68,0.7)" }} />
           </span>
           {liveLabel}
         </span>
       </div>
-      {/* List */}
-      <div style={{ padding: "8px 0" }}>
-        {items.slice(0, 6).map((tx, i) => {
-          const isDeposit = tx.kind === "deposit";
-          const dColor = depositColor ?? "#4ade80";
-          const wColor = withdrawColor ?? "#fbbf24";
-          const txColor = isDeposit ? dColor : wColor;
-          return (
-            <div key={tx.id} style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "8px 16px",
-              borderBottom: i < Math.min(items.length, 6) - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{
-                  fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 999,
-                  background: `${txColor}26`,
-                  color: txColor,
-                  border: `1px solid ${txColor}55`,
-                  textTransform: "uppercase",
-                  flexShrink: 0,
-                }}>
-                  {isDeposit ? depositLabel : withdrawLabel}
-                </span>
-                <span style={{
-                  fontSize: 13, fontWeight: 600, letterSpacing: "0.3px",
-                  color: "rgba(230,222,255,0.88)",
-                  fontFamily: "'tabular-nums', monospace",
-                  fontVariantNumeric: "tabular-nums lining-nums",
-                }}>
-                  {tx.userRefMasked}
-                </span>
-              </div>
-              <span style={{
-                fontSize: 13, fontWeight: 700,
-                color: txColor,
-                fontFamily: "monospace",
-              }}>
-                {tx.amountDisplay}
-              </span>
-            </div>
-          );
-        })}
-        {items.length === 0 && (
+      {/* List — vertical ticker: show 3 rows, scroll every 3s */}
+      <div
+        ref={scrollRef}
+        className="ui-hide-scrollbar"
+        style={{
+          height: LIVE_TX_ROW_HEIGHT * LIVE_TX_VISIBLE_ROWS,
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+      >
+        {displayList.length > 0 ? displayList.map((tx, i) => renderRow(tx, i, `${tx.id}-${i}`)) : (
           <div style={{ padding: "16px", textAlign: "center", color: "var(--vp-muted)", fontSize: 12 }}>—</div>
         )}
       </div>
@@ -147,8 +181,6 @@ const QUICK_ACTION_DEFS = [
 ];
 
 // ─── Live data hook (inline, tiny) ───────────────────────
-import { useEffect } from "react";
-
 function useLiveTx(internalTestMode: boolean) {
   const [items, setItems] = useState<Array<{ id: string; userRefMasked: string; amountDisplay: string; kind: "deposit" | "withdraw" }>>([]);
   useEffect(() => {
@@ -237,7 +269,6 @@ export function VividMobileHome({
   const txDeposit     = (t("public.vivid.liveTable.deposit")  || "存款")     as string;
   const txWithdraw    = (t("public.vivid.liveTable.withdraw") || "提款")     as string;
   const txLive        = (t("public.vivid.liveTable.live")     || "实时")     as string;
-  const promoImgH     = theme.vividPromoCardConfig?.imgHeight ?? 140;
 
   return (
     <div className="vp-shell lg:hidden" style={{ paddingBottom: 80 }}>
@@ -344,8 +375,8 @@ export function VividMobileHome({
                     display: "flex", flexDirection: "column",
                   }}
                 >
-                  {/* Image — height from admin config (vividPromoCardConfig.imgHeight) */}
-                  <div style={{ height: promoImgH, overflow: "hidden", borderRadius: "16px 16px 0 0", background: "var(--vp-card)" }}>
+                  {/* Image — 1:1 ratio per UI system (object-cover center) */}
+                  <div style={{ width: "100%", aspectRatio: "1/1", overflow: "hidden", borderRadius: "16px 16px 0 0", background: "var(--vp-card)" }}>
                     {(p.coverUrlMobilePromo || p.coverUrl) ? (
                       p.promoLink ? (
                         <a href={p.promoLink} target="_blank" rel="noopener noreferrer" style={{ display: "block", height: "100%" }}>
