@@ -505,11 +505,20 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
     },
     heroBanners: Array.isArray(t.heroBanners)
       ? t.heroBanners
-          .map((b) => ({
-            imageUrl: normalizeUrlForUi(b.imageUrl) ?? "",
-            linkUrl: normalizeUrlForUi(b.linkUrl),
-            title: b.title ? sanitizeText(b.title, 80) : null
-          }))
+          .map((b) => {
+            // Backward-compatible: accept multiple legacy keys.
+            const imageUrl = normalizeUrlForUi(
+              b.imageUrl
+              ?? b.logoUrl
+              ?? b.url
+              ?? b.src
+            ) ?? "";
+            return {
+              imageUrl,
+              linkUrl: normalizeUrlForUi(b.linkUrl),
+              title: b.title ? sanitizeText(b.title, 80) : null
+            };
+          })
           .filter((b) => Boolean(b.imageUrl))
           .slice(0, 12)
       : [],
@@ -654,7 +663,8 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
         .map((item) => {
           const row = asRecord(item);
           if (!row) return null;
-          const imageUrl = normalizeUrlForUi(row.imageUrl);
+          // Backward-compatible: accept older field names from old theme versions.
+          const imageUrl = normalizeUrlForUi(row.imageUrl ?? row.logoUrl ?? row.url ?? row.src);
           if (!imageUrl) return null;
           return {
             imageUrl,

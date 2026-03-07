@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import "@/styles/vivid-portal.css";
 import { VividTopbar } from "./VividTopbar";
 import { VividFooter } from "./VividFooter";
@@ -9,19 +8,10 @@ import { AnnouncementMarquee } from "@/components/public/AnnouncementMarquee";
 import { LiveTransactionTable } from "@/components/public/LiveTransactionTable";
 import { FallbackImage } from "@/components/FallbackImage";
 import { HeroPromotionSlider } from "@/components/public/HeroPromotionSlider";
-import { PromotionModal } from "@/components/public/PromotionModal";
 import { useLocale } from "@/lib/i18n/context";
 
 type Promo = { id: string; title: string; coverUrl: string | null; percentText?: string | null };
 type Game  = { id: string; name: string; logoUrl: string | null };
-type Social = { id: string; label: string; url: string };
-
-const QUICK_ACTIONS = [
-  { label: "Deposit",  href: "/deposit",     icon: "💰", color: "#7c3aed" },
-  { label: "Withdraw", href: "/withdraw",    icon: "📤", color: "#6366f1" },
-  { label: "Bonus",    href: "/bonus",       icon: "🎁", color: "#a855f7" },
-  { label: "Support",  href: "/chat",        icon: "💬", color: "#4f46e5" },
-];
 
 type HeroBanner = { imageUrl: string; linkUrl?: string | null };
 
@@ -35,11 +25,11 @@ export function VividHomeClient({
   internalTestMode = false,
   uiText = {},
   heroBanners = [],
-  marqueeText,
-  marqueeMessages,
-  marqueeBg,
-  marqueeBorder,
-  marqueeTextColor,
+  announcementMarqueeText = null,
+  marqueeMessages = [],
+  marqueeBg = null,
+  marqueeBorder = null,
+  marqueeTextColor = null,
 }: {
   siteName?: string;
   promotions?: Promo[];
@@ -50,7 +40,7 @@ export function VividHomeClient({
   internalTestMode?: boolean;
   uiText?: Record<string, string>;
   heroBanners?: HeroBanner[];
-  marqueeText?: string | null;
+  announcementMarqueeText?: string | null;
   marqueeMessages?: string[];
   marqueeBg?: string | null;
   marqueeBorder?: string | null;
@@ -62,6 +52,23 @@ export function VividHomeClient({
   const heroTitle = (uiText.vividHeroTitle?.trim() || t("public.vivid.hero.title")) as string;
   const topGames  = games.slice(0, 12);
   const topPromos = promotions.slice(0, 3);
+  const heroSlides = heroBanners
+    .filter((b) => b.imageUrl?.trim())
+    .slice(0, 5)
+    .map((b, i) => ({
+      id: `hero-${i}`,
+      imageUrl: b.imageUrl,
+      linkUrl: b.linkUrl ?? null,
+    }));
+  const fallbackSlides = topPromos
+    .filter((p) => p.coverUrl?.trim())
+    .slice(0, 5)
+    .map((p) => ({
+      id: `promo-${p.id}`,
+      imageUrl: p.coverUrl as string,
+      linkUrl: "/promotion",
+    }));
+  const displayHeroSlides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
 
   const QUICK_ACTIONS_I18N = [
     { label: t("public.actions.deposit"),  href: depositUrl,    icon: "💰", color: "#7c3aed" },
@@ -74,17 +81,23 @@ export function VividHomeClient({
     <div className="vp-shell">
       <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
 
+      <AnnouncementMarquee
+        text={announcementMarqueeText ?? (marqueeMessages.length > 0 ? undefined : (t("public.marquee.welcome") ?? "Welcome — Latest promotions and updates"))}
+        messages={marqueeMessages.length > 0 ? marqueeMessages : undefined}
+        variant="vivid"
+        marqueeBg={marqueeBg}
+        marqueeBorder={marqueeBorder}
+        textColor={marqueeTextColor}
+      />
+
       <div className="vp-w vp-main">
 
-        {/* ── 跑马灯（与手机版一致，Theme 公告滚动条配置） ── */}
-        <AnnouncementMarquee
-          text={marqueeText ?? (marqueeMessages?.length ? undefined : (t("public.marquee.welcome") ?? "Welcome — Latest promotions and updates"))}
-          messages={marqueeMessages?.length ? marqueeMessages : undefined}
-          variant="vivid"
-          marqueeBg={marqueeBg}
-          marqueeBorder={marqueeBorder}
-          textColor={marqueeTextColor}
-        />
+        {/* ── 首页轮播图（后台 Theme 配置） ── */}
+        {displayHeroSlides.length > 0 ? (
+          <section className="vp-card overflow-hidden" style={{ borderRadius: 16 }}>
+            <HeroPromotionSlider slides={displayHeroSlides} />
+          </section>
+        ) : null}
 
         {/* ── Hero ── */}
         <section className="vp-hero">
@@ -99,22 +112,6 @@ export function VividHomeClient({
             </Link>
           </div>
         </section>
-
-        {/* ── 首页轮播图（后台 Theme 配置） ── */}
-        {heroBanners.filter((b) => b.imageUrl?.trim()).length > 0 ? (
-          <section className="vp-card overflow-hidden" style={{ borderRadius: 16 }}>
-            <HeroPromotionSlider
-              slides={heroBanners
-                .filter((b) => b.imageUrl?.trim())
-                .slice(0, 5)
-                .map((b, i) => ({
-                  id: `hero-${i}`,
-                  imageUrl: b.imageUrl,
-                  linkUrl: b.linkUrl ?? null,
-                }))}
-            />
-          </section>
-        ) : null}
 
         {/* ── Quick Actions ── */}
         <section>

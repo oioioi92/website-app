@@ -273,7 +273,7 @@ export function ThemeSettingsClient() {
       <div className="admin-card p-6 space-y-6">
         <SectionTitle
           title="🏷️ Logo 与站名"
-          desc="Vivid 新版本顶栏只显示「网站名称」文字，不显示 Logo 图。Logo 图为桌面/旧版用。站名新版本必填。"
+          desc="Vivid 新版本顶栏只显示「网站名称」文字，不显示 Logo 图。Logo 图仅桌面/旧版用；旧版显示高度约 40~60px。"
         />
         <ImageInput
           label="Logo 图片"
@@ -381,7 +381,7 @@ export function ThemeSettingsClient() {
         <div className="admin-card p-6 space-y-6">
           <SectionTitle
             title="🔘 按钮图片"
-            desc="仅桌面版操作栏使用。Vivid 新版本顶栏为文字「登录」「注册」，没有这些按钮图，无需上传。"
+            desc="仅桌面版操作栏使用。Vivid 新版本顶栏为文字「登录」「注册」，没有这些按钮图，无需上传。旧版按钮建议保持约 10:3 比例。"
           />
           <div className="grid gap-6 sm:grid-cols-2">
             {btnDefs.map(({ key, label }) => (

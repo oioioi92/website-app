@@ -70,6 +70,23 @@ export function VividMobileHome({
     [games, activeCat]
   );
   const topPromos = promotions.slice(0, 6);
+  const heroSlides = (theme.heroBanners ?? [])
+    .filter((b) => b.imageUrl?.trim())
+    .slice(0, 5)
+    .map((b, i) => ({
+      id: `hero-${i}`,
+      imageUrl: b.imageUrl,
+      linkUrl: b.linkUrl ?? null,
+    }));
+  const fallbackSlides = topPromos
+    .filter((p) => p.coverUrl?.trim())
+    .slice(0, 5)
+    .map((p) => ({
+      id: `promo-${p.id}`,
+      imageUrl: p.coverUrl as string,
+      linkUrl: "/promotion",
+    }));
+  const displayHeroSlides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
 
   return (
     <div className="vp-shell lg:hidden">
@@ -194,19 +211,9 @@ export function VividMobileHome({
         </div>
 
         {/* ── 首页轮播图（后台 Theme 配置） ── */}
-        {(theme.heroBanners ?? []).filter((b) => b.imageUrl?.trim()).length > 0 ? (
+        {displayHeroSlides.length > 0 ? (
           <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--vp-border)" }}>
-            <HeroPromotionSlider
-              compact
-              slides={(theme.heroBanners ?? [])
-                .filter((b) => b.imageUrl?.trim())
-                .slice(0, 5)
-                .map((b, i) => ({
-                  id: `hero-${i}`,
-                  imageUrl: b.imageUrl,
-                  linkUrl: b.linkUrl ?? null,
-                }))}
-            />
+            <HeroPromotionSlider compact slides={displayHeroSlides} />
           </div>
         ) : null}
 

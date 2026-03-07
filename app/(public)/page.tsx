@@ -35,11 +35,11 @@ export default async function PublicHomePage() {
             internalTestMode={internalTestMode}
             uiText={theme.uiText ?? {}}
             heroBanners={theme.heroBanners ?? []}
-            marqueeText={theme.announcementMarqueeText ?? undefined}
-            marqueeMessages={theme.marqueeMessages?.length ? theme.marqueeMessages : undefined}
-            marqueeBg={theme.marqueeBg ?? undefined}
-            marqueeBorder={theme.marqueeBorder ?? undefined}
-            marqueeTextColor={theme.marqueeTextColor ?? undefined}
+            announcementMarqueeText={theme.announcementMarqueeText ?? null}
+            marqueeMessages={theme.marqueeMessages ?? []}
+            marqueeBg={theme.marqueeBg ?? null}
+            marqueeBorder={theme.marqueeBorder ?? null}
+            marqueeTextColor={theme.marqueeTextColor ?? null}
           />
         </div>
         <div className="lg:hidden">
@@ -110,11 +110,11 @@ export default async function PublicHomePage() {
             internalTestMode={internalTestMode}
             uiText={mockTheme.uiText ?? {}}
             heroBanners={mockTheme.heroBanners ?? []}
-            marqueeText={mockTheme.announcementMarqueeText ?? undefined}
-            marqueeMessages={mockTheme.marqueeMessages?.length ? mockTheme.marqueeMessages : undefined}
-            marqueeBg={mockTheme.marqueeBg ?? undefined}
-            marqueeBorder={mockTheme.marqueeBorder ?? undefined}
-            marqueeTextColor={mockTheme.marqueeTextColor ?? undefined}
+            announcementMarqueeText={mockTheme.announcementMarqueeText ?? null}
+            marqueeMessages={mockTheme.marqueeMessages ?? []}
+            marqueeBg={mockTheme.marqueeBg ?? null}
+            marqueeBorder={mockTheme.marqueeBorder ?? null}
+            marqueeTextColor={mockTheme.marqueeTextColor ?? null}
           />
         </div>
         <div className="lg:hidden">
