@@ -291,7 +291,7 @@ export function VividMobileHome({
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
           {theme.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={theme.logoUrl} alt={siteName} style={{ height: 42, width: "auto", objectFit: "contain", maxWidth: 180 }} />
+            <img src={theme.logoUrl} alt={siteName} style={{ height: 58, width: "auto", objectFit: "contain", maxWidth: 200 }} />
           ) : (
             <span style={{
               fontSize: 17, fontWeight: 800,

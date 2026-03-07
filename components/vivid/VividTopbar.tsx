@@ -57,7 +57,7 @@ export function VividTopbar({ siteName = "KINGDOM888", logoUrl = null, loginUrl 
       <div className="vp-w vp-bar-inner">
         <Link href="/" className="vp-logo" style={{ display: "flex", alignItems: "center" }}>
           {logoUrl
-            ? <Image src={logoUrl} alt={siteName} width={200} height={56} style={{ height: 48, width: "auto", maxWidth: 220, objectFit: "contain" }} unoptimized />
+            ? <Image src={logoUrl} alt={siteName} width={260} height={64} style={{ height: 64, width: "auto", maxWidth: 260, objectFit: "contain" }} unoptimized />
             : siteName
           }
         </Link>
