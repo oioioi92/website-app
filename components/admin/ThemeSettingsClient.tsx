@@ -318,8 +318,8 @@ export function ThemeSettingsClient() {
           label="Logo 图片"
           value={theme.logoUrl ?? ""}
           onChange={(v) => patch({ logoUrl: v || null })}
-          size="160×48 或 200×60 透明 PNG"
-          aspectRatio="4/1"
+          size="160×48 或 200×60 透明 PNG（10:3）"
+          aspectRatio="10/3"
           hint="仅桌面版/旧版布局显示。Vivid 新版手机端顶栏只显示「网站名称」文字，不显示 Logo 图。"
         />
         <div>
@@ -342,8 +342,8 @@ export function ThemeSettingsClient() {
           title="📣 首页主标语 (Vivid 桌面)"
           desc="桌面版首页左侧主卡上的文案。手机版首页已改为直接显示轮播图（欢迎主卡已删除），此配置目前仅影响桌面版宽屏布局。留空则使用默认多语言文案。"
         />
-        <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-[12px] text-amber-800">
-          📱 手机版首页已删除欢迎主卡，改为直接显示轮播图作为主视觉。以下文案只在桌面版（宽屏）显示。
+        <div className="rounded-xl bg-red-50 border border-red-300 p-3 text-[12px] text-red-700 font-semibold">
+          ⚠️ 暂未生效：桌面版已重构为「左栏 + 右栏游戏列表」两栏布局，主标语 Hero 卡已移除。以下字段填写后不会在前台显示，暂时保留供后续开发使用。
         </div>
         <div>
           <label className={labelClass}>限时优惠标签</label>
@@ -389,7 +389,7 @@ export function ThemeSettingsClient() {
           desc="手机版：轮播图是首页主视觉区（最顶部，取代了欢迎主卡）。桌面版：显示在内容区，最大宽 980px。最多 5 张。实际显示比例为 16:7（略比 16:9 更宽扁），建议上传 16:9 原图，系统居中裁切；重要内容请放图片中央。"
         />
         <div className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-[12px] text-blue-800 mb-2">
-          📐 实际显示比例 <strong>16:7</strong>（上下会略微裁切 16:9 图片）。建议上传 <strong>1200×675 或更宽</strong>，重要内容放中央安全区。
+          📐 实际显示比例 <strong>16:7</strong>（上下会略微裁切图片）。建议直接上传 <strong>1200×525 或更宽的 16:7 图片</strong>，重要内容放中央安全区。若上传 16:9（1200×675），系统会居中裁切，顶部和底部各约 75px 会被截掉。
         </div>
         <div className="space-y-4">
           {Array.from({ length: 5 }, (_, i) => (
@@ -399,7 +399,7 @@ export function ThemeSettingsClient() {
               key={i}
               index={i}
               banner={b}
-              imgSize="建议 1200×675 以上（16:9）"
+              imgSize="建议 1200×525 以上（16:7）"
               aspectRatio="16/7"
               shared
               onChange={(nb) => {
@@ -476,7 +476,7 @@ export function ThemeSettingsClient() {
       const actions = Array.from({ length: 8 }, (_, i) => (theme.quickActions ?? [])[i] ?? defaultAction);
       return (
         <div className="admin-card p-6 space-y-5">
-          <SectionTitle title="⚡ 快捷入口" desc="Vivid 手机版首页轮播图下方 4 个快捷按钮（取前 4 个）。最多配置 8 个，手机只显示前 4 个；可设图片（有图则显示图，无图则显示 emoji）。图标实际显示约 32px，但建议上传 56×56 或 64×64 以保证清晰。" />
+          <SectionTitle title="⚡ 快捷入口" desc="Vivid 首页轮播图下方 4 个快捷按钮（取前 4 个）。最多配置 8 个，手机只显示前 4 个；可设图片（有图则显示图，无图则显示 emoji）。图标显示尺寸：手机约 32px、桌面约 40px，建议上传 64×64 或 80×80 高清图以保证清晰。" />
           <div className="space-y-3">
             {actions.map((a, i) => (
               <div key={i} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4">
