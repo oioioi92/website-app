@@ -343,7 +343,7 @@ export function ThemeSettingsClient() {
       <div className="admin-card p-6 space-y-5">
         <SectionTitle
           title="📸 首页轮播图"
-          desc="桌面版或部分布局使用。Vivid 新版本移动首页主区为紫色主卡（见「首页主标语」），不显示轮播图。最多 5 张，建议 1200×450。"
+          desc="Vivid 新版本会用：桌面首页与手机首页主卡下方都会显示本轮播图。最多 5 张，建议 1200×450；可填点击链接。"
         />
         <div className="space-y-4">
           {Array.from({ length: 5 }, (_, i) => (

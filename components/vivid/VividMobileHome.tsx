@@ -5,6 +5,7 @@ import { useState, useMemo } from "react";
 import "@/styles/vivid-portal.css";
 import { FallbackImage } from "@/components/FallbackImage";
 import { AnnouncementMarquee } from "@/components/public/AnnouncementMarquee";
+import { HeroPromotionSlider } from "@/components/public/HeroPromotionSlider";
 import { LiveTransactionTable } from "@/components/public/LiveTransactionTable";
 import { ReferralBlock } from "@/components/public/ReferralBlock";
 import { inferUiGameCategory, UI_GAME_CATEGORIES, type UiGameCategory } from "@/lib/public/uiGameCategories";
@@ -191,6 +192,23 @@ export function VividMobileHome({
             </Link>
           </div>
         </div>
+
+        {/* ── 首页轮播图（后台 Theme 配置） ── */}
+        {(theme.heroBanners ?? []).filter((b) => b.imageUrl?.trim()).length > 0 ? (
+          <div style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--vp-border)" }}>
+            <HeroPromotionSlider
+              compact
+              slides={(theme.heroBanners ?? [])
+                .filter((b) => b.imageUrl?.trim())
+                .slice(0, 5)
+                .map((b, i) => ({
+                  id: `hero-${i}`,
+                  imageUrl: b.imageUrl,
+                  linkUrl: b.linkUrl ?? null,
+                }))}
+            />
+          </div>
+        ) : null}
 
         {/* ── Quick Actions ── */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>

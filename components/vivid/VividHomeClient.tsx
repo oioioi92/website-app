@@ -7,6 +7,7 @@ import { VividTopbar } from "./VividTopbar";
 import { VividFooter } from "./VividFooter";
 import { LiveTransactionTable } from "@/components/public/LiveTransactionTable";
 import { FallbackImage } from "@/components/FallbackImage";
+import { HeroPromotionSlider } from "@/components/public/HeroPromotionSlider";
 import { PromotionModal } from "@/components/public/PromotionModal";
 import { useLocale } from "@/lib/i18n/context";
 
@@ -21,6 +22,8 @@ const QUICK_ACTIONS = [
   { label: "Support",  href: "/chat",        icon: "💬", color: "#4f46e5" },
 ];
 
+type HeroBanner = { imageUrl: string; linkUrl?: string | null };
+
 export function VividHomeClient({
   siteName = "KINGDOM888",
   promotions = [],
@@ -29,6 +32,8 @@ export function VividHomeClient({
   registerUrl = "/register-wa",
   depositUrl = "/deposit",
   internalTestMode = false,
+  uiText = {},
+  heroBanners = [],
 }: {
   siteName?: string;
   promotions?: Promo[];
@@ -37,8 +42,13 @@ export function VividHomeClient({
   registerUrl?: string;
   depositUrl?: string;
   internalTestMode?: boolean;
+  uiText?: Record<string, string>;
+  heroBanners?: HeroBanner[];
 }) {
   const { t } = useLocale();
+  const heroBadge = (uiText.vividHeroBadge?.trim() || t("public.vivid.hero.badge")) as string;
+  const heroSubtitle = (uiText.vividHeroSubtitle?.trim() || t("public.vivid.hero.subtitle")) as string;
+  const heroTitle = (uiText.vividHeroTitle?.trim() || t("public.vivid.hero.title")) as string;
   const topGames  = games.slice(0, 12);
   const topPromos = promotions.slice(0, 3);
 
@@ -68,8 +78,8 @@ export function VividHomeClient({
 
         {/* ── Hero ── */}
         <section className="vp-hero">
-          <div className="vp-hero-badge">{t("public.vivid.hero.badge")}</div>
-          <h1>{t("public.vivid.hero.subtitle")} {siteName}<br />{t("public.vivid.hero.title")}</h1>
+          <div className="vp-hero-badge">{heroBadge}</div>
+          <h1>{heroSubtitle} {siteName}<br />{heroTitle}</h1>
           <div className="vp-hero-actions">
             <Link href={registerUrl} className="vp-btn vp-btn-primary">
               {t("public.vivid.hero.register")}
@@ -79,6 +89,22 @@ export function VividHomeClient({
             </Link>
           </div>
         </section>
+
+        {/* ── 首页轮播图（后台 Theme 配置） ── */}
+        {heroBanners.filter((b) => b.imageUrl?.trim()).length > 0 ? (
+          <section className="vp-card overflow-hidden" style={{ borderRadius: 16 }}>
+            <HeroPromotionSlider
+              slides={heroBanners
+                .filter((b) => b.imageUrl?.trim())
+                .slice(0, 5)
+                .map((b, i) => ({
+                  id: `hero-${i}`,
+                  imageUrl: b.imageUrl,
+                  linkUrl: b.linkUrl ?? null,
+                }))}
+            />
+          </section>
+        ) : null}
 
         {/* ── Quick Actions ── */}
         <section>

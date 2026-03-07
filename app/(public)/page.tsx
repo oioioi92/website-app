@@ -33,6 +33,8 @@ export default async function PublicHomePage() {
             registerUrl={theme.registerUrl ?? "/register-wa"}
             depositUrl={theme.depositUrl ?? "/deposit"}
             internalTestMode={internalTestMode}
+            uiText={theme.uiText ?? {}}
+            heroBanners={theme.heroBanners ?? []}
           />
         </div>
         <div className="lg:hidden">
@@ -101,6 +103,8 @@ export default async function PublicHomePage() {
             registerUrl={mockTheme.registerUrl ?? "/register-wa"}
             depositUrl={mockTheme.depositUrl ?? "/deposit"}
             internalTestMode={internalTestMode}
+            uiText={mockTheme.uiText ?? {}}
+            heroBanners={mockTheme.heroBanners ?? []}
           />
         </div>
         <div className="lg:hidden">
