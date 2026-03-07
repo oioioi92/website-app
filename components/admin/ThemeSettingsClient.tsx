@@ -20,6 +20,10 @@ function SizeBadge({ size, note }: { size: string; note?: string }) {
   );
 }
 
+function SectionTitle({ title }: { title: string }) {
+  return <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2 mb-4">{title}</h2>;
+}
+
 const emptyBanner: ThemeBanner = { imageUrl: "", linkUrl: null, title: null };
 
 export function ThemeSettingsClient() {
@@ -56,6 +60,16 @@ export function ThemeSettingsClient() {
   function patchRoutes(partial: Partial<ThemeConfig["routes"]>) {
     if (!theme) return;
     setTheme({ ...theme, routes: { ...theme.routes, ...partial } });
+  }
+
+  function patchUiGameCategories(list: string[]) {
+    if (!theme) return;
+    setTheme({ ...theme, uiGameCategories: list });
+  }
+
+  function patchCategoryPills(list: ThemeConfig["categoryPills"]) {
+    if (!theme) return;
+    setTheme({ ...theme, categoryPills: list });
   }
 
   function patchAgeGate(partial: Partial<ThemeConfig["ageGate"]>) {
@@ -124,8 +138,9 @@ export function ThemeSettingsClient() {
         </a>
       </div>
 
+      {/* 1. Site & entry URLs */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionEntry")}</h2>
+        <SectionTitle title={t("admin.site.sectionEntry")} />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>{t("admin.site.siteName")}</label>
@@ -158,8 +173,9 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* ── 2. 顶栏与跑马灯 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionMarquee")}</h2>
+        <SectionTitle title={t("admin.site.sectionMarquee")} />
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className={labelClass}>{t("admin.site.marqueeSingle")}</label>
@@ -188,6 +204,13 @@ export function ThemeSettingsClient() {
               <input type="text" value={String((theme as unknown as Record<string, string | null | undefined>)[key] ?? "")} onChange={(e) => patch({ [key]: e.target.value || null } as Partial<ThemeConfig>)} className={inputClass} placeholder={ph ?? (phKey ? t(phKey) : "")} />
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* ── 3. 首页区块标题与路径 ── */}
+      <div className="admin-card p-6 space-y-6">
+        <SectionTitle title={t("admin.site.sectionTitlesAndRoutes")} />
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>{t("admin.site.quickActionsTitle")}</label>
             <input type="text" value={theme.sectionTitles?.quickActions ?? ""} onChange={(e) => patchSectionTitles({ quickActions: e.target.value })} className={inputClass} placeholder="QUICK ACTIONS" />
@@ -215,8 +238,54 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* 3b. Game categories & pills */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionAgeGate")}</h2>
+        <SectionTitle title={t("admin.site.sectionGameCategories")} />
+        <div>
+          <label className={labelClass}>{t("admin.site.uiGameCategoriesLabel")}</label>
+          <input
+            type="text"
+            value={(theme.uiGameCategories ?? []).join(", ")}
+            onChange={(e) => patchUiGameCategories(e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
+            className={inputClass}
+            placeholder="Casino, Sportbook, Slots, E-Sports, Poker, Fishing"
+          />
+          <p className="mt-1 text-[11px] text-[var(--compact-muted)]">{t("admin.site.optional") ?? "Optional"} — comma-separated</p>
+        </div>
+        <div>
+          <label className={labelClass}>{t("admin.site.categoryPillsLabel")}</label>
+          {Array.from({ length: 12 }, (_, i) => (theme.categoryPills ?? [])[i] ?? { id: "", label: "" }).map((p, i) => (
+            <div key={i} className="mb-2 flex gap-2">
+              <input
+                type="text"
+                value={p.id}
+                onChange={(e) => {
+                  const next = Array.from({ length: 12 }, (_, j) => (theme.categoryPills ?? [])[j] ?? { id: "", label: "" });
+                  next[i] = { ...next[i]!, id: e.target.value };
+                  patchCategoryPills(next);
+                }}
+                className={`${inputClass} flex-1 max-w-[120px]`}
+                placeholder="id"
+              />
+              <input
+                type="text"
+                value={p.label}
+                onChange={(e) => {
+                  const next = Array.from({ length: 12 }, (_, j) => (theme.categoryPills ?? [])[j] ?? { id: "", label: "" });
+                  next[i] = { ...next[i]!, label: e.target.value };
+                  patchCategoryPills(next);
+                }}
+                className={`${inputClass} flex-1`}
+                placeholder="Label"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. Age gate */}
+      <div className="admin-card p-6 space-y-6">
+        <SectionTitle title={t("admin.site.sectionAgeGate")} />
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex items-center gap-2">
             <input type="checkbox" id="ageGateEnabled" checked={theme.ageGate?.enabled ?? false} onChange={(e) => patchAgeGate({ enabled: e.target.checked })} className="rounded border-[var(--compact-card-border)]" />
@@ -233,8 +302,9 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* ── 5. 下载 App 条 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionDownloadBar")}</h2>
+        <SectionTitle title={t("admin.site.sectionDownloadBar")} />
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex items-center gap-2">
             <input type="checkbox" id="downloadBarEnabled" checked={theme.downloadBar?.enabled ?? false} onChange={(e) => patchDownloadBar({ enabled: e.target.checked })} className="rounded border-[var(--compact-card-border)]" />
@@ -263,8 +333,9 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* ── 6. 快捷操作栏（存款/提款按钮） ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionActionBar")}</h2>
+        <SectionTitle title={t("admin.site.sectionActionBar")} />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>{t("admin.site.depositColor")}</label>
@@ -302,9 +373,10 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* ── 7. 首页轮播图 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionHeroBanners")}</h2>
-        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.heroBannersDesc")}</p>
+        <SectionTitle title={t("admin.site.sectionHeroBanners")} />
+        <p className="text-[13px] text-[var(--compact-muted)] -mt-2">{t("admin.site.heroBannersDesc")}</p>
         {(theme.heroBanners ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner).slice(0, 5).map((b, i) => (
           <div key={i} className="grid gap-3 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-3">
             <div>
@@ -356,9 +428,10 @@ export function ThemeSettingsClient() {
         ))}
       </div>
 
+      {/* ── 8. 子公司/品牌条 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionSubsidiaries")}</h2>
-        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.subsidiariesDesc")}</p>
+        <SectionTitle title={t("admin.site.sectionSubsidiaries")} />
+        <p className="text-[13px] text-[var(--compact-muted)] -mt-2">{t("admin.site.subsidiariesDesc")}</p>
         {(theme.subsidiaries ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner).slice(0, 5).map((b, i) => (
           <div key={i} className="grid gap-3 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-3">
             <div>
@@ -410,9 +483,10 @@ export function ThemeSettingsClient() {
         ))}
       </div>
 
+      {/* ── 9. 快捷入口（首页按钮） ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionQuickActions") ?? "Quick Actions（快捷入口）"}</h2>
-        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.quickActionsDesc") ?? "每项可填 iconUrl，前台即用照片代替图标/文字。"}</p>
+        <SectionTitle title={t("admin.site.sectionQuickActions") ?? "Quick Actions"} />
+        <p className="text-[13px] text-[var(--compact-muted)] -mt-2">{t("admin.site.quickActionsDesc") ?? "每项可填 iconUrl，前台即用照片代替图标/文字。"}</p>
         {(theme.quickActions ?? []).concat({ label: "", url: "", iconUrl: null, iconKey: null, style: "gold" }).slice(0, 8).map((a, i) => (
           <div key={i} className="grid gap-3 rounded-lg border border-[var(--compact-card-border)] p-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
@@ -431,9 +505,10 @@ export function ThemeSettingsClient() {
         ))}
       </div>
 
+      {/* ── 10. 底部导航 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionBottomNav") ?? "Bottom Nav（底部导航）"}</h2>
-        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.bottomNavDesc") ?? "每项可填 iconUrl，前台底部导航即用照片代替 emoji。"}</p>
+        <SectionTitle title={t("admin.site.sectionBottomNav") ?? "Bottom Nav"} />
+        <p className="text-[13px] text-[var(--compact-muted)] -mt-2">{t("admin.site.bottomNavDesc") ?? "每项可填 iconUrl，前台底部导航即用照片代替 emoji。"}</p>
         {(() => {
           const defaultSix: ThemeConfig["bottomNav"] = [
             { href: "/", label: "HOME", icon: "🏠", iconUrl: null, badge: null },
@@ -475,8 +550,9 @@ export function ThemeSettingsClient() {
         })()}
       </div>
 
+      {/* ── 11. 图片与背景 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionImages")}</h2>
+        <SectionTitle title={t("admin.site.sectionImages")} />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>{t("admin.site.partnershipBadge")} <SizeBadge size="600×120" note="长条徽章" /></label>
@@ -505,9 +581,10 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* ── 12. 主题色与展示风格 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionDisplay")}</h2>
-        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.themeColorsDesc")}</p>
+        <SectionTitle title={t("admin.site.sectionDisplay")} />
+        <p className="text-[13px] text-[var(--compact-muted)] -mt-2">{t("admin.site.themeColorsDesc")}</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>{t("admin.site.themePrimaryColor")}</label>
@@ -545,9 +622,10 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* ── 13. Vivid 风格（手机端紫黑主题） ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionVividColors")}</h2>
-        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.vividCssHint")}</p>
+        <SectionTitle title={t("admin.site.sectionVividColors")} />
+        <p className="text-[13px] text-[var(--compact-muted)] -mt-2">{t("admin.site.vividCssHint")}</p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { key: "vividBg", labelKey: "admin.site.vividBg", ph: "#080810" },
@@ -572,9 +650,10 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* ── 14. 桌面版风格 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionDeskColors")}</h2>
-        <p className="text-[13px] text-[var(--compact-muted)]">{t("admin.site.deskCssHint")}</p>
+        <SectionTitle title={t("admin.site.sectionDeskColors")} />
+        <p className="text-[13px] text-[var(--compact-muted)] -mt-2">{t("admin.site.deskCssHint")}</p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { key: "deskBg", labelKey: "admin.site.deskBg", ph: "#0E1014" },
@@ -591,8 +670,9 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* ── 15. 流水 / 推荐 / 客服小窗颜色 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionLivetxReferralChat")}</h2>
+        <SectionTitle title={t("admin.site.sectionLivetxReferralChat")} />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { key: "livetxDepositColor", labelKey: "admin.site.livetxDepositColor", ph: "#1e3a5f" },
@@ -609,8 +689,9 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
+      {/* ── 16. 全局字体与语义色 ── */}
       <div className="admin-card p-6 space-y-6">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">{t("admin.site.sectionFrontSemanticFont")}</h2>
+        <SectionTitle title={t("admin.site.sectionFrontSemanticFont")} />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { key: "frontAccent", labelKey: "admin.site.frontAccent", ph: "#06b6d4" },
@@ -628,11 +709,9 @@ export function ThemeSettingsClient() {
         </div>
       </div>
 
-      {/* ── Vivid Portal 促销卡片配置 ── */}
+      {/* ── 17. Vivid 促销卡片 ── */}
       <div className="admin-card p-6 space-y-5">
-        <h2 className="text-sm font-semibold text-[var(--compact-text)] border-b border-[var(--compact-card-border)] pb-2">
-          {t("admin.site.sectionVividPromoCard")}
-        </h2>
+        <SectionTitle title={t("admin.site.sectionVividPromoCard")} />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
