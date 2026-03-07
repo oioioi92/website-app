@@ -11,12 +11,35 @@ import { HeroPromotionSlider } from "@/components/public/HeroPromotionSlider";
 import { useLocale } from "@/lib/i18n/context";
 import type { ThemeConfig } from "@/lib/public/theme";
 
-type Promo = { id: string; title: string; coverUrl: string | null; percentText?: string | null };
-type Game  = { id: string; name: string; logoUrl: string | null };
+type Promo = { id: string; title: string; coverUrl: string | null; percentText?: string | null; promoLink?: string | null };
+type Game = { id: string; name: string; logoUrl: string | null };
 
 type HeroBanner = { imageUrl: string; linkUrl?: string | null };
 
+// ─── Desktop: same design language as mobile ─────────────────
+const CARD_STYLE: React.CSSProperties = {
+  background: "var(--vp-card)",
+  border: "1px solid rgba(120,80,255,0.2)",
+  borderRadius: 16,
+};
+
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+      <span style={{
+        width: 4, height: 18, borderRadius: 2, flexShrink: 0,
+        background: "linear-gradient(180deg,var(--vp-accent),var(--vp-accent2))",
+        display: "inline-block",
+      }} />
+      <span style={{ fontSize: 18, fontWeight: 700, color: "var(--vp-text)", lineHeight: 1 }}>
+        {title}
+      </span>
+    </div>
+  );
+}
+
 export function VividHomeClient({
+  theme,
   siteName = "KINGDOM888",
   promotions = [],
   games = [],
@@ -31,8 +54,8 @@ export function VividHomeClient({
   marqueeBg = null,
   marqueeBorder = null,
   marqueeTextColor = null,
-  theme: themeProp = null,
 }: {
+  theme?: ThemeConfig;
   siteName?: string;
   promotions?: Promo[];
   games?: Game[];
@@ -47,14 +70,13 @@ export function VividHomeClient({
   marqueeBg?: string | null;
   marqueeBorder?: string | null;
   marqueeTextColor?: string | null;
-  theme?: ThemeConfig | null;
 }) {
   const { t } = useLocale();
   const heroBadge = (uiText.vividHeroBadge?.trim() || t("public.vivid.hero.badge")) as string;
   const heroSubtitle = (uiText.vividHeroSubtitle?.trim() || t("public.vivid.hero.subtitle")) as string;
   const heroTitle = (uiText.vividHeroTitle?.trim() || t("public.vivid.hero.title")) as string;
-  const topGames  = games.slice(0, 12);
-  const topPromos = promotions.slice(0, 3);
+  const topGames = games.slice(0, 12);
+  const topPromos = promotions.slice(0, 6);
   const heroSlides = heroBanners
     .filter((b) => b.imageUrl?.trim())
     .slice(0, 5)
@@ -73,11 +95,11 @@ export function VividHomeClient({
     }));
   const displayHeroSlides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
 
-  const QUICK_ACTIONS_I18N = [
-    { label: t("public.actions.deposit"),  href: depositUrl,    icon: "💰", color: "#7c3aed" },
-    { label: t("public.actions.withdraw"), href: "/withdraw",   icon: "📤", color: "#6366f1" },
-    { label: t("public.vivid.bottomNav.bonus"), href: "/bonus", icon: "🎁", color: "#a855f7" },
-    { label: t("public.nav.support"),      href: "/chat",       icon: "💬", color: "#4f46e5" },
+  const QUICK_ACTIONS = [
+    { label: t("public.actions.deposit"),  href: depositUrl,    icon: "💰" },
+    { label: t("public.actions.withdraw"), href: "/withdraw",   icon: "📤" },
+    { label: t("public.vivid.quickActions.bonus"), href: "/bonus", icon: "🎁" },
+    { label: t("public.nav.support"),      href: "/chat",       icon: "💬" },
   ];
 
   return (
@@ -95,34 +117,30 @@ export function VividHomeClient({
 
       <div className="vp-w vp-main">
 
-        {/* ── 首页轮播图（后台 Theme 配置） ── */}
+        {/* ── Banner: same as mobile (max 980px, 16:7), same radius ── */}
         {displayHeroSlides.length > 0 ? (
-          <section className="vp-card mx-auto w-full max-w-[980px] overflow-hidden" style={{ borderRadius: 16 }}>
+          <section className="overflow-hidden mx-auto w-full max-w-[980px]" style={{ ...CARD_STYLE, borderRadius: 20 }}>
             <HeroPromotionSlider compact slides={displayHeroSlides} />
           </section>
         ) : null}
 
-        {/* ── Hero ── */}
+        {/* ── Hero: same tone as mobile (badge + title + CTA) ── */}
         <section className="vp-hero">
           <div className="vp-hero-badge">{heroBadge}</div>
           <h1>{heroSubtitle} {siteName}<br />{heroTitle}</h1>
           <div className="vp-hero-actions">
-            <Link href={registerUrl} className="vp-btn vp-btn-primary">
-              {t("public.vivid.hero.register")}
-            </Link>
-            <Link href={depositUrl} className="vp-btn vp-btn-outline">
-              {t("public.vivid.hero.deposit")}
-            </Link>
+            <Link href={registerUrl} className="vp-btn vp-btn-primary">{t("public.vivid.hero.register")}</Link>
+            <Link href={depositUrl} className="vp-btn vp-btn-outline">{t("public.vivid.hero.deposit")}</Link>
           </div>
         </section>
 
-        {/* ── Quick Actions ── */}
+        {/* ── Quick Actions: same card shell as mobile, 4 columns ── */}
         <section>
-          <div className="vp-actions-grid">
-            {QUICK_ACTIONS_I18N.map((a) => (
-              <Link key={a.label} href={a.href} className="vp-action-item">
-                <div className="icon" style={{ background: `${a.color}30`, border: `1px solid ${a.color}55` }}>
-                  {a.icon}
+          <div className="vp-actions-grid vp-actions-unified">
+            {QUICK_ACTIONS.map((a) => (
+              <Link key={a.label} href={a.href} className="vp-action-item vp-action-unified">
+                <div className="icon">
+                  <span style={{ fontSize: 26 }}>{a.icon}</span>
                 </div>
                 <span>{a.label}</span>
               </Link>
@@ -130,71 +148,102 @@ export function VividHomeClient({
           </div>
         </section>
 
-        {/* ── Live Transaction + Featured Promos ── */}
+        {/* ── Live Transaction + Promotions: same design language ── */}
         <section className="grid gap-6 lg:grid-cols-2">
-          <div className="vp-card vp-livetx-card flex flex-col gap-0 overflow-hidden">
+          {/* Live: same card shell as mobile, theme colors, table has own title + live badge */}
+          <div style={{ ...CARD_STYLE, overflow: "hidden", padding: "16px 16px 12px" }}>
             <LiveTransactionTable
-              internalTestMode={internalTestMode}
-              variant="v3"
-              title={t("public.vivid.liveTable.title") || "实时交易"}
-              depositLabel={t("public.vivid.liveTable.deposit") || "存款"}
-              withdrawLabel={t("public.vivid.liveTable.withdraw") || "提款"}
-              liveLabel={t("public.vivid.liveTable.live") || "实时"}
-              loadingText={t("public.vivid.liveTable.loading") || "加载中…"}
-              demoLabel={t("public.vivid.liveTable.demo") || "DEMO"}
-              depositColor={themeProp?.livetxDepositColor ?? undefined}
-              withdrawColor={themeProp?.livetxWithdrawColor ?? undefined}
-            />
+                internalTestMode={internalTestMode}
+                variant="v3"
+                depositColor={theme?.livetxDepositColor ?? undefined}
+                withdrawColor={theme?.livetxWithdrawColor ?? undefined}
+                title={t("public.vivid.liveTable.title")}
+                depositLabel={t("public.vivid.liveTable.deposit")}
+                withdrawLabel={t("public.vivid.liveTable.withdraw")}
+                liveLabel={t("public.vivid.liveTable.live")}
+                demoLabel={t("public.vivid.liveTable.demo")}
+                loadingText={t("public.vivid.liveTable.loading")}
+              />
           </div>
-          <div className="flex flex-col gap-4">
+
+          {/* Promotions: same card as mobile (1:1 image, title, buttons), 1 column in sidebar */}
+          <div>
+            <SectionHeader title={t("public.vivid.section.promos")} />
             {topPromos.length > 0 ? (
-              topPromos.map((p) => (
-                <div key={p.id} className="vp-promo-card vp-promo-card-row overflow-hidden" style={{ borderRadius: 14 }}>
-                  <div style={{ display: "flex", flex: 1, gap: 0, overflow: "hidden", borderRadius: "inherit" }}>
-                    {p.coverUrl && (
-                      <div className="vp-promo-row-img" style={{ flexShrink: 0 }}>
-                        <FallbackImage src={p.coverUrl} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
-                      </div>
-                    )}
-                    <div className="vp-promo-body">
-                      {p.percentText && (
-                        <span className="vp-badge vp-badge-gold">{p.percentText}</span>
+              <div className="flex flex-col gap-4">
+                {topPromos.map((p) => (
+                  <div
+                    key={p.id}
+                    style={{
+                      ...CARD_STYLE,
+                      display: "flex",
+                      flexDirection: "column",
+                      overflow: "hidden",
+                      padding: 0,
+                    }}
+                  >
+                    <div style={{ width: "100%", aspectRatio: "1/1", overflow: "hidden", background: "var(--vp-card2)" }}>
+                      {p.coverUrl ? (
+                        p.promoLink ? (
+                          <a href={p.promoLink} target="_blank" rel="noopener noreferrer" style={{ display: "block", height: "100%" }}>
+                            <FallbackImage src={p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
+                          </a>
+                        ) : (
+                          <Link href="/promotion" style={{ display: "block", height: "100%" }}>
+                            <FallbackImage src={p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
+                          </Link>
+                        )
+                      ) : (
+                        <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 }}>🎁</div>
                       )}
-                      <p className="font-semibold text-sm m-0" style={{ color: "var(--vp-text)" }}>{p.title}</p>
-                      <Link href="/promotion" className="vp-btn vp-btn-primary" style={{ height: 34, fontSize: 13, marginTop: "auto" }}>
-                        Claim
-                      </Link>
+                    </div>
+                    <div style={{ padding: "12px 16px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+                      {p.percentText && (
+                        <span style={{
+                          display: "inline-flex", width: "fit-content",
+                          padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 700,
+                          background: "rgba(245,158,11,0.2)", border: "1px solid rgba(245,158,11,0.4)", color: "#fcd34d",
+                        }}>
+                          {p.percentText}
+                        </span>
+                      )}
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "var(--vp-text)", lineHeight: 1.4, minHeight: 40 }}>
+                        {p.title}
+                      </p>
+                      <div style={{ display: "flex", gap: 8, height: 36 }}>
+                        <Link href="/deposit" className="vp-btn vp-btn-primary" style={{ flex: 1, height: 36, fontSize: 13, minWidth: 0 }}>
+                          {t("public.vivid.promo.claim") || "Claim"}
+                        </Link>
+                        <Link href="/promotion" className="vp-btn vp-btn-outline" style={{ flexShrink: 0, height: 36, fontSize: 12, padding: "0 12px" }}>
+                          {t("public.vivid.promo.tnc") || "Terms"}
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
-              <div className="vp-card flex flex-col items-center justify-center gap-3 py-10 text-center">
-                <span className="text-4xl">🎁</span>
-                <p className="text-sm m-0" style={{ color: "var(--vp-muted)" }}>No promotions yet — stay tuned!</p>
-                <Link href="/promotion" className="vp-btn vp-btn-primary" style={{ height: 34, fontSize: 13 }}>View Promos</Link>
+              <div style={{ ...CARD_STYLE, padding: 32, textAlign: "center" }}>
+                <span style={{ fontSize: 40 }}>🎁</span>
+                <p style={{ margin: "12px 0 16px", fontSize: 14, color: "var(--vp-muted)" }}>{t("public.vivid.promo.empty") || "No promotions yet — stay tuned!"}</p>
+                <Link href="/promotion" className="vp-btn vp-btn-primary" style={{ height: 36, fontSize: 13 }}>{t("public.vivid.promo.viewAll") || "View Promos"}</Link>
               </div>
             )}
           </div>
         </section>
 
-        {/* ── Popular Games ── */}
+        {/* ── Popular Games: same section header + same card shell as mobile ── */}
         <section>
-          <div className="vp-section-head">
-            <h2 className="vp-section-title m-0">
-              <span className="dot" />
-              {t("public.vivid.section.games")}
-            </h2>
-          </div>
+          <SectionHeader title={t("public.vivid.section.games")} />
           {topGames.length > 0 ? (
-            <div className="vp-tile-grid">
+            <div className="vp-tile-grid vp-tile-unified">
               {topGames.map((g) => (
-                <Link key={g.id} href={`/games/play/${g.id}`} className="vp-tile">
+                <Link key={g.id} href={`/games/play/${g.id}`} className="vp-tile vp-tile-unified">
                   <div className="thumb">
                     {g.logoUrl ? (
-                      <FallbackImage src={g.logoUrl} alt={g.name} className="h-full w-full object-cover" />
+                      <FallbackImage src={g.logoUrl} alt={g.name} className="h-full w-full object-cover object-center" />
                     ) : (
-                      <span>🎮</span>
+                      <span style={{ opacity: 0.6 }}>🎮</span>
                     )}
                   </div>
                   <div className="label">{g.name}</div>
@@ -202,27 +251,25 @@ export function VividHomeClient({
               ))}
             </div>
           ) : (
-            <div className="vp-card flex items-center justify-center py-12 text-center">
-              <div>
-                <span className="text-5xl block mb-3">🎮</span>
-                <p className="m-0 text-sm" style={{ color: "var(--vp-muted)" }}>Games coming soon!</p>
-                <Link href="/games" className="vp-btn vp-btn-primary" style={{ marginTop: 16, height: 36, fontSize: 13 }}>Browse Games</Link>
-              </div>
+            <div style={{ ...CARD_STYLE, padding: 48, textAlign: "center" }}>
+              <span style={{ fontSize: 48 }}>🎮</span>
+              <p style={{ margin: "16px 0", fontSize: 14, color: "var(--vp-muted)" }}>{t("public.vivid.games.noGames") || "Games coming soon!"}</p>
+              <Link href="/games" className="vp-btn vp-btn-primary" style={{ height: 36, fontSize: 13 }}>{t("public.vivid.games.browse") || "Browse Games"}</Link>
             </div>
           )}
         </section>
 
-        {/* ── Trust Strip ── */}
+        {/* ── Trust strip: same card style ── */}
         <section className="grid gap-4 sm:grid-cols-3">
           {[
             { icon: "🔒", titleKey: "public.vivid.trust.secureTitle",  descKey: "public.vivid.trust.secureDesc" },
             { icon: "⚡", titleKey: "public.vivid.trust.payoutTitle",   descKey: "public.vivid.trust.payoutDesc" },
-            { icon: "🎧", titleKey: "public.vivid.trust.supportTitle",  descKey: "public.vivid.trust.supportDesc" },
+            { icon: "🎧", titleKey: "public.vivid.trust.supportTitle", descKey: "public.vivid.trust.supportDesc" },
           ].map((item) => (
-            <div key={item.titleKey} className="vp-card text-center" style={{ padding: "24px 20px" }}>
-              <div className="text-3xl mb-3">{item.icon}</div>
-              <p className="font-bold text-sm m-0 mb-1" style={{ color: "var(--vp-text)" }}>{t(item.titleKey)}</p>
-              <p className="text-xs m-0" style={{ color: "var(--vp-muted)" }}>{t(item.descKey)}</p>
+            <div key={item.titleKey} style={{ ...CARD_STYLE, padding: "24px 20px", textAlign: "center" }}>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>{item.icon}</div>
+              <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "var(--vp-text)" }}>{t(item.titleKey)}</p>
+              <p style={{ margin: 0, fontSize: 12, color: "var(--vp-muted)" }}>{t(item.descKey)}</p>
             </div>
           ))}
         </section>
