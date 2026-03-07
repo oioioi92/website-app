@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import "@/styles/vivid-portal.css";
 import { VividTopbar } from "./VividTopbar";
@@ -10,10 +11,38 @@ import { FallbackImage } from "@/components/FallbackImage";
 import { HeroPromotionSlider } from "@/components/public/HeroPromotionSlider";
 import { useLocale } from "@/lib/i18n/context";
 
-type Promo = { id: string; title: string; coverUrl: string | null; percentText?: string | null };
-type Game = { id: string; name: string; logoUrl: string | null };
+// ─── Shared design tokens (mirrors mobile system) ────────
+// container: max-w 1200px, margin auto, padding 0 20px
+// card radius: 16px | hero/banner: 20px | chips: 9999px
+// images: object-fit cover, object-position center (shared with mobile)
+// ─────────────────────────────────────────────────────────
 
+type Promo = { id: string; title: string; coverUrl: string | null; percentText?: string | null };
+type Game  = { id: string; name: string; logoUrl: string | null };
 type HeroBanner = { imageUrl: string; linkUrl?: string | null };
+
+// ─── Shared card shell (same as mobile CARD token) ───────
+const CARD: CSSProperties = {
+  background: "var(--vp-card)",
+  border: "1px solid rgba(120,80,255,0.2)",
+  borderRadius: 16,
+};
+
+// ─── Section header (same as mobile SectionHeader) ───────
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+      <span style={{
+        width: 4, height: 20, borderRadius: 2, flexShrink: 0,
+        background: "linear-gradient(180deg,var(--vp-accent),var(--vp-accent2))",
+        display: "inline-block",
+      }} />
+      <span style={{ fontSize: 18, fontWeight: 700, color: "var(--vp-text)", lineHeight: 1 }}>
+        {title}
+      </span>
+    </div>
+  );
+}
 
 export function VividHomeClient({
   siteName = "KINGDOM888",
@@ -30,8 +59,6 @@ export function VividHomeClient({
   marqueeBg = null,
   marqueeBorder = null,
   marqueeTextColor = null,
-  livetxDepositColor = null,
-  livetxWithdrawColor = null,
 }: {
   siteName?: string;
   promotions?: Promo[];
@@ -47,46 +74,37 @@ export function VividHomeClient({
   marqueeBg?: string | null;
   marqueeBorder?: string | null;
   marqueeTextColor?: string | null;
-  livetxDepositColor?: string | null;
-  livetxWithdrawColor?: string | null;
 }) {
   const { t } = useLocale();
-  const topGames = games.slice(0, 12);
-  const topPromos = promotions.slice(0, 5);
+  const heroBadge    = (uiText.vividHeroBadge?.trim()    || t("public.vivid.hero.badge"))    as string;
+  const heroSubtitle = (uiText.vividHeroSubtitle?.trim() || t("public.vivid.hero.subtitle")) as string;
+  const heroTitle    = (uiText.vividHeroTitle?.trim()    || t("public.vivid.hero.title"))    as string;
+
+  const topGames  = games.slice(0, 16);
+  const topPromos = promotions.slice(0, 4);
+
   const heroSlides = heroBanners
     .filter((b) => b.imageUrl?.trim())
     .slice(0, 5)
-    .map((b, i) => ({
-      id: `hero-${i}`,
-      imageUrl: b.imageUrl,
-      linkUrl: b.linkUrl ?? null,
-    }));
-  const fallbackSlides = topPromos
+    .map((b, i) => ({ id: `hero-${i}`, imageUrl: b.imageUrl, linkUrl: b.linkUrl ?? null }));
+  const fallbackSlides = promotions
     .filter((p) => p.coverUrl?.trim())
     .slice(0, 5)
-    .map((p) => ({
-      id: `promo-${p.id}`,
-      imageUrl: p.coverUrl as string,
-      linkUrl: "/promotion",
-    }));
+    .map((p) => ({ id: `promo-${p.id}`, imageUrl: p.coverUrl as string, linkUrl: "/promotion" }));
   const displayHeroSlides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
 
   const QUICK_ACTIONS = [
-    { label: t("public.actions.deposit"), href: depositUrl, icon: "💰" },
-    { label: t("public.actions.withdraw"), href: "/withdraw", icon: "📤" },
-    { label: t("public.vivid.bottomNav.bonus"), href: "/bonus", icon: "🎁" },
-    { label: t("public.nav.support"), href: "/chat", icon: "💬" },
+    { label: t("public.actions.deposit"),      href: depositUrl,  icon: "💰" },
+    { label: t("public.actions.withdraw"),     href: "/withdraw", icon: "📤" },
+    { label: t("public.vivid.bottomNav.bonus"),href: "/bonus",    icon: "🎁" },
+    { label: t("public.nav.support"),          href: "/chat",     icon: "💬" },
   ];
-
-  const FEATURE_PROMPOS = topPromos.slice(0, 3);
-  const LIVE_PROMOS = topPromos.slice(0, 2);
 
   return (
     <div className="vp-shell">
-      {/* [1] TOP HEADER */}
       <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
 
-      {/* [2] ANNOUNCEMENT BAR */}
+      {/* ══ Announcement marquee ══════════════════════════════ */}
       <AnnouncementMarquee
         text={announcementMarqueeText ?? (marqueeMessages.length > 0 ? undefined : (t("public.marquee.welcome") ?? "Welcome — Latest promotions and updates"))}
         messages={marqueeMessages.length > 0 ? marqueeMessages : undefined}
@@ -96,144 +114,232 @@ export function VividHomeClient({
         textColor={marqueeTextColor}
       />
 
-      {/* [3] MAIN HERO — single main visual, no duplicate welcome card */}
-      {displayHeroSlides.length > 0 && (
-        <section className="desk-hero" aria-label="Main banner">
-          <div className="desk-hero-inner">
+      {/* ══ Page container (max-w 1200px, centered) ══════════ */}
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "28px 20px 80px", display: "flex", flexDirection: "column", gap: 32 }}>
+
+        {/* ══ 1. HERO BANNER ══════════════════════════════════ */}
+        {/* Desktop: centered container, max-width 1200px, border-radius 20px */}
+        {displayHeroSlides.length > 0 ? (
+          <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(120,80,255,0.2)" }}>
             <HeroPromotionSlider compact slides={displayHeroSlides} />
           </div>
-        </section>
-      )}
-
-      <div className="vp-w vp-main">
-        {/* [4] QUICK ACTION STRIP — flat strip, not big boxes */}
-        <section className="desk-quick-strip" aria-label="Quick actions">
-          {QUICK_ACTIONS.map((a) => (
-            <Link key={a.label} href={a.href} className="desk-quick-strip-item">
-              <span className="desk-quick-strip-icon">{a.icon}</span>
-              <span>{a.label}</span>
-            </Link>
-          ))}
-        </section>
-
-        {/* [5] FEATURE SECTION — 3 feature cards (activities) */}
-        {FEATURE_PROMPOS.length > 0 && (
-          <section className="desk-feature" aria-label="Featured promotions">
-            <div className="desk-feature-grid">
-              {FEATURE_PROMPOS.map((p, i) => (
-                <Link key={p.id} href="/promotion" className="desk-feature-card">
-                  <div className="desk-feature-card-img">
-                    {p.coverUrl ? (
-                      <FallbackImage src={p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
-                    ) : (
-                      <span>🎁</span>
-                    )}
-                  </div>
-                  <div className="desk-feature-card-body">
-                    {p.percentText && <span className="desk-feature-badge">{p.percentText}</span>}
-                    <p className="desk-feature-title">{p.title}</p>
-                  </div>
-                </Link>
-              ))}
+        ) : (
+          /* Fallback hero card when no banners uploaded */
+          <div style={{
+            borderRadius: 20, overflow: "hidden",
+            background: "linear-gradient(135deg,#1e1040 0%,#2d1060 45%,#1a0d2e 100%)",
+            border: "1px solid rgba(120,80,255,0.3)",
+            padding: "48px 40px",
+            position: "relative",
+          }}>
+            <div style={{
+              position: "absolute", top: -60, right: -40, width: 240, height: 240,
+              borderRadius: "50%", background: "rgba(168,85,247,0.15)", filter: "blur(60px)", pointerEvents: "none",
+            }} />
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: "rgba(168,85,247,0.2)", border: "1px solid rgba(168,85,247,0.4)",
+              borderRadius: 9999, padding: "4px 14px", fontSize: 12, fontWeight: 600,
+              color: "var(--vp-accent)", marginBottom: 16,
+            }}>
+              {heroBadge}
             </div>
-          </section>
+            <h1 style={{
+              margin: "0 0 20px", fontSize: "clamp(24px,3vw,42px)", fontWeight: 900, lineHeight: 1.2,
+              background: "linear-gradient(90deg,#fff,rgba(255,255,255,.75))",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+            }}>
+              {heroSubtitle} {siteName}<br />{heroTitle}
+            </h1>
+            <div style={{ display: "flex", gap: 12 }}>
+              <Link href={registerUrl} className="vp-btn vp-btn-primary" style={{ height: 44, fontSize: 14, padding: "0 28px" }}>
+                {t("public.vivid.hero.register")}
+              </Link>
+              <Link href={depositUrl} className="vp-btn vp-btn-outline" style={{ height: 44, fontSize: 14, padding: "0 28px" }}>
+                {t("public.vivid.hero.deposit")}
+              </Link>
+            </div>
+          </div>
         )}
 
-        {/* [6] LIVE + PROMOTION — 40% | 60% */}
-        <section className="desk-live-promo">
-          <div className="desk-live-panel">
-            <div className="desk-live-panel-body">
+        {/* ══ 2. QUICK ACTIONS ════════════════════════════════ */}
+        {/* Desktop: same 4-col grid, larger gap (20px) */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 20 }}>
+          {QUICK_ACTIONS.map((a) => (
+            <Link
+              key={a.label}
+              href={a.href}
+              style={{
+                ...CARD,
+                height: 96,
+                padding: "16px 10px 14px",
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                gap: 10, textDecoration: "none", color: "var(--vp-text)",
+                transition: "border-color .15s, box-shadow .15s",
+              }}
+            >
+              <span style={{ fontSize: 30, lineHeight: 1 }}>{a.icon}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, textAlign: "center", lineHeight: 1.2 }}>
+                {a.label}
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        {/* ══ 3. LIVE TX + PROMOTIONS (2-col) ═════════════════ */}
+        {/* Desktop: left = live transaction, right = promotion cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, alignItems: "start" }}>
+
+          {/* Left: Live Transaction */}
+          <div>
+            <SectionHeader title={t("public.vivid.section.live") as string || "实时交易"} />
+            <div style={{ ...CARD, overflow: "hidden" }}>
               <LiveTransactionTable
                 internalTestMode={internalTestMode}
                 variant="v3"
-                depositColor={livetxDepositColor}
-                withdrawColor={livetxWithdrawColor}
-                title={t("public.vivid.liveTable.title")}
-                depositLabel={t("public.vivid.liveTable.deposit")}
-                withdrawLabel={t("public.vivid.liveTable.withdraw")}
-                liveLabel={t("public.vivid.liveTable.live")}
-                demoLabel={t("public.vivid.liveTable.demo")}
-                loadingText={t("public.vivid.liveTable.loading")}
+                depositColor="var(--vp-green)"
+                withdrawColor="var(--vp-gold)"
+                title={t("public.vivid.liveTable.title") as string}
+                depositLabel={t("public.vivid.liveTable.deposit") as string}
+                withdrawLabel={t("public.vivid.liveTable.withdraw") as string}
+                liveLabel={t("public.vivid.liveTable.live") as string}
+                demoLabel={t("public.vivid.liveTable.demo") as string}
+                loadingText={t("public.vivid.liveTable.loading") as string}
               />
             </div>
           </div>
-          <div className="desk-promo-stack">
-            {LIVE_PROMOS.length > 0 ? (
-              LIVE_PROMOS.map((p) => (
-                <Link key={p.id} href="/promotion" className="desk-promo-card">
-                  <div className="desk-promo-card-img">
-                    {p.coverUrl ? (
-                      <FallbackImage src={p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
-                    ) : (
-                      <span>🎁</span>
-                    )}
+
+          {/* Right: Promotion cards (1:1 images, same as mobile) */}
+          <div>
+            <SectionHeader title={t("public.vivid.section.promos") as string || "最新活动"} />
+            {topPromos.length > 0 ? (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                {topPromos.map((p) => (
+                  <div key={p.id} style={{ ...CARD, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+                    {/* 1:1 image — same ratio as mobile */}
+                    <div style={{ width: "100%", aspectRatio: "1/1", overflow: "hidden", background: "var(--vp-card)" }}>
+                      {p.coverUrl ? (
+                        <FallbackImage
+                          src={p.coverUrl}
+                          alt={p.title}
+                          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
+                        />
+                      ) : (
+                        <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36 }}>🎁</div>
+                      )}
+                    </div>
+                    {/* Card body */}
+                    <div style={{ padding: "10px 12px 12px", display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+                      {p.percentText && (
+                        <span style={{
+                          alignSelf: "flex-start", fontSize: 11, fontWeight: 700,
+                          background: "rgba(245,158,11,0.2)", color: "#fcd34d",
+                          border: "1px solid rgba(245,158,11,0.4)",
+                          borderRadius: 999, padding: "2px 8px",
+                        }}>{p.percentText}</span>
+                      )}
+                      <p style={{
+                        margin: 0, fontSize: 13, fontWeight: 700, color: "var(--vp-text)",
+                        lineHeight: 1.4, minHeight: 36,
+                        display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden",
+                      }}>
+                        {p.title}
+                      </p>
+                      <Link
+                        href="/deposit"
+                        className="vp-btn vp-btn-primary"
+                        style={{ height: 34, fontSize: 12, marginTop: "auto" }}
+                      >
+                        {t("public.vivid.promo.claim") || "领取"}
+                      </Link>
+                    </div>
                   </div>
-                  <div className="desk-promo-card-body">
-                    {p.percentText && <span className="desk-promo-badge">{p.percentText}</span>}
-                    <p className="desk-promo-title">{p.title}</p>
-                    <span className="desk-promo-cta">{t("public.vivid.promo.claim") ?? "Claim"}</span>
-                  </div>
-                </Link>
-              ))
+                ))}
+              </div>
             ) : (
-              <div className="desk-promo-empty">
-                <span>🎁</span>
-                <p>{t("public.vivid.section.promos") ?? "Promotions"}</p>
-                <Link href="/promotion" className="vp-btn vp-btn-primary" style={{ marginTop: 8, fontSize: 13 }}>
-                  View all
-                </Link>
+              <div style={{ ...CARD, padding: "32px 20px", textAlign: "center" }}>
+                <span style={{ fontSize: 40, display: "block", marginBottom: 12 }}>🎁</span>
+                <p style={{ margin: 0, color: "var(--vp-muted)", fontSize: 13 }}>暂无活动</p>
               </div>
             )}
           </div>
-        </section>
+        </div>
 
-        {/* [7] HOT GAMES */}
-        <section className="desk-hot-games" aria-label="Hot games">
-          <h2 className="vp-section-title m-0">
-            <span className="dot" />
-            {t("public.vivid.section.games")}
-          </h2>
+        {/* ══ 4. HOT GAMES ════════════════════════════════════ */}
+        {/* Desktop: 8-col grid (mobile uses 3-col) */}
+        <div>
+          <SectionHeader title={t("public.vivid.section.games") as string || "热门游戏"} />
           {topGames.length > 0 ? (
-            <div className="vp-tile-grid">
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(8, 1fr)",
+              gap: 14,
+            }}>
               {topGames.map((g) => (
-                <Link key={g.id} href={`/games/play/${g.id}`} className="vp-tile">
-                  <div className="thumb">
-                    {g.logoUrl ? (
-                      <FallbackImage src={g.logoUrl} alt={g.name} className="h-full w-full object-cover object-center" />
-                    ) : (
-                      <span>🎮</span>
-                    )}
+                <Link
+                  key={g.id}
+                  href={`/games/play/${encodeURIComponent(g.id)}`}
+                  style={{
+                    ...CARD,
+                    textDecoration: "none",
+                    display: "flex", flexDirection: "column", alignItems: "center",
+                    padding: 12, gap: 8,
+                    transition: "border-color .15s, box-shadow .15s",
+                  }}
+                >
+                  {/* 1:1 icon — same as mobile */}
+                  <div style={{
+                    width: "100%", aspectRatio: "1/1",
+                    borderRadius: 12, overflow: "hidden",
+                    background: "linear-gradient(135deg,rgba(100,60,200,0.2),rgba(60,40,140,0.35))",
+                    border: "1px solid rgba(160,100,255,0.2)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 28,
+                  }}>
+                    {g.logoUrl
+                      ? <FallbackImage src={g.logoUrl} alt={g.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
+                      : <span style={{ opacity: 0.6 }}>🎮</span>}
                   </div>
-                  <div className="label">{g.name}</div>
+                  <span style={{
+                    fontSize: 11, fontWeight: 600, color: "rgba(220,210,255,0.85)",
+                    textAlign: "center", lineHeight: 1.3, minHeight: 28,
+                    width: "100%", overflow: "hidden",
+                    display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                  }}>
+                    {g.name}
+                  </span>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="vp-card flex items-center justify-center py-12 text-center">
-              <span className="text-5xl block mb-3">🎮</span>
-              <p className="m-0 text-sm" style={{ color: "var(--vp-muted)" }}>Games coming soon!</p>
-              <Link href="/games" className="vp-btn vp-btn-primary" style={{ marginTop: 16, height: 36, fontSize: 13 }}>Browse Games</Link>
+            <div style={{ ...CARD, padding: "48px 20px", textAlign: "center" }}>
+              <span style={{ fontSize: 48, display: "block", marginBottom: 12 }}>🎮</span>
+              <p style={{ margin: 0, color: "var(--vp-muted)", fontSize: 13 }}>游戏即将上线</p>
+              <Link href="/games" className="vp-btn vp-btn-primary" style={{ marginTop: 16, height: 36, fontSize: 13, display: "inline-flex", alignItems: "center", padding: "0 20px" }}>
+                Browse Games
+              </Link>
             </div>
           )}
-        </section>
+        </div>
 
-        {/* [8] TRUST / SERVICE */}
-        <section className="desk-trust grid gap-4 sm:grid-cols-3">
+        {/* ══ 5. TRUST CARDS (3 columns) ══════════════════════ */}
+        {/* Desktop: 3 columns, same icons and text as mobile */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
           {[
-            { icon: "🔒", titleKey: "public.vivid.trust.secureTitle", descKey: "public.vivid.trust.secureDesc" },
-            { icon: "⚡", titleKey: "public.vivid.trust.payoutTitle", descKey: "public.vivid.trust.payoutDesc" },
-            { icon: "🎧", titleKey: "public.vivid.trust.supportTitle", descKey: "public.vivid.trust.supportDesc" },
+            { icon: "🔒", titleKey: "public.vivid.trust.secureTitle",  descKey: "public.vivid.trust.secureDesc" },
+            { icon: "⚡", titleKey: "public.vivid.trust.payoutTitle",   descKey: "public.vivid.trust.payoutDesc" },
+            { icon: "🎧", titleKey: "public.vivid.trust.supportTitle",  descKey: "public.vivid.trust.supportDesc" },
           ].map((item) => (
-            <div key={item.titleKey} className="vp-card text-center desk-trust-card">
-              <div className="text-2xl mb-2">{item.icon}</div>
-              <p className="font-bold text-sm m-0 mb-1" style={{ color: "var(--vp-text)" }}>{t(item.titleKey)}</p>
-              <p className="text-xs m-0" style={{ color: "var(--vp-muted)" }}>{t(item.descKey)}</p>
+            <div key={item.titleKey} style={{ ...CARD, padding: "28px 20px", textAlign: "center" }}>
+              <div style={{ fontSize: 36, marginBottom: 12 }}>{item.icon}</div>
+              <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 14, color: "var(--vp-text)" }}>{t(item.titleKey)}</p>
+              <p style={{ margin: 0, fontSize: 12, color: "var(--vp-muted)", lineHeight: 1.5 }}>{t(item.descKey)}</p>
             </div>
           ))}
-        </section>
+        </div>
+
       </div>
 
-      {/* [9] FOOTER */}
       <VividFooter siteName={siteName} />
     </div>
   );
