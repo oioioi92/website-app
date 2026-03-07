@@ -1138,6 +1138,18 @@ export function ThemeSettingsClient() {
             ))}
           </div>
         </div>
+        {/* Referral banner image */}
+        <div>
+          <p className="mb-2 text-xs font-bold text-[var(--compact-muted)] uppercase">推荐有礼横幅图片</p>
+          <ImageInput
+            label="推荐区块顶部横幅"
+            value={theme.referralBannerImageUrl ?? ""}
+            onChange={(v) => patch({ referralBannerImageUrl: v || null })}
+            hint="建议尺寸：800×350（16:7）。手机版和桌面版推荐区块顶部均显示此图。"
+            aspectRatio="16/7"
+            shared
+          />
+        </div>
         <div>
           <p className="mb-2 text-xs font-bold text-[var(--compact-muted)] uppercase">字体</p>
           <div className="grid gap-3 sm:grid-cols-2">

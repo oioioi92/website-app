@@ -44,6 +44,7 @@ export default async function PublicHomePage() {
             livetxWithdrawColor={theme.livetxWithdrawColor ?? null}
             referralBlockBg={theme.referralBlockBg ?? null}
             referralBlockBorder={theme.referralBlockBorder ?? null}
+            referralBannerImageUrl={theme.referralBannerImageUrl ?? null}
             quickActions={theme.quickActions ?? []}
             uiGameCategories={theme.uiGameCategories ?? []}
           />
@@ -125,6 +126,7 @@ export default async function PublicHomePage() {
             livetxWithdrawColor={mockTheme.livetxWithdrawColor ?? null}
             referralBlockBg={mockTheme.referralBlockBg ?? null}
             referralBlockBorder={mockTheme.referralBlockBorder ?? null}
+            referralBannerImageUrl={mockTheme.referralBannerImageUrl ?? null}
             quickActions={mockTheme.quickActions ?? []}
             uiGameCategories={mockTheme.uiGameCategories ?? []}
           />

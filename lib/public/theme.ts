@@ -154,9 +154,10 @@ export type ThemeConfig = {
   /** Desktop 容器宽度/Banner 高度 */
   deskContainer: string | null;
   deskBannerH: string | null;
-  /** 推荐区块背景/边框 */
+  /** 推荐区块背景/边框/顶部横幅图 */
   referralBlockBg: string | null;
   referralBlockBorder: string | null;
+  referralBannerImageUrl: string | null;
   /** 客服悬浮按钮背景 */
   chatFabBg: string | null;
   /** 前台通用语义色 */
@@ -287,6 +288,7 @@ const defaults: ThemeConfig = {
   deskBannerH: null,
   referralBlockBg: null,
   referralBlockBorder: null,
+  referralBannerImageUrl: null,
   chatFabBg: null,
   frontAccent: null,
   frontSuccess: null,
@@ -448,6 +450,7 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
     deskBannerH: sanitizeText(t.deskBannerH, 20) || null,
     referralBlockBg: sanitizeCssColor(sanitizeText(t.referralBlockBg, 100)) || sanitizeText(t.referralBlockBg, 100) || null,
     referralBlockBorder: sanitizeCssColor(sanitizeText(t.referralBlockBorder, 100)) || sanitizeText(t.referralBlockBorder, 100) || null,
+    referralBannerImageUrl: sanitizeText(t.referralBannerImageUrl, 400) || null,
     chatFabBg: sanitizeCssColor(sanitizeText(t.chatFabBg, 60)),
     frontAccent: sanitizeCssColor(sanitizeText(t.frontAccent, 60)),
     frontSuccess: sanitizeCssColor(sanitizeText(t.frontSuccess, 60)),
@@ -962,6 +965,7 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
     deskBannerH: asString(obj.deskBannerH),
     referralBlockBg: sanitizeCssColor(asString(obj.referralBlockBg)) || asString(obj.referralBlockBg),
     referralBlockBorder: sanitizeCssColor(asString(obj.referralBlockBorder)) || asString(obj.referralBlockBorder),
+    referralBannerImageUrl: asString(obj.referralBannerImageUrl) || null,
     chatFabBg: sanitizeCssColor(asString(obj.chatFabBg)),
     frontAccent: sanitizeCssColor(asString(obj.frontAccent)),
     frontSuccess: sanitizeCssColor(asString(obj.frontSuccess)),

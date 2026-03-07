@@ -436,6 +436,7 @@ export function VividMobileHome({
             loginPath={theme.loginUrl ?? "/login"}
             blockBg={theme.referralBlockBg}
             blockBorder={theme.referralBlockBorder}
+            bannerImageUrl={theme.referralBannerImageUrl}
           />
         </div>
 

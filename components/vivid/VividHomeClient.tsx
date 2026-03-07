@@ -156,6 +156,7 @@ export function VividHomeClient({
   livetxWithdrawColor = null,
   referralBlockBg = null,
   referralBlockBorder = null,
+  referralBannerImageUrl = null,
   quickActions: themeQuickActions = [],
   uiGameCategories: themeCategories = [],
 }: {
@@ -177,6 +178,7 @@ export function VividHomeClient({
   livetxWithdrawColor?: string | null;
   referralBlockBg?: string | null;
   referralBlockBorder?: string | null;
+  referralBannerImageUrl?: string | null;
   quickActions?: QuickAction[];
   uiGameCategories?: string[];
 }) {
@@ -292,6 +294,7 @@ export function VividHomeClient({
             loginPath={loginUrl}
             blockBg={referralBlockBg}
             blockBorder={referralBlockBorder}
+            bannerImageUrl={referralBannerImageUrl}
           />
 
         </div>{/* end left column */}

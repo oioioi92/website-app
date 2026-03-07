@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { FallbackImage } from "@/components/FallbackImage";
 import { useLocale } from "@/lib/i18n/context";
 
 type Member = { id: string; userRef: string; displayName?: string | null; referralCode?: string | null };
@@ -11,11 +12,13 @@ export function ReferralBlock({
   loginPath = "/login",
   blockBg = null,
   blockBorder = null,
+  bannerImageUrl = null,
 }: {
   registerPath?: string;
   loginPath?: string;
   blockBg?: string | null;
   blockBorder?: string | null;
+  bannerImageUrl?: string | null;
 }) {
   const { t } = useLocale();
   const [member, setMember] = useState<Member | null | undefined>(undefined);
@@ -65,12 +68,24 @@ export function ReferralBlock({
     <div
       className="vp-referral-block"
       style={{
-        padding: "14px 16px",
         background: blockBg ?? "rgba(120, 80, 255, 0.08)",
         border: blockBorder ? `1px solid ${blockBorder}` : "1px solid rgba(120,80,255,0.2)",
         borderRadius: 16,
+        overflow: "hidden",
       }}
     >
+      {/* Banner image (optional) */}
+      {bannerImageUrl && (
+        <div style={{ width: "100%", aspectRatio: "16/7", overflow: "hidden" }}>
+          <FallbackImage
+            src={bannerImageUrl}
+            alt="referral banner"
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+      )}
+
+      <div style={{ padding: "14px 16px" }}>
       <p className="vp-referral-title" style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "var(--vp-text)" }}>
         {t("public.vivid.referral.title")}
       </p>
@@ -131,6 +146,7 @@ export function ReferralBlock({
           )}
         </div>
       )}
+      </div>{/* end padding wrapper */}
     </div>
   );
 }
