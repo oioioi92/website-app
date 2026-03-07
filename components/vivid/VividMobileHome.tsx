@@ -87,7 +87,7 @@ function MobileLiveList({
           minHeight: LIVE_TX_ROW_HEIGHT,
           height: LIVE_TX_ROW_HEIGHT,
           padding: "0 16px",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          borderBottom: "1px solid rgba(120,80,255,0.18)",
           flexShrink: 0,
         }}
       >

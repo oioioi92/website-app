@@ -56,7 +56,7 @@ function DesktopLiveList({
       <div key={key} style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         height: LTX_ROW_H, padding: "0 16px", flexShrink: 0,
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        borderBottom: "1px solid rgba(120,80,255,0.18)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{
