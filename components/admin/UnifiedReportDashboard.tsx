@@ -21,6 +21,7 @@ export type DashboardFilters = {
   provider: string;
   gameCode: string;
   bankId: string;
+  doctor: string;
 };
 
 const defaultFilters: DashboardFilters = {
@@ -32,7 +33,8 @@ const defaultFilters: DashboardFilters = {
   externalRef: "",
   provider: "",
   gameCode: "",
-  bankId: ""
+  bankId: "",
+  doctor: ""
 };
 
 function toQueryParams(f: DashboardFilters, reportKey: string, page = 1, pageSize = 20): URLSearchParams {
@@ -45,16 +47,19 @@ function toQueryParams(f: DashboardFilters, reportKey: string, page = 1, pageSiz
   if (f.txType && f.txType !== "ALL") sp.set("txType", f.txType);
   if (isRecordsReport(reportKey) && f.status !== "ALL") sp.set("status", f.status);
   if (f.externalRef) sp.set("externalRef", f.externalRef);
-  if (reportKey === "winloss-by-game" || reportKey === "ledger-transactions") {
+  if (f.doctor) sp.set("doctor", f.doctor);
+  if (reportKey === "winloss-by-game" || reportKey === "ledger-transactions" || reportKey === "bonus-cost" || reportKey === "user-kpi" || reportKey === "reconciliation") {
     if (f.dateFrom) sp.set("from", f.dateFrom);
     if (f.dateTo) sp.set("to", f.dateTo);
   }
+  if (reportKey === "hourly-sales" && f.dateFrom) sp.set("date", f.dateFrom);
   if (reportKey === "winloss-by-game") {
     if (f.provider) sp.set("provider", f.provider);
     if (f.gameCode) sp.set("gameCode", f.gameCode);
   }
   if (reportKey === "ledger-transactions" && f.provider) sp.set("provider", f.provider);
   if (reportKey === "ledger-transactions" && f.gameCode) sp.set("gameCode", f.gameCode);
+  if (reportKey === "gateway-search" && f.externalRef) sp.set("reference", f.externalRef);
   return sp;
 }
 
@@ -378,6 +383,16 @@ export function UnifiedReportDashboard() {
                   className={inputClass}
                 />
               </div>
+              <div>
+                <label className={labelClass}>Doctor</label>
+                <input
+                  type="text"
+                  value={filters.doctor}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, doctor: e.target.value }))}
+                  placeholder="Doctor"
+                  className={inputClass}
+                />
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
               <button
@@ -406,6 +421,13 @@ export function UnifiedReportDashboard() {
         )}
       </div>
 
+      {/* Today hint: when viewing today only, show "all customers" hint */}
+      {appliedFilters.dateFrom && appliedFilters.dateTo && appliedFilters.dateFrom === appliedFilters.dateTo && !appliedFilters.userId && (
+        <div className="rounded-xl border border-indigo-200/80 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-800">
+          <span className="font-medium">Today&apos;s data:</span> Showing all customers&apos; transactions for {appliedFilters.dateFrom}. Leave Player empty for full list; fill Player to see one customer only.
+        </div>
+      )}
+
       {/* Report blocks: key from appliedFilters so changing filters resets pagination */}
       <div className="space-y-6">
         <ReportBlock
@@ -426,6 +448,41 @@ export function UnifiedReportDashboard() {
           key={`winloss-${JSON.stringify(appliedFilters)}`}
           reportKey="winloss-by-game"
           title={t("admin.reportTitle.winloss-by-game") ?? "Win/Loss by Game"}
+          filters={appliedFilters}
+          pageSize={20}
+        />
+        <ReportBlock
+          key={`hourly-${JSON.stringify(appliedFilters)}`}
+          reportKey="hourly-sales"
+          title={t("admin.reportTitle.hourly-sales") ?? "Daily Sales / Hourly"}
+          filters={appliedFilters}
+          pageSize={50}
+        />
+        <ReportBlock
+          key={`bonus-${JSON.stringify(appliedFilters)}`}
+          reportKey="bonus-cost"
+          title={t("admin.reportTitle.bonus-cost") ?? "Bonus Cost Summary"}
+          filters={appliedFilters}
+          pageSize={20}
+        />
+        <ReportBlock
+          key={`userkpi-${JSON.stringify(appliedFilters)}`}
+          reportKey="user-kpi"
+          title={t("admin.reportTitle.user-kpi") ?? "User KPI Daily"}
+          filters={appliedFilters}
+          pageSize={20}
+        />
+        <ReportBlock
+          key={`gateway-${JSON.stringify(appliedFilters)}`}
+          reportKey="gateway-search"
+          title={t("admin.reportTitle.gateway-search") ?? "Gateway Search"}
+          filters={appliedFilters}
+          pageSize={20}
+        />
+        <ReportBlock
+          key={`recon-${JSON.stringify(appliedFilters)}`}
+          reportKey="reconciliation"
+          title={t("admin.reportTitle.reconciliation") ?? "Reconciliation"}
           filters={appliedFilters}
           pageSize={20}
         />

@@ -332,6 +332,43 @@ async function getUserKpi(_sp: URLSearchParams): Promise<ReportApiResponse> {
   };
 }
 
+const GATEWAY_SEARCH_COLUMNS: ReportColumn[] = [
+  { key: "external_ref", label: "Reference", align: "left" },
+  { key: "channel", label: "Channel", align: "left" },
+  { key: "amount", label: "Amount", align: "right" },
+  { key: "created_at", label: "Time", align: "left" },
+  { key: "status", label: "Status", align: "left" }
+];
+
+async function getGatewaySearch(sp: URLSearchParams): Promise<ReportApiResponse> {
+  const reference = sp.get("reference")?.trim();
+  // 占位：后续对接网关查询 API 后按 reference 查询
+  return {
+    report: "gateway_search",
+    columns: GATEWAY_SEARCH_COLUMNS,
+    rows: [],
+    summary: { total_count: 0 }
+  };
+}
+
+const RECONCILIATION_COLUMNS: ReportColumn[] = [
+  { key: "report_date", label: "Date", align: "left" },
+  { key: "channel", label: "Channel", align: "left" },
+  { key: "expected", label: "Expected", align: "right" },
+  { key: "actual", label: "Actual", align: "right" },
+  { key: "diff", label: "Diff", align: "right" }
+];
+
+async function getReconciliation(_sp: URLSearchParams): Promise<ReportApiResponse> {
+  // 占位：后续接入对账逻辑
+  return {
+    report: "reconciliation",
+    columns: RECONCILIATION_COLUMNS,
+    rows: [],
+    summary: { total_count: 0 }
+  };
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ reportKey: string }> }
@@ -368,6 +405,14 @@ export async function GET(
   }
   if (reportKey === "user-kpi") {
     const body = await getUserKpi(sp);
+    return NextResponse.json(body);
+  }
+  if (reportKey === "gateway-search") {
+    const body = await getGatewaySearch(sp);
+    return NextResponse.json(body);
+  }
+  if (reportKey === "reconciliation") {
+    const body = await getReconciliation(sp);
     return NextResponse.json(body);
   }
 
