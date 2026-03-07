@@ -1,11 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useLocale } from "@/lib/i18n/context";
 import { ThemeSettingsClient } from "@/components/admin/ThemeSettingsClient";
 
 export default function AdminSettingsThemePage() {
-  const { t } = useLocale();
   return (
     <div className="max-w-4xl">
       <div className="flex items-center gap-2 text-[13px] text-slate-500">
@@ -23,7 +21,7 @@ export default function AdminSettingsThemePage() {
           <div>
             <h1 className="text-xl font-bold tracking-tight text-slate-800">THEME</h1>
             <p className="mt-0.5 text-sm text-slate-500">
-              {t("admin.settingsSection.themeSubtitle")}
+              前台外观、图片、颜色、文案与导航配置
             </p>
           </div>
         </div>
