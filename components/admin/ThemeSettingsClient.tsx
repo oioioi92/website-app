@@ -262,7 +262,7 @@ export function ThemeSettingsClient() {
           label="整页背景图"
           value={theme.pageBackgroundUrl ?? ""}
           onChange={(v) => patch({ pageBackgroundUrl: v || null })}
-          size="建议 1920×1080 或更大"
+          size="1920×1080 或更大（与屏幕比例一致更佳）"
           hint="填入图片地址即可。图片会覆盖整个网站背景，不需要设颜色。"
         />
       </div>
@@ -279,8 +279,8 @@ export function ThemeSettingsClient() {
           label="Logo 图片"
           value={theme.logoUrl ?? ""}
           onChange={(v) => patch({ logoUrl: v || null })}
-          size="200×50 透明底 PNG"
-          hint="建议使用透明背景的 PNG 或 SVG 文件。"
+          size="仅桌面/旧版用，建议 160×48 或 200×60 透明 PNG"
+          hint="Vivid 顶栏不显示 Logo，仅显示站名文字。"
         />
         <div>
           <label className={labelClass}>网站名称</label>
@@ -343,7 +343,7 @@ export function ThemeSettingsClient() {
       <div className="admin-card p-6 space-y-5">
         <SectionTitle
           title="📸 首页轮播图"
-          desc="Vivid 新版本会用：桌面首页与手机首页主卡下方都会显示本轮播图。最多 5 张，建议 1200×450；可填点击链接。"
+          desc="Vivid 新版本会用：桌面与手机首页主卡下方都会显示。最多 5 张，横图 16:9 最佳（如 1200×675）；可填点击链接。"
         />
         <div className="space-y-4">
           {Array.from({ length: 5 }, (_, i) => (
@@ -353,7 +353,7 @@ export function ThemeSettingsClient() {
               key={i}
               index={i}
               banner={b}
-              imgSize="1200×450"
+              imgSize="1200×675（16:9）或横图"
               onChange={(nb) => {
                 const next = Array.from({ length: 5 }, (_, j) =>
                   ((theme.heroBanners ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner))[j] ?? emptyBanner
@@ -390,8 +390,8 @@ export function ThemeSettingsClient() {
                 label={label}
                 value={theme.actionBarButtonImages?.[key] ?? ""}
                 onChange={(v) => patchActionBarButtonImages({ [key]: v || null })}
-                size="200×60"
-                hint="建议透明底 PNG"
+                size="仅旧版用 约 120×36 或 160×48 透明 PNG"
+                hint="Vivid 不显示；旧版操作栏会缩放显示。"
               />
             ))}
           </div>
@@ -447,7 +447,7 @@ export function ThemeSettingsClient() {
                       next[i] = { ...next[i], iconUrl: v || null };
                       patchQuickActions(next.filter(x => x.label || x.url || x.iconUrl));
                     }}
-                    size="100×100"
+                    size="56×56 或 64×64 方图（Vivid 显示约 28px）"
                   />
                   <div className="space-y-3">
                     <div>
@@ -522,7 +522,7 @@ export function ThemeSettingsClient() {
                       label="图标图片（替换 emoji）"
                       value={item.iconUrl ?? ""}
                       onChange={(v) => upd("iconUrl", v || null)}
-                      size="60×60 透明 PNG"
+                      size="48×48 或 56×56 透明 PNG（底部栏显示约 24px）"
                     />
                     <div className="space-y-3">
                       <div>
@@ -618,7 +618,7 @@ export function ThemeSettingsClient() {
     /* ── 8. 品牌与合作 ── */
     if (activeSection === "partners") return (
       <div className="admin-card p-6 space-y-5">
-        <SectionTitle title="🤝 品牌与合作" desc="子公司 / 品牌 Logo 条（最多 5 个），以及合作徽章图片。" />
+        <SectionTitle title="🤝 品牌与合作" desc="子公司 / 品牌 Logo 条（最多 5 个），以及合作徽章图片。多为桌面/旧版用。" />
         <p className="text-xs font-bold text-[var(--compact-muted)] uppercase">品牌 Logo（最多 5 个）</p>
         <div className="space-y-4">
           {Array.from({ length: 5 }, (_, i) =>
@@ -628,7 +628,7 @@ export function ThemeSettingsClient() {
               key={i}
               index={i}
               banner={b}
-              imgSize="300×150"
+              imgSize="约 200×100 横图"
               onChange={(nb) => {
                 const next = Array.from({ length: 5 }, (_, j) =>
                   ((theme.subsidiaries ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner))[j] ?? emptyBanner
@@ -644,7 +644,7 @@ export function ThemeSettingsClient() {
             label="合作商徽章（长条图）"
             value={theme.partnershipBadgeUrl ?? ""}
             onChange={(v) => patch({ partnershipBadgeUrl: v || null })}
-            size="600×120"
+            size="约 400×80 或 600×120 横条"
           />
         </div>
       </div>
@@ -653,24 +653,24 @@ export function ThemeSettingsClient() {
     /* ── 9. 其他图片 ── */
     if (activeSection === "otherImages") return (
       <div className="admin-card p-6 space-y-6">
-        <SectionTitle title="🗂️ 其他图片" desc="首页其他位置的图片，如次级横幅、流水表背景、中间插槽。" />
+        <SectionTitle title="🗂️ 其他图片" desc="桌面版首页用：次级横幅、流水表背景、中间插槽。Vivid 新版本首页未使用。" />
         <ImageInput
           label="次级横幅（首页大图下方）"
           value={theme.secondaryBannerUrl ?? ""}
           onChange={(v) => patch({ secondaryBannerUrl: v || null })}
-          size="1200×300"
+          size="桌面版用 约 800×400 或 16:8 横图"
         />
         <ImageInput
           label="流水表背景"
           value={theme.liveTxBgImageUrl ?? ""}
           onChange={(v) => patch({ liveTxBgImageUrl: v || null })}
-          size="800×200"
+          size="桌面版用 约 600×200 横图"
         />
         <ImageInput
           label="中间插槽图片"
           value={theme.centerSlotImageUrl ?? ""}
           onChange={(v) => patch({ centerSlotImageUrl: v || null })}
-          size="400×300"
+          size="桌面版用 约 400×300"
         />
       </div>
     );
@@ -692,7 +692,7 @@ export function ThemeSettingsClient() {
           label="App 图标图片"
           value={theme.downloadBar?.imageUrl ?? ""}
           onChange={(v) => patchDownloadBar({ imageUrl: v || null })}
-          size="200×200"
+          size="96×96 或 128×128 方图（显示为小图标）"
           hint="显示在横幅左侧的图标"
         />
         <div className="grid gap-4 sm:grid-cols-2">
@@ -815,7 +815,7 @@ export function ThemeSettingsClient() {
                           const groupItems = padded.map((x, i) => i === idx ? { ...x, imageUrl: v } : x).filter(x => x.imageUrl);
                           patchTrustBadges([...allBadges, ...groupItems]);
                         }}
-                        size="120×60"
+                        size="约 80×40 或 120×60 小图标"
                       />
                       {item.imageUrl && (
                         <input
