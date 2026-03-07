@@ -11,6 +11,8 @@ const inputClass =
 const labelClass = "mb-1 block text-xs font-semibold text-[var(--compact-muted)] uppercase tracking-wide";
 
 /* ─── 图片预览输入框 ────────────────────────────────────────── */
+// aspectRatio: CSS aspect-ratio string, e.g. "16/7", "1/1", "2/1"
+// shared: true = Desktop + Mobile 共用同一张图（居中裁切）
 function ImageInput({
   label,
   value,
@@ -18,6 +20,8 @@ function ImageInput({
   placeholder = "https://...",
   size,
   hint,
+  aspectRatio,
+  shared = false,
 }: {
   label: string;
   value: string;
@@ -25,24 +29,43 @@ function ImageInput({
   placeholder?: string;
   size?: string;
   hint?: string;
+  aspectRatio?: string;
+  shared?: boolean;
 }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
         <label className={labelClass}>{label}</label>
         {size && (
           <span className="rounded bg-blue-50 border border-blue-200 px-1.5 py-0.5 text-[10px] font-bold text-blue-600 leading-none">
             📐 {size}
           </span>
         )}
+        {aspectRatio && (
+          <span className="rounded bg-slate-100 border border-slate-300 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 leading-none">
+            比例 {aspectRatio.replace("/", ":")}
+          </span>
+        )}
+        {shared && (
+          <span className="rounded bg-purple-50 border border-purple-200 px-1.5 py-0.5 text-[10px] font-bold text-purple-600 leading-none">
+            🖥️📱 桌面+手机共用
+          </span>
+        )}
       </div>
       {value ? (
-        <div className="relative group rounded-lg overflow-hidden border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)]">
+        <div
+          className="relative group rounded-lg overflow-hidden border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)]"
+          style={aspectRatio ? { aspectRatio } : { maxHeight: 112 }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={value}
             alt=""
-            className="max-h-28 w-full object-contain"
+            style={
+              aspectRatio
+                ? { position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }
+                : { maxHeight: 112, width: "100%", objectFit: "contain" }
+            }
             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
           />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/40 transition-opacity">
@@ -56,8 +79,11 @@ function ImageInput({
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border-2 border-dashed border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4 text-center">
-          <p className="text-xs text-[var(--compact-muted)]">暂无图片</p>
+        <div
+          className="rounded-lg border-2 border-dashed border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] flex items-center justify-center"
+          style={aspectRatio ? { aspectRatio } : { padding: 16 }}
+        >
+          <p className="text-xs text-[var(--compact-muted)]">暂无图片 {aspectRatio ? `（${aspectRatio.replace("/", ":")}）` : ""}</p>
         </div>
       )}
       <input
@@ -68,6 +94,11 @@ function ImageInput({
         placeholder={placeholder}
       />
       {hint && <p className="text-[11px] text-[var(--compact-muted)]">{hint}</p>}
+      {shared && (
+        <p className="text-[11px] text-purple-600 font-medium">
+          ℹ️ 桌面版与手机版共用同一张图，系统将居中裁切（object-fit: cover），请把重要内容放在图片中央安全区。
+        </p>
+      )}
     </div>
   );
 }
@@ -88,11 +119,15 @@ function BannerRow({
   banner,
   onChange,
   imgSize,
+  aspectRatio,
+  shared = false,
 }: {
   index: number;
   banner: ThemeBanner;
   onChange: (b: ThemeBanner) => void;
   imgSize: string;
+  aspectRatio?: string;
+  shared?: boolean;
 }) {
   const hasImg = !!banner.imageUrl;
   return (
@@ -110,6 +145,8 @@ function BannerRow({
         value={banner.imageUrl ?? ""}
         onChange={(v) => onChange({ ...banner, imageUrl: v })}
         size={imgSize}
+        aspectRatio={aspectRatio}
+        shared={shared}
       />
       {hasImg && (
         <div>
@@ -262,8 +299,10 @@ export function ThemeSettingsClient() {
           label="整页背景图"
           value={theme.pageBackgroundUrl ?? ""}
           onChange={(v) => patch({ pageBackgroundUrl: v || null })}
-          size="1920×1080 或更大（与屏幕比例一致更佳）"
-          hint="填入图片地址即可。图片会覆盖整个网站背景，不需要设颜色。"
+          size="建议 1920×1080"
+          aspectRatio="16/9"
+          shared
+          hint="图片会覆盖整个网站背景（桌面+手机）。重要内容请放中央，系统将居中裁切填满屏幕。"
         />
       </div>
     );
@@ -279,8 +318,9 @@ export function ThemeSettingsClient() {
           label="Logo 图片"
           value={theme.logoUrl ?? ""}
           onChange={(v) => patch({ logoUrl: v || null })}
-          size="仅桌面/旧版用，建议 160×48 或 200×60 透明 PNG"
-          hint="Vivid 顶栏不显示 Logo，仅显示站名文字。"
+          size="160×48 或 200×60 透明 PNG"
+          aspectRatio="4/1"
+          hint="仅桌面版/旧版布局显示。Vivid 新版手机端顶栏只显示「网站名称」文字，不显示 Logo 图。"
         />
         <div>
           <label className={labelClass}>网站名称</label>
@@ -346,8 +386,11 @@ export function ThemeSettingsClient() {
       <div className="admin-card p-6 space-y-5">
         <SectionTitle
           title="📸 首页轮播图"
-          desc="手机版：轮播图是首页主视觉区（最顶部），已取代欢迎主卡。桌面版：显示在内容区，最大宽 980px。最多 5 张，建议横图 16:9（如 1200×675）；可填点击跳转链接。"
+          desc="手机版：轮播图是首页主视觉区（最顶部，取代了欢迎主卡）。桌面版：显示在内容区，最大宽 980px。最多 5 张。实际显示比例为 16:7（略比 16:9 更宽扁），建议上传 16:9 原图，系统居中裁切；重要内容请放图片中央。"
         />
+        <div className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-[12px] text-blue-800 mb-2">
+          📐 实际显示比例 <strong>16:7</strong>（上下会略微裁切 16:9 图片）。建议上传 <strong>1200×675 或更宽</strong>，重要内容放中央安全区。
+        </div>
         <div className="space-y-4">
           {Array.from({ length: 5 }, (_, i) => (
             (theme.heroBanners ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner)[i] ?? emptyBanner
@@ -356,7 +399,9 @@ export function ThemeSettingsClient() {
               key={i}
               index={i}
               banner={b}
-              imgSize="1200×675（16:9）或横图"
+              imgSize="建议 1200×675 以上（16:9）"
+              aspectRatio="16/7"
+              shared
               onChange={(nb) => {
                 const next = Array.from({ length: 5 }, (_, j) =>
                   ((theme.heroBanners ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner))[j] ?? emptyBanner
@@ -393,8 +438,9 @@ export function ThemeSettingsClient() {
                 label={label}
                 value={theme.actionBarButtonImages?.[key] ?? ""}
                 onChange={(v) => patchActionBarButtonImages({ [key]: v || null })}
-                size="仅旧版用 约 120×36 或 160×48 透明 PNG"
-                hint="Vivid 不显示；旧版操作栏会缩放显示。"
+                size="120×36 或 160×48 透明 PNG"
+                aspectRatio="10/3"
+                hint="仅旧版桌面操作栏使用。Vivid 新版手机端不显示这些按钮图片。"
               />
             ))}
           </div>
@@ -450,7 +496,9 @@ export function ThemeSettingsClient() {
                       next[i] = { ...next[i], iconUrl: v || null };
                       patchQuickActions(next.filter(x => x.label || x.url || x.iconUrl));
                     }}
-                    size="56×56 或 64×64 方图（Vivid 手机版显示约 32px）"
+                    size="56×56 或 64×64 透明 PNG"
+                    aspectRatio="1/1"
+                    shared
                   />
                   <div className="space-y-3">
                     <div>
@@ -525,7 +573,9 @@ export function ThemeSettingsClient() {
                       label="图标图片（替换 emoji）"
                       value={item.iconUrl ?? ""}
                       onChange={(v) => upd("iconUrl", v || null)}
-                      size="48×48 或 56×56 透明 PNG（底部栏显示约 24px）"
+                      size="48×48 或 56×56 透明 PNG"
+                      aspectRatio="1/1"
+                      hint="底部栏实际显示约 20px，建议上传 56×56 高分辨率版。"
                     />
                     <div className="space-y-3">
                       <div>
@@ -631,7 +681,8 @@ export function ThemeSettingsClient() {
               key={i}
               index={i}
               banner={b}
-              imgSize="约 200×100 横图"
+              imgSize="建议 200×100 透明 PNG"
+              aspectRatio="2/1"
               onChange={(nb) => {
                 const next = Array.from({ length: 5 }, (_, j) =>
                   ((theme.subsidiaries ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner))[j] ?? emptyBanner
@@ -647,7 +698,8 @@ export function ThemeSettingsClient() {
             label="合作商徽章（长条图）"
             value={theme.partnershipBadgeUrl ?? ""}
             onChange={(v) => patch({ partnershipBadgeUrl: v || null })}
-            size="约 400×80 或 600×120 横条"
+            size="建议 600×120 横条"
+            aspectRatio="5/1"
           />
         </div>
       </div>
@@ -661,19 +713,25 @@ export function ThemeSettingsClient() {
           label="次级横幅（首页大图下方）"
           value={theme.secondaryBannerUrl ?? ""}
           onChange={(v) => patch({ secondaryBannerUrl: v || null })}
-          size="桌面版用 约 800×400 或 16:8 横图"
+          size="建议 800×400"
+          aspectRatio="2/1"
+          hint="仅桌面版旧布局显示，Vivid 手机版首页不显示此图。"
         />
         <ImageInput
           label="流水表背景"
           value={theme.liveTxBgImageUrl ?? ""}
           onChange={(v) => patch({ liveTxBgImageUrl: v || null })}
-          size="桌面版用 约 600×200 横图"
+          size="建议 600×200"
+          aspectRatio="3/1"
+          hint="仅桌面版旧布局显示。"
         />
         <ImageInput
           label="中间插槽图片"
           value={theme.centerSlotImageUrl ?? ""}
           onChange={(v) => patch({ centerSlotImageUrl: v || null })}
-          size="桌面版用 约 400×300"
+          size="建议 400×300"
+          aspectRatio="4/3"
+          hint="仅桌面版旧布局显示。"
         />
       </div>
     );
@@ -695,8 +753,9 @@ export function ThemeSettingsClient() {
           label="App 图标图片"
           value={theme.downloadBar?.imageUrl ?? ""}
           onChange={(v) => patchDownloadBar({ imageUrl: v || null })}
-          size="96×96 或 128×128 方图（显示为小图标）"
-          hint="显示在横幅左侧的图标"
+          size="建议 128×128 方图"
+          aspectRatio="1/1"
+          hint="显示在下载横幅左侧的 App 图标，实际显示约 48px，建议上传高分辨率。"
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -755,7 +814,9 @@ export function ThemeSettingsClient() {
             label="跑马灯背景图片"
             value={theme.marqueeBg?.startsWith("url(") ? theme.marqueeBg.slice(4, -1).replace(/"/g, "") : ""}
             onChange={(v) => patch({ marqueeBg: v ? `url("${v}")` : null })}
-            hint="上传图片后，跑马灯条会用此图片作为背景。留空则用背景颜色或默认样式。"
+            size="建议 1200×40 超宽横条"
+            aspectRatio="30/1"
+            hint="上传图片后，跑马灯条会用此图片作为背景（高度约 36px）。留空则用背景颜色或默认样式。"
           />
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -818,7 +879,8 @@ export function ThemeSettingsClient() {
                           const groupItems = padded.map((x, i) => i === idx ? { ...x, imageUrl: v } : x).filter(x => x.imageUrl);
                           patchTrustBadges([...allBadges, ...groupItems]);
                         }}
-                        size="约 80×40 或 120×60 小图标"
+                        size="建议 120×60 透明 PNG"
+                        aspectRatio="2/1"
                       />
                       {item.imageUrl && (
                         <input
