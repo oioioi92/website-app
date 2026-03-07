@@ -11,10 +11,12 @@ type Tab = "transaction" | "accounts";
 
 export function VividHistoryClient({
   siteName = "KINGDOM888",
+  logoUrl = null,
   loginUrl = "/login",
   registerUrl = "/register-wa",
 }: {
   siteName?: string;
+  logoUrl?: string | null;
   loginUrl?: string;
   registerUrl?: string;
 }) {
@@ -23,7 +25,7 @@ export function VividHistoryClient({
 
   return (
     <div className="vp-shell">
-      <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+      <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
 
       <div className="vp-w vp-main" style={{ paddingTop: 12, paddingBottom: 100 }}>
         <nav className="text-sm" style={{ color: "var(--vp-muted)" }}>

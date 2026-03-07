@@ -4,10 +4,7 @@ export const dynamic = "force-dynamic";
 
 export default function AdminChatPage() {
   return (
-    <div
-      className="admin-chat-full -m-3 flex flex-col min-h-0 overflow-hidden"
-      style={{ height: "calc(100vh - var(--topbar-h, 48px))" }}
-    >
+    <div className="admin-chat-full flex flex-1 flex-col min-h-0 overflow-hidden">
       <AdminLiveChatClient />
     </div>
   );

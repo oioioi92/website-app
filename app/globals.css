@@ -876,17 +876,22 @@ a {
   box-shadow: 0 10px 22px rgba(245, 158, 11, 0.16);
 }
 
+/* 跑马灯：两段相同内容，-50% 平移实现无缝循环 */
 @keyframes marquee {
-  from {
-    transform: translateX(0);
+  0% {
+    transform: translate3d(0, 0, 0);
   }
-  to {
-    transform: translateX(-50%);
+  100% {
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 .marquee-scroll {
+  display: inline-flex;
+  width: max-content;
+  min-width: max-content;
   animation: marquee 25s linear infinite;
+  backface-visibility: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

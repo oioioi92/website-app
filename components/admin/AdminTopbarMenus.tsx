@@ -19,7 +19,6 @@ export function AdminTopbarMenus() {
   const { t } = useLocale();
   const [bankOpen, setBankOpen] = useState(false);
   const bankRef = useRef<HTMLDivElement>(null);
-  const isChatPage = pathname?.startsWith("/admin/chat") ?? false;
 
   useEffect(() => {
     function closeAll(e: MouseEvent) {
@@ -33,22 +32,6 @@ export function AdminTopbarMenus() {
   return (
     <div className="admin-topbar-menus flex items-center gap-2 text-[var(--compact-muted)]">
       <span className="admin-topbar-hide-on-mobile"><WhatsAppStatusBadge /></span>
-      {isChatPage && (
-        <>
-          <Link
-            href="/admin/chat/templates"
-            className="rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            {t("admin.templates")}
-          </Link>
-          <Link
-            href="/admin/chat/bot"
-            className="rounded border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-          >
-            {t("admin.settings")}
-          </Link>
-        </>
-      )}
       <div className="relative admin-topbar-hide-on-mobile" ref={bankRef}>
         <button
           type="button"

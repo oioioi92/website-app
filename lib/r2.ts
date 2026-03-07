@@ -20,8 +20,9 @@ export function isR2Configured(): boolean {
 }
 
 export function createR2Client() {
+  const region = process.env.R2_REGION?.trim() || "auto";
   return new S3Client({
-    region: "auto",
+    region,
     endpoint: required("R2_ENDPOINT"),
     credentials: {
       accessKeyId: required("R2_ACCESS_KEY_ID"),

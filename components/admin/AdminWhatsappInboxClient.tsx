@@ -118,15 +118,16 @@ export function AdminWhatsappInboxClient() {
   }
 
   return (
-    <div className="mt-6 flex gap-4">
-      <div className="w-72 flex-shrink-0 rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">{t("admin.whatsappInbox.panelConversations")}</div>
+    <div className="wa-inbox mt-4 md:mt-6 flex flex-col md:flex-row gap-3 md:gap-4 min-h-0 flex-1 md:flex-initial">
+      {/* 左侧：会话列表 — 电话版先显示、限高；桌面版固定宽 */}
+      <div className="w-full md:w-72 flex-shrink-0 rounded-xl border border-slate-200 bg-white shadow-sm flex flex-col min-h-0 max-h-[35vh] md:max-h-[60vh]">
+        <div className="border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 shrink-0">{t("admin.whatsappInbox.panelConversations")}</div>
         {loadingConvs ? (
           <div className="py-8 text-center text-sm text-slate-500">{t("admin.whatsappInbox.loading")}</div>
         ) : convs.length === 0 ? (
           <div className="py-8 text-center text-sm text-slate-500">{t("admin.whatsappInbox.noConversations")}</div>
         ) : (
-          <ul className="max-h-[60vh] overflow-y-auto">
+          <ul className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
             {convs.map((c) => (
               <li key={c.phone}>
                 <button
@@ -134,8 +135,8 @@ export function AdminWhatsappInboxClient() {
                   onClick={() => setSelected(c.phone)}
                   className={`w-full border-b border-slate-100 px-3 py-2.5 text-left text-sm hover:bg-slate-50 ${selected === c.phone ? "bg-sky-50" : ""}`}
                 >
-                  <div className="font-mono font-medium text-slate-800">{c.phone}</div>
-                  {c.member && <div className="text-xs text-slate-500">{c.member.displayName || c.member.userRef}{t("admin.whatsappInbox.linkedMember")}</div>}
+                  <div className="font-mono font-medium text-slate-800 truncate">{c.phone}</div>
+                  {c.member && <div className="text-xs text-slate-500 truncate">{c.member.displayName || c.member.userRef}{t("admin.whatsappInbox.linkedMember")}</div>}
                   <div className="truncate text-xs text-slate-500">{c.preview}</div>
                   <div className="text-xs text-slate-400">{new Date(c.lastAt).toLocaleString()}</div>
                 </button>
@@ -144,27 +145,26 @@ export function AdminWhatsappInboxClient() {
           </ul>
         )}
       </div>
-      <div className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white shadow-sm flex flex-col">
+      {/* 右侧：会话详情 + 回复 — 电话版全宽、占满剩余空间 */}
+      <div className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white shadow-sm flex flex-col min-h-[50vh] md:min-h-0">
         {!selected ? (
-          <div className="flex flex-1 items-center justify-center text-slate-500">{t("admin.whatsappInbox.selectConversation")}</div>
+          <div className="flex flex-1 items-center justify-center text-slate-500 text-sm text-center px-4">{t("admin.whatsappInbox.selectConversation")}</div>
         ) : (
           <>
-            <div className="border-b border-slate-200 px-4 py-2 flex items-center justify-between">
-              <div>
-                <span className="font-mono font-semibold text-slate-800">{selected}</span>
-                {member && (
-                  <>
-                    <span className="mx-2 text-slate-400">·</span>
-                    <Link href={"/admin/players?search=" + encodeURIComponent(member.userRef)} className="text-sm text-sky-600 hover:underline">
-                      {member.displayName || member.userRef} → {t("admin.whatsappInbox.playerDetail")}
-                    </Link>
-                  </>
-                )}
-              </div>
+            <div className="border-b border-slate-200 px-3 md:px-4 py-2 flex flex-wrap items-center gap-1 shrink-0">
+              <span className="font-mono font-semibold text-slate-800 text-sm break-all">{selected}</span>
+              {member && (
+                <>
+                  <span className="text-slate-400">·</span>
+                  <Link href={"/admin/players?search=" + encodeURIComponent(member.userRef)} className="text-sm text-sky-600 hover:underline truncate max-w-[180px] md:max-w-none">
+                    {member.displayName || member.userRef} → {t("admin.whatsappInbox.playerDetail")}
+                  </Link>
+                </>
+              )}
             </div>
-            <div className="flex-1 overflow-y-auto p-4 min-h-[200px] max-h-[50vh] space-y-2">
+            <div className="flex-1 overflow-y-auto p-3 md:p-4 min-h-[120px] max-h-[40vh] md:max-h-[50vh] space-y-2 overscroll-contain">
               {loadingMsg ? (
-                <div className="text-center text-slate-500">{t("admin.whatsappInbox.loading")}</div>
+                <div className="text-center text-slate-500 text-sm">{t("admin.whatsappInbox.loading")}</div>
               ) : (
                 messages.map((m) => (
                   <div
@@ -172,7 +172,7 @@ export function AdminWhatsappInboxClient() {
                     className={`flex ${m.direction === "out" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                      className={`max-w-[85%] md:max-w-[80%] rounded-lg px-3 py-2 text-sm ${
                         m.direction === "out" ? "bg-sky-500 text-white" : "bg-slate-100 text-slate-800"
                       }`}
                     >
@@ -186,22 +186,22 @@ export function AdminWhatsappInboxClient() {
               )}
               <div ref={listEndRef} />
             </div>
-            <div className="border-t border-slate-200 p-3">
-              {outside24h && <p className="mb-2 text-xs text-amber-600">{t("admin.whatsappInbox.outside24hNote")}</p>}
-              <div className="flex gap-2">
+            <div className="border-t border-slate-200 p-2 md:p-3 shrink-0 bg-slate-50/50">
+              {outside24h && <p className="mb-1.5 text-xs text-amber-600">{t("admin.whatsappInbox.outside24hNote")}</p>}
+              <div className="flex gap-2 items-end">
                 <textarea
                   value={reply}
                   onChange={(e) => setReply(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendReply())}
                   placeholder={t("admin.whatsappInbox.replyPlaceholder")}
-                  className="min-h-[44px] flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  className="min-h-[44px] flex-1 min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                   rows={2}
                 />
                 <button
                   type="button"
                   onClick={sendReply}
                   disabled={!reply.trim() || sending}
-                  className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 hover:bg-sky-700"
+                  className="rounded-lg bg-sky-600 px-3 md:px-4 py-2 text-sm font-medium text-white disabled:opacity-50 hover:bg-sky-700 shrink-0"
                 >
                   {sending ? t("admin.whatsappInbox.sending") : t("admin.whatsappInbox.send")}
                 </button>

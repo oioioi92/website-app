@@ -9,9 +9,22 @@ import { VividFooter } from "@/components/vivid/VividFooter";
 import "@/styles/vivid-portal.css";
 
 type QuickLink = { label: string; href: string };
-type ChatMsg = { id: string; sender: string; body: string; at: string };
-type SocketMsg = { id?: string; senderType?: string; bodyText?: string; createdAt?: string };
+type ChatMsg = { id: string; sender: string; body: string; at: string; quickReplies?: string[] };
+type SocketMsg = {
+  id?: string;
+  senderType?: string;
+  bodyText?: string;
+  createdAt?: string;
+  metadataJson?: { quickReplies?: string[] } | null;
+};
 const IMG_PREFIX = "[img]";
+
+function getQuickReplies(m: SocketMsg): string[] {
+  const j = m?.metadataJson;
+  if (!j || typeof j !== "object") return [];
+  const q = (j as { quickReplies?: unknown }).quickReplies;
+  return Array.isArray(q) ? q.filter((x): x is string => typeof x === "string").slice(0, 10) : [];
+}
 
 function parseImageBody(body: string): string | null {
   const txt = body.trim();
@@ -37,6 +50,7 @@ function BrandDot({ kind }: { kind: "whatsapp" | "telegram" }) {
 }
 
 export function EmbeddedChatClient({
+  logoUrl = null,
   uiText,
   quickLinks,
   vivid = false,
@@ -47,6 +61,7 @@ export function EmbeddedChatClient({
   uiText?: Record<string, string>;
   quickLinks: QuickLink[];
   vivid?: boolean;
+  logoUrl?: string | null;
   siteName?: string;
   loginUrl?: string;
   registerUrl?: string;
@@ -142,11 +157,13 @@ export function EmbeddedChatClient({
         .map((m) => {
           const body = (m?.bodyText ?? "").trim();
           if (!body) return null;
+          const quickReplies = getQuickReplies(m);
           return {
             id: m?.id ?? `mh-${Date.now()}`,
             sender: m?.senderType ?? "unknown",
             body,
-            at: m?.createdAt ? new Date(m.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString()
+            at: m?.createdAt ? new Date(m.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString(),
+            ...(quickReplies.length > 0 ? { quickReplies } : {})
           } as ChatMsg;
         })
         .filter((x): x is ChatMsg => Boolean(x));
@@ -157,6 +174,7 @@ export function EmbeddedChatClient({
       const body = (m?.bodyText ?? "").trim();
       if (!body) return;
       const id = m?.id ?? `m-${Date.now()}`;
+      const quickReplies = getQuickReplies(m);
       setMsgs((prev) => {
         if (prev.some((x) => x.id === id)) return prev;
         return [
@@ -165,7 +183,8 @@ export function EmbeddedChatClient({
             id,
             sender: m?.senderType ?? "unknown",
             body,
-            at: m?.createdAt ? new Date(m.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString()
+            at: m?.createdAt ? new Date(m.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString(),
+            ...(quickReplies.length > 0 ? { quickReplies } : {})
           }
         ].slice(-120);
       });
@@ -191,6 +210,16 @@ export function EmbeddedChatClient({
     if (!socketRef.current || !conversationId) return;
     socketRef.current.emit("visitor_message", { conversationId, bodyText: body });
     setInput("");
+  }
+
+  /** 点击系统消息下的选项按钮时，直接以该文案作为访客消息发送（可触发 bot 关键词回复等） */
+  function sendQuickReply(body: string) {
+    const text = (body ?? "").trim();
+    if (!text || !socketRef.current || !conversationId) return;
+    socketRef.current.emit("visitor_message", { conversationId, bodyText: text });
+    setMsgs((prev) =>
+      [...prev, { id: `local-qr-${Date.now()}`, sender: "visitor", body: text, at: new Date().toLocaleTimeString() }].slice(-120)
+    );
   }
 
   async function sendImage(file: File) {
@@ -232,30 +261,51 @@ export function EmbeddedChatClient({
   if (vivid) {
     const statusColor = status === "online" ? "#22c55e" : status === "connecting" ? "#f59e0b" : "#ef4444";
     return (
-      <div className="vp-shell" style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
-        <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+      <div
+        className="vp-shell vp-chat-page"
+        style={{
+          minHeight: "100dvh",
+          height: "100dvh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          paddingTop: "env(safe-area-inset-top)",
+        }}
+      >
+        <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
 
-        <div className="vp-w" style={{ flex: 1, paddingTop: 24, paddingBottom: 40 }}>
+        <div
+          className="vp-w vp-chat-content"
+          style={{
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
+            paddingTop: 16,
+            paddingBottom: "max(24px, env(safe-area-inset-bottom))",
+            overflow: "hidden",
+          }}
+        >
 
           {/* Page title row */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexShrink: 0 }}>
+            <h1 style={{ margin: 0, fontSize: "clamp(18px, 4.5vw, 22px)", fontWeight: 800, color: "#fff" }}>
               💬 {title}
             </h1>
             <span style={{
               display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "4px 12px", borderRadius: 999,
+              padding: "4px 10px", borderRadius: 999,
               background: `${statusColor}20`, border: `1px solid ${statusColor}55`,
-              fontSize: 12, fontWeight: 700, color: statusColor,
+              fontSize: 11, fontWeight: 700, color: statusColor,
             }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: statusColor, display: "inline-block" }} />
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, display: "inline-block" }} />
               {statusText}
             </span>
           </div>
 
           {/* Quick links (WA / TG) */}
           {sortedQuickLinks.length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10, flexShrink: 0 }}>
               {sortedQuickLinks.map((x) => {
                 const lower = x.label.toLowerCase();
                 const isWa = lower.includes("whatsapp");
@@ -270,10 +320,10 @@ export function EmbeddedChatClient({
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      display: "inline-flex", alignItems: "center", gap: 8,
-                      padding: "8px 16px", borderRadius: 12,
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      padding: "6px 12px", borderRadius: 12,
                       background: bg, border: `1px solid ${border}`,
-                      color, fontSize: 13, fontWeight: 700, textDecoration: "none",
+                      color, fontSize: 12, fontWeight: 700, textDecoration: "none",
                       transition: "opacity .15s",
                     }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.8"; }}
@@ -288,17 +338,20 @@ export function EmbeddedChatClient({
             </div>
           )}
 
-          {/* Chat window */}
-          <div style={{
-            background: "var(--vp-card)",
-            border: "1px solid rgba(176,96,255,0.25)",
-            borderRadius: 18,
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-            minHeight: 520,
-            maxHeight: "calc(100dvh - 260px)",
-          }}>
+          {/* Chat window：电话版占满剩余高度 */}
+          <div
+            className="vp-chat-window"
+            style={{
+              background: "var(--vp-card)",
+              border: "1px solid rgba(176,96,255,0.25)",
+              borderRadius: 16,
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minHeight: 0,
+            }}
+          >
             {/* Messages */}
             <div
               ref={listRef}
@@ -349,6 +402,30 @@ export function EmbeddedChatClient({
                         </p>
                       )}
                     </div>
+                    {m.quickReplies && m.quickReplies.length > 0 && (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4, maxWidth: "75%" }}>
+                        {m.quickReplies.map((label, i) => (
+                          <button
+                            key={`${m.id}-${i}-${label}`}
+                            type="button"
+                            onClick={() => sendQuickReply(label)}
+                            style={{
+                              padding: "8px 14px",
+                              borderRadius: 12,
+                              border: "1px solid rgba(176,96,255,0.5)",
+                              background: "rgba(176,96,255,0.2)",
+                              color: "#fff",
+                              fontSize: 13,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", paddingLeft: 4, paddingRight: 4 }}>
                       {m.sender === "system" ? "Support" : m.sender} · {m.at}
                     </span>
@@ -359,12 +436,14 @@ export function EmbeddedChatClient({
 
             {/* Input bar */}
             <div style={{
-              padding: "12px 14px",
+              padding: "10px 12px",
+              paddingBottom: "max(10px, env(safe-area-inset-bottom))",
               borderTop: "1px solid rgba(176,96,255,0.2)",
               display: "flex",
               gap: 8,
               alignItems: "center",
               background: "rgba(0,0,0,0.25)",
+              flexShrink: 0,
             }}>
               <input
                 type="text"
@@ -523,6 +602,20 @@ export function EmbeddedChatClient({
                 <p className="min-w-0 break-words whitespace-pre-wrap text-[14px] leading-relaxed text-white/95 md:text-[14px] md:leading-6">
                   {m.body}
                 </p>
+              )}
+              {m.quickReplies && m.quickReplies.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {m.quickReplies.map((label, i) => (
+                    <button
+                      key={`${m.id}-${i}-${label}`}
+                      type="button"
+                      onClick={() => sendQuickReply(label)}
+                      className="rounded-lg border border-white/30 bg-white/10 px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-white/20"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           ))}

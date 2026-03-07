@@ -128,6 +128,24 @@ function matchRule(rule: BotRule, lowerText: string): boolean {
   return lowerText.includes(rule.keyword);
 }
 
+/** 替换自动回复中的变量，使离线回复/规则回复更灵活。支持：{{visitorName}} {{visitorEmail}} {{visitorPhone}} {{date}} {{time}} {{waitingCount}} */
+function substituteReplyVars(
+  text: string,
+  conv: { visitorName?: string | null; visitorEmail?: string | null; visitorPhone?: string | null },
+  opts?: { waitingCount?: number }
+): string {
+  const now = new Date();
+  const vars: Record<string, string> = {
+    visitorName: (conv.visitorName ?? "").trim(),
+    visitorEmail: (conv.visitorEmail ?? "").trim(),
+    visitorPhone: (conv.visitorPhone ?? "").trim(),
+    date: now.toLocaleDateString(),
+    time: now.toLocaleTimeString(),
+    waitingCount: opts?.waitingCount != null ? String(opts.waitingCount) : ""
+  };
+  return text.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? `{{${key}}}`);
+}
+
 function normalizeKeywordList(raw: unknown): string[] {
   const arr = Array.isArray(raw) ? raw : [];
   return Array.from(
@@ -1205,6 +1223,10 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
       const nowMs = Date.now();
       const botActive = botCfg.enabled && isNowInSchedule(botCfg, nowMs);
       if (botActive && botCfg.welcomeEnabled && botCfg.welcomeReply && history.length === 0) {
+        const welcomeWaitingCount = await chatDb.conversation.count({
+          where: { status: "open", assignedAdminId: null, deletedAt: null, id: { not: c.id } }
+        });
+        const welcomeBody = substituteReplyVars(botCfg.welcomeReply, c, { waitingCount: welcomeWaitingCount });
         const metadataJson =
           botCfg.welcomeQuickReplies.length > 0
             ? ({ quickReplies: botCfg.welcomeQuickReplies } as object)
@@ -1213,7 +1235,7 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
           data: {
             conversationId: c.id,
             senderType: "system",
-            bodyText: botCfg.welcomeReply,
+            bodyText: welcomeBody,
             metadataJson: metadataJson ?? undefined,
             ip,
             sessionId: c.visitorSessionId
@@ -1297,11 +1319,20 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
               cooldownBlocked = nowMs - lastHit.createdAt.getTime() < matchedRule.cooldownSec * 1000;
             }
           }
+          const waitingCount = await chatDb.conversation.count({
+            where: {
+              status: "open",
+              assignedAdminId: null,
+              deletedAt: null,
+              id: { not: c.id }
+            }
+          });
+          const resolvedReply = substituteReplyVars(autoReply, c, { waitingCount });
           const lastBot = await chatDb.message.findFirst({
             where: { conversationId: c.id, senderType: "system" },
             orderBy: { createdAt: "desc" }
           });
-          const tooSoon = lastBot && lastBot.bodyText === autoReply && Date.now() - lastBot.createdAt.getTime() < 20_000;
+          const tooSoon = lastBot && lastBot.bodyText === resolvedReply && Date.now() - lastBot.createdAt.getTime() < 20_000;
           if (!tooSoon && !cooldownBlocked) {
             const metadataJson =
               matchedRule?.quickReplies?.length > 0
@@ -1311,7 +1342,7 @@ function safeParse<T extends z.ZodTypeAny>(schema: T, payload: unknown) {
               data: {
                 conversationId: c.id,
                 senderType: "system",
-                bodyText: autoReply,
+                bodyText: resolvedReply,
                 metadataJson: metadataJson ?? undefined,
                 ip,
                 sessionId: c.visitorSessionId

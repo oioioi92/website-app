@@ -5,6 +5,7 @@
 import { db } from "@/lib/db";
 import { getGrantTag, getGroupLabel, getLimitTag, getPromoStatus } from "@/lib/promo/present";
 import { isNonGameProviderName, resolvePromotionCover } from "@/lib/public/namedAssets";
+import { resolveProviderCategory } from "@/lib/public/uiGameCategories";
 import type { PublicPromotion } from "@/components/public/PromotionCard";
 
 const PROMO_SELECT = {
@@ -28,7 +29,7 @@ const PROMO_SELECT = {
 
 type PromoRow = Awaited<ReturnType<typeof getActivePromotions>>[number];
 
-type GameRow = { id: string; name: string; logoUrl: string | null; code: string | null };
+type GameRow = { id: string; name: string; logoUrl: string | null; code: string | null; category: string | null };
 
 function isDemoLogoUrl(input: string | null | undefined) {
   const s = (input ?? "").trim().toLowerCase();
@@ -91,24 +92,27 @@ export async function getActiveGames(limit: number) {
   return db.gameProvider.findMany({
     where: { isActive: true },
     orderBy: [{ sortOrder: "asc" }, { updatedAt: "desc" }],
-    select: { id: true, name: true, logoUrl: true, code: true },
+    select: { id: true, name: true, logoUrl: true, code: true, category: true },
     take: limit
   });
 }
 
-/** 过滤非游戏 provider，并规范化 logoUrl（不做本地 assets 兜底，方便后台逐个上传/替换） */
+/** 过滤非游戏 provider，并规范化 logoUrl 与 category（空则按 name/code 推断） */
 export function mapGamesToPublicUi(
   games: GameRow[]
-): Array<{ id: string; name: string; logoUrl: string | null; code: string | null }> {
+): Array<{ id: string; name: string; logoUrl: string | null; code: string | null; category: string }> {
   const filtered = games.filter(
     (g) => !isNonGameProviderName(g.name) && !isNonGameProviderName(g.code)
   );
   return filtered.map((game) => ({
-    ...game,
+    id: game.id,
+    name: game.name,
     logoUrl:
       typeof game.logoUrl === "string" && game.logoUrl.trim() && !isDemoLogoUrl(game.logoUrl)
         ? game.logoUrl
-        : null
+        : null,
+    code: game.code,
+    category: resolveProviderCategory(game.category, game.name, game.code)
   }));
 }
 

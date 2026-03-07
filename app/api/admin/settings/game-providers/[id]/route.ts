@@ -14,10 +14,15 @@ export async function PATCH(
   const { id } = await params;
   if (!id) return NextResponse.json({ error: "ID_REQUIRED" }, { status: 400 });
 
+  const VALID_CATEGORIES = ["slots", "live", "sports", "fishing", "lottery", "new"];
   const body = (await req.json().catch(() => null)) as {
     name?: string;
     code?: string | null;
     logoUrl?: string | null;
+    category?: string | null;
+    apiBaseUrl?: string | null;
+    apiKey?: string | null;
+    secret?: string | null;
     isActive?: boolean;
     sortOrder?: number;
   } | null;
@@ -29,6 +34,13 @@ export async function PATCH(
   if (typeof body.name === "string" && body.name.trim()) updateData.name = body.name.trim();
   if (body.code !== undefined) updateData.code = body.code === "" || body.code == null ? null : String(body.code).trim();
   if (body.logoUrl !== undefined) updateData.logoUrl = body.logoUrl === "" || body.logoUrl == null ? null : String(body.logoUrl).trim();
+  if (body.category !== undefined) {
+    const raw = body.category === "" || body.category == null ? null : String(body.category).trim().toLowerCase();
+    updateData.category = raw && VALID_CATEGORIES.includes(raw) ? raw : null;
+  }
+  if (body.apiBaseUrl !== undefined) updateData.apiBaseUrl = body.apiBaseUrl === "" || body.apiBaseUrl == null ? null : String(body.apiBaseUrl).trim();
+  if (body.apiKey !== undefined) updateData.apiKey = body.apiKey === "" || body.apiKey == null ? null : String(body.apiKey).trim();
+  if (body.secret !== undefined) updateData.secret = body.secret === "" || body.secret == null ? null : String(body.secret).trim();
   if (typeof body.isActive === "boolean") updateData.isActive = body.isActive;
   if (typeof body.sortOrder === "number") updateData.sortOrder = body.sortOrder;
 

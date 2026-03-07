@@ -29,6 +29,7 @@ const TAB_KEYS = [
 
 export function VividPromoClient({
   siteName = "KINGDOM888",
+  logoUrl = null,
   promotions = [],
   defaultTab = "All",
   loginUrl = "/login",
@@ -38,6 +39,7 @@ export function VividPromoClient({
   uiText,
 }: {
   siteName?: string;
+  logoUrl?: string | null;
   promotions?: PublicPromotion[];
   defaultTab?: string;
   loginUrl?: string;
@@ -66,7 +68,7 @@ export function VividPromoClient({
 
   return (
     <div className="vp-shell">
-      <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+      <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
 
       <div className="vp-w vp-main">
         {/* Breadcrumb + Page title */}

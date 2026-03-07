@@ -10,10 +10,12 @@ type Step = 1 | 2 | 3;
 
 export function VividRegisterClient({
   siteName = "KINGDOM888",
+  logoUrl = null,
   loginUrl = "/login",
   registerUrl = "/register-wa",
 }: {
   siteName?: string;
+  logoUrl?: string | null;
   loginUrl?: string;
   registerUrl?: string;
 }) {
@@ -36,7 +38,7 @@ export function VividRegisterClient({
 
   return (
     <div className="vp-shell">
-      <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+      <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
 
       <div className="vp-w" style={{ paddingTop: 40, paddingBottom: 60 }}>
         <div style={{ maxWidth: 560, margin: "0 auto" }}>

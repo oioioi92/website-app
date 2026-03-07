@@ -84,6 +84,7 @@ export function AdminLiveChatClient() {
   const [defaultQuickRepliesSaved, setDefaultQuickRepliesSaved] = useState(false);
   const [defaultQuickRepliesPreview, setDefaultQuickRepliesPreview] = useState<string>("");
   const [templates, setTemplates] = useState<Template[]>(FALLBACK_TEMPLATES);
+  const [quickTemplates, setQuickTemplates] = useState<{ deposit: string[]; withdraw: string[]; walletProblem: string[] }>({ deposit: [], withdraw: [], walletProblem: [] });
   const [hotkeyPanelOpen, setHotkeyPanelOpen] = useState(false);
   const [queueError, setQueueError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -173,10 +174,24 @@ export function AdminLiveChatClient() {
       .catch(() => {});
   }
 
+  function loadQuickTemplates() {
+    fetch("/api/admin/chat/settings/quick-templates", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d: { deposit?: string[]; withdraw?: string[]; walletProblem?: string[] }) => {
+        setQuickTemplates({
+          deposit: Array.isArray(d.deposit) ? d.deposit : [],
+          withdraw: Array.isArray(d.withdraw) ? d.withdraw : [],
+          walletProblem: Array.isArray(d.walletProblem) ? d.walletProblem : []
+        });
+      })
+      .catch(() => {});
+  }
+
   // 队列轮询：30s 一次，页面不可见时暂停，减少 API 消耗
   useEffect(() => {
     loadQueue();
     loadTemplates();
+    loadQuickTemplates();
     let t: ReturnType<typeof setInterval> | null = null;
     const startPoll = () => {
       if (!t) t = setInterval(loadQueue, 30000);
@@ -872,7 +887,7 @@ export function AdminLiveChatClient() {
                                   <img src={imgUrl} alt="" className="max-w-full max-h-64 rounded-lg object-contain" />
                                 </a>
                               ) : (
-                                <p className={`whitespace-pre-wrap break-words leading-relaxed ${isSystem ? "text-base font-semibold text-amber-900" : "text-sm"}`}>{msg.bodyText}</p>
+                                <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.bodyText}</p>
                               );
                             })()}
                             <p className="text-[10px] text-slate-400 mt-1.5">
@@ -942,64 +957,56 @@ export function AdminLiveChatClient() {
         )}
       </div>
 
-      {/* 底部：模板 + 输入区（紧凑布局，选项可折叠） */}
+      {/* 底部：三个快捷句下拉 + 设置 一行，下方输入区 */}
       <div className="shrink-0 border-t border-slate-200 bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.04)] relative">
-        <div className="flex flex-wrap items-center gap-1.5 px-2.5 py-1 border-b border-slate-100 bg-slate-50/80">
-          <span className="shrink-0 text-[10px] font-medium text-slate-500">{t("admin.chat.quickReply")}</span>
+        <div className="flex flex-nowrap items-center gap-2 px-2.5 py-1 border-b border-slate-100 bg-slate-50/80">
           <select
-            className="shrink-0 rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-800 hover:bg-emerald-100 focus:outline-none focus:ring-1 focus:ring-emerald-300"
+            className="shrink-0 rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-sky-300"
             onChange={(e) => {
               const v = e.target.value;
               e.target.value = "";
-              if (v === MANAGE_TEMPLATES_VALUE) {
-                router.push("/admin/chat/templates");
-                return;
-              }
-              const tmpl = templates.find((x) => x.id === v);
-              if (tmpl) applyTemplate(tmpl.bodyText);
+              if (v) applyTemplate(v);
             }}
             value=""
+            title="Deposit"
           >
-            <option value="">{t("admin.chat.selectTemplate")}</option>
-            {templates.map((tmpl) => (
-              <option key={tmpl.id} value={tmpl.id}>{tmpl.title}</option>
+            <option value="">Deposit</option>
+            {quickTemplates.deposit.map((s, i) => (
+              <option key={`d-${i}`} value={s}>{s.length > 40 ? s.slice(0, 37) + "…" : s}</option>
             ))}
-            <option value={MANAGE_TEMPLATES_VALUE}>{t("admin.chat.manageTemplates")}</option>
           </select>
-          <button
-            type="button"
-            onClick={() => setOptionsExpanded((x) => !x)}
-            className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${optionsExpanded ? "bg-indigo-100 text-indigo-700" : "text-slate-500 hover:bg-slate-100"}`}
-            title={t("admin.chat.optionsHint")}
+          <select
+            className="shrink-0 rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-sky-300"
+            onChange={(e) => {
+              const v = e.target.value;
+              e.target.value = "";
+              if (v) applyTemplate(v);
+            }}
+            value=""
+            title="Withdraw"
           >
-            {t("admin.chat.optionsLabel")} {optionsExpanded ? "▲" : "▼"}
-          </button>
-          <span className="shrink-0 text-[10px] text-slate-400">{t("admin.chat.hotkey")}</span>
+            <option value="">Withdraw</option>
+            {quickTemplates.withdraw.map((s, i) => (
+              <option key={`w-${i}`} value={s}>{s.length > 40 ? s.slice(0, 37) + "…" : s}</option>
+            ))}
+          </select>
+          <select
+            className="shrink-0 rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-sky-300"
+            onChange={(e) => {
+              const v = e.target.value;
+              e.target.value = "";
+              if (v) applyTemplate(v);
+            }}
+            value=""
+            title="Wallet Problem"
+          >
+            <option value="">Wallet Problem</option>
+            {quickTemplates.walletProblem.map((s, i) => (
+              <option key={`wp-${i}`} value={s}>{s.length > 40 ? s.slice(0, 37) + "…" : s}</option>
+            ))}
+          </select>
+          <Link href="/admin/chat/settings" className="shrink-0 rounded px-2 py-0.5 text-[10px] font-medium text-sky-600 hover:bg-sky-50">设置</Link>
         </div>
-        {optionsExpanded && (
-          <div className="border-b border-slate-100 bg-slate-50/30 px-2.5 py-1 space-y-1">
-            <div className="flex gap-1.5 items-center flex-wrap">
-              <input
-                type="text"
-                value={quickRepliesInput}
-                onChange={(e) => setQuickRepliesInput(e.target.value)}
-                placeholder={t("admin.chat.optionsPlaceholder")}
-                className="flex-1 min-w-[140px] rounded border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-600 placeholder-slate-400 focus:border-indigo-300 focus:outline-none focus:ring-1 focus:ring-indigo-200"
-              />
-              <button
-                type="button"
-                onClick={saveDefaultQuickReplies}
-                className="shrink-0 rounded border border-slate-300 bg-white px-2 py-1 text-[10px] font-medium text-slate-600 hover:bg-slate-50"
-                title={t("admin.chat.optionsHint")}
-              >
-                {defaultQuickRepliesSaved ? t("admin.chat.setAsDefaultDone") : t("admin.chat.setAsDefault")}
-              </button>
-            </div>
-            {defaultQuickRepliesPreview && (
-              <p className="text-[10px] text-slate-400">{t("admin.chat.currentDefault")}{defaultQuickRepliesPreview}</p>
-            )}
-          </div>
-        )}
         <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white relative">
           {showHotkeyPanel && (
             <div className="absolute bottom-full left-2.5 right-2.5 mb-1 max-h-40 overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-xl z-10">

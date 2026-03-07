@@ -11,6 +11,7 @@ type PublicBankItem = { bankName: string; bankCode: string; accountName: string;
 
 export function VividDepositPage({
   siteName = "KINGDOM888",
+  logoUrl = null,
   loginUrl = "/login",
   registerUrl = "/register-wa",
   depositUrl,
@@ -18,6 +19,7 @@ export function VividDepositPage({
   whatsappUrl,
 }: {
   siteName?: string;
+  logoUrl?: string | null;
   loginUrl?: string;
   registerUrl?: string;
   depositUrl?: string | null;
@@ -28,7 +30,7 @@ export function VividDepositPage({
   if (depositUrl) {
     return (
       <div className="vp-shell">
-        <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+        <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
         <div className="vp-w" style={{ paddingTop: 60, paddingBottom: 80, textAlign: "center" }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>{"💳"}</div>
           <p style={{ color: "var(--vp-muted)", fontSize: 14, marginBottom: 24 }}>
@@ -60,7 +62,7 @@ export function VividDepositPage({
 
   return (
     <div className="vp-shell">
-      <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+      <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
 
       <div className="vp-w vp-main" style={{ paddingTop: 32, paddingBottom: 100 }}>
         <nav className="text-sm" style={{ color: "var(--vp-muted)" }}>

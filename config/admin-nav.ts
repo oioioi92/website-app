@@ -21,6 +21,7 @@ export const ADMIN_NAV: NavGroup[] = [
     defaultOpen: true,
     items: [
       { key: "chat", label: "Live Chat", tooltip: "客服聊天队列", href: "/admin/chat", icon: "chat", permission: "view" },
+      { key: "chat-settings", label: "Live Chat 设置", tooltip: "欢迎语、三类快捷句、Bot、模板", href: "/admin/chat/settings", icon: "settings", permission: "view" },
       { key: "whatsapp-inbox", label: "WhatsApp 收件箱", tooltip: "商业号会话、顾客信息、回复", href: "/admin/whatsapp-inbox", icon: "whatsapp", permission: "view" },
       { key: "register-pending", label: "待发送账号", tooltip: "新注册待发 ID+临时密码给用户", href: "/admin/register-pending", icon: "user-plus", permission: "view" },
       { key: "pending-depo", label: "Pending Deposit", tooltip: "待审核入款", href: "/admin/deposits/pending", icon: "deposit", permission: "approve" },

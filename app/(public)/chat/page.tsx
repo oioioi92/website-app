@@ -52,6 +52,7 @@ export default async function PublicChatPage() {
       quickLinks={deduped}
       vivid={true}
       siteName={theme?.siteName ?? "KINGDOM888"}
+      logoUrl={theme?.logoUrl ?? null}
       loginUrl={theme?.loginUrl ?? "/login"}
       registerUrl={theme?.registerUrl ?? "/register-wa"}
     />

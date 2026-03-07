@@ -21,11 +21,13 @@ const CAT_KEYS = [
 
 export function VividGamesClient({
   siteName = "KINGDOM888",
+  logoUrl = null,
   games = [],
   loginUrl = "/login",
   registerUrl = "/register-wa",
 }: {
   siteName?: string;
+  logoUrl?: string | null;
   games?: Game[];
   loginUrl?: string;
   registerUrl?: string;
@@ -42,7 +44,7 @@ export function VividGamesClient({
 
   return (
     <div className="vp-shell">
-      <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+      <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
 
       <div className="vp-w vp-main">
         {/* Breadcrumb */}

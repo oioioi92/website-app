@@ -29,6 +29,7 @@ export default async function PromotionPage() {
     <VividPromoClient
       promotions={promotions}
       siteName={theme?.siteName ?? "KINGDOM888"}
+      logoUrl={theme?.logoUrl ?? null}
       defaultTab="Promotion"
       loginUrl={theme?.loginUrl ?? "/login"}
       registerUrl={theme?.registerUrl ?? "/register-wa"}

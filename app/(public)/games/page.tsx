@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function PublicGamesPage() {
   let games: Array<{ id: string; name: string; logoUrl: string | null; code?: string | null }> = [];
   let siteName = "KINGDOM888";
+  let logoUrl: string | null = null;
   let loginUrl = "/login";
   let registerUrl = "/register-wa";
   try {
@@ -17,11 +18,12 @@ export default async function PublicGamesPage() {
     ]);
     games = g;
     siteName = theme.siteName ?? "KINGDOM888";
+    logoUrl = theme.logoUrl ?? null;
     loginUrl = theme.loginUrl ?? "/login";
     registerUrl = theme.registerUrl ?? "/register-wa";
   } catch {
     games = [];
   }
 
-  return <VividGamesClient games={games} siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />;
+  return <VividGamesClient games={games} siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />;
 }

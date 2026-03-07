@@ -7,6 +7,7 @@ import { VividFooter } from "./VividFooter";
 
 export function VividWithdrawPage({
   siteName = "KINGDOM888",
+  logoUrl = null,
   loginUrl = "/login",
   registerUrl = "/register-wa",
   withdrawUrl,
@@ -14,6 +15,7 @@ export function VividWithdrawPage({
   whatsappUrl,
 }: {
   siteName?: string;
+  logoUrl?: string | null;
   loginUrl?: string;
   registerUrl?: string;
   withdrawUrl?: string | null;
@@ -23,7 +25,7 @@ export function VividWithdrawPage({
   if (withdrawUrl) {
     return (
       <div className="vp-shell">
-        <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+        <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
         <div className="vp-w" style={{ paddingTop: 60, paddingBottom: 80, textAlign: "center" }}>
           <div style={{ marginBottom: 16 }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#b060ff" strokeWidth={1.5} style={{ width: 64, height: 64, margin: "0 auto" }}>
@@ -51,7 +53,7 @@ export function VividWithdrawPage({
 
   return (
     <div className="vp-shell">
-      <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+      <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
 
       <div className="vp-w vp-main" style={{ paddingTop: 32, paddingBottom: 100 }}>
         <nav className="text-sm" style={{ color: "var(--vp-muted)" }}>

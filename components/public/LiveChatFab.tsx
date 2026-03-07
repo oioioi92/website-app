@@ -50,7 +50,7 @@ export function LiveChatFab({
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [msgs, setMsgs] = useState<Array<{ id: string; sender: string; body: string; at: string }>>([]);
+  const [msgs, setMsgs] = useState<Array<{ id: string; sender: string; body: string; at: string; quickReplies?: string[] }>>([]);
   const [status, setStatus] = useState<"idle" | "connecting" | "online" | "error">("idle");
   const sockRef = useRef<Socket | null>(null);
   const seededRef = useRef(false);
@@ -135,16 +135,37 @@ export function LiveChatFab({
         setMsgs((prev) => [...prev, { id: `local-${Date.now()}`, sender: "visitor", body: pending, at: new Date().toLocaleTimeString() }]);
       }
     });
-    s.on("message_new", (m: { id?: string; senderType?: string; bodyText?: string; createdAt?: string }) => {
+    s.on("message_history", (list: Array<{ id?: string; senderType?: string; bodyText?: string; createdAt?: string; metadataJson?: { quickReplies?: string[] } | null }>) => {
+      const next = (Array.isArray(list) ? list : [])
+        .map((m) => {
+          const body = (m?.bodyText ?? "").trim();
+          if (!body) return null;
+          const rawQ = m?.metadataJson && typeof m.metadataJson === "object" ? (m.metadataJson as { quickReplies?: unknown }).quickReplies : undefined;
+          const quickReplies = Array.isArray(rawQ) ? rawQ.filter((x): x is string => typeof x === "string").slice(0, 10) : undefined;
+          return {
+            id: m?.id ?? `mh-${Date.now()}`,
+            sender: m?.senderType ?? "unknown",
+            body,
+            at: m?.createdAt ? new Date(m.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString(),
+            ...(quickReplies?.length ? { quickReplies } : {})
+          };
+        })
+        .filter(Boolean) as Array<{ id: string; sender: string; body: string; at: string; quickReplies?: string[] }>;
+      if (next.length > 0) setMsgs(next.slice(-120));
+    });
+    s.on("message_new", (m: { id?: string; senderType?: string; bodyText?: string; createdAt?: string; metadataJson?: { quickReplies?: string[] } | null }) => {
       const body = (m?.bodyText ?? "").trim();
       if (!body) return;
+      const rawQ = m?.metadataJson && typeof m.metadataJson === "object" ? (m.metadataJson as { quickReplies?: unknown }).quickReplies : undefined;
+      const quickReplies = Array.isArray(rawQ) ? rawQ.filter((x): x is string => typeof x === "string").slice(0, 10) : undefined;
       setMsgs((prev) => [
         ...prev,
         {
           id: m?.id ?? `m-${Date.now()}-${Math.random()}`,
           sender: m?.senderType ?? "unknown",
           body,
-          at: m?.createdAt ? new Date(m.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString()
+          at: m?.createdAt ? new Date(m.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString(),
+          ...(quickReplies?.length ? { quickReplies } : {})
         }
       ]);
     });
@@ -194,6 +215,13 @@ export function LiveChatFab({
     setMsgs((prev) => [...prev, { id: `local-${Date.now()}`, sender: "visitor", body: text, at: new Date().toLocaleTimeString() }]);
   }
 
+  function sendQuickReply(body: string) {
+    const text = (body ?? "").trim();
+    if (!text || !sockRef.current || !conversationId) return;
+    sockRef.current.emit("visitor_message", { conversationId, bodyText: text });
+    setMsgs((prev) => [...prev, { id: `local-qr-${Date.now()}`, sender: "visitor", body: text, at: new Date().toLocaleTimeString() }]);
+  }
+
   const fullScreenPanel = open ? (
     <section
       className="fixed left-0 right-0 z-[9999] flex flex-col lg:!hidden"
@@ -223,6 +251,20 @@ export function LiveChatFab({
                     <span>{m.at}</span>
                   </div>
                   <p className="whitespace-pre-wrap break-words text-xs text-white/90 max-h-20 overflow-y-auto">{m.body}</p>
+                  {m.quickReplies && m.quickReplies.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {m.quickReplies.map((label, i) => (
+                        <button
+                          key={`${m.id}-${i}-${label}`}
+                          type="button"
+                          onClick={() => sendQuickReply(label)}
+                          className="rounded-lg border border-white/30 bg-white/10 px-2 py-1 text-[11px] font-semibold text-white hover:bg-white/20"
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -288,6 +330,20 @@ export function LiveChatFab({
                       <span>{m.at}</span>
                     </div>
                     <p className="whitespace-pre-wrap break-words text-xs text-white/90 max-h-20 overflow-y-auto">{m.body}</p>
+                    {m.quickReplies && m.quickReplies.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {m.quickReplies.map((label, i) => (
+                          <button
+                            key={`${m.id}-${i}-${label}`}
+                            type="button"
+                            onClick={() => sendQuickReply(label)}
+                            className="rounded-lg border border-white/30 bg-white/10 px-2 py-1 text-[11px] font-semibold text-white hover:bg-white/20"
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))
               )}

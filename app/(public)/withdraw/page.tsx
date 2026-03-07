@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function WithdrawPage() {
   let withdrawUrl: string | null = null;
   let siteName = "KINGDOM888";
+  let logoUrl: string | null = null;
   let loginUrl = "/login";
   let registerUrl = "/register-wa";
   let whatsappUrl: string | null = null;
@@ -15,6 +16,7 @@ export default async function WithdrawPage() {
   try {
     const { theme } = await getPublicTheme();
     siteName = theme.siteName ?? siteName;
+    logoUrl = theme.logoUrl ?? null;
     loginUrl = theme.loginUrl ?? loginUrl;
     registerUrl = theme.registerUrl ?? registerUrl;
 
@@ -31,6 +33,7 @@ export default async function WithdrawPage() {
   return (
     <VividWithdrawPage
       siteName={siteName}
+      logoUrl={logoUrl}
       loginUrl={loginUrl}
       registerUrl={registerUrl}
       withdrawUrl={withdrawUrl}

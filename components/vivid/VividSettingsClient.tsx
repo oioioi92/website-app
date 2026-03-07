@@ -16,10 +16,12 @@ const LANGS: Array<{ locale: Locale; labelKey: string }> = [
 
 export function VividSettingsClient({
   siteName = "KINGDOM888",
+  logoUrl = null,
   loginUrl = "/login",
   registerUrl = "/register-wa",
 }: {
   siteName?: string;
+  logoUrl?: string | null;
   loginUrl?: string;
   registerUrl?: string;
 }) {
@@ -95,7 +97,7 @@ export function VividSettingsClient({
 
   return (
     <div className="vp-shell">
-      <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+      <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
 
       <div className="vp-w vp-main" style={{ paddingTop: 24, paddingBottom: 100 }}>
         <nav className="text-sm" style={{ color: "var(--vp-muted)" }}>

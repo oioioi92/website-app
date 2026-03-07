@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FallbackImage } from "@/components/FallbackImage";
@@ -9,12 +10,12 @@ import type { ThemeConfig } from "@/lib/public/theme";
 import type { ThemeBottomNavItem } from "@/lib/public/theme";
 
 const DEFAULT_ITEMS: ThemeBottomNavItem[] = [
-  { href: "/", label: "Home", icon: "🏠", badge: null },
-  { href: "/games", label: "Games", icon: "🎮", badge: null },
-  { href: "/promotion", label: "Promo", icon: "🎁", badge: null },
-  { href: "/history", label: "History", icon: "📜", badge: null },
-  { href: "/chat", label: "Live Chat", icon: "💬", badge: null },
-  { href: "/settings", label: "Setting", icon: "⚙️", badge: null },
+  { href: "/", label: "Home", icon: "🏠", iconUrl: null, badge: null },
+  { href: "/games", label: "Games", icon: "🎮", iconUrl: null, badge: null },
+  { href: "/promotion", label: "Promo", icon: "🎁", iconUrl: null, badge: null },
+  { href: "/history", label: "History", icon: "📜", iconUrl: null, badge: null },
+  { href: "/chat", label: "Live Chat", icon: "💬", iconUrl: null, badge: null },
+  { href: "/settings", label: "Setting", icon: "⚙️", iconUrl: null, badge: null },
 ];
 
 /** 从 theme 里按 href 找对应项，找不到用默认。 */
@@ -42,6 +43,7 @@ function buildBottomNavWithLiveChat(
     href: "/chat",
     label: liveChatLabel,
     icon: "💬",
+    iconUrl: null,
     badge: null,
   };
   return [
@@ -62,6 +64,15 @@ export function MobileBottomNav({ chatUrl, theme }: { chatUrl: string; theme: Th
   let items = buildBottomNavWithLiveChat(themeNav, liveChatLabel);
   if (items.length !== 6) items = [...DEFAULT_ITEMS];
 
+  const [hasMember, setHasMember] = useState<boolean | null>(null);
+  const loginUrl = (theme?.loginUrl?.trim() && theme.loginUrl.startsWith("/") ? theme.loginUrl : "/login").split("?")[0];
+  useEffect(() => {
+    fetch("/api/public/member/session", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setHasMember(!!d?.member))
+      .catch(() => setHasMember(false));
+  }, []);
+
   return (
     <nav data-mobile-shell-nav data-bottom-nav-items="6" className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--p44-grey-light)]/30 bg-[color:var(--p44-header-bg)]/98 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur lg:hidden">
       <div className="mx-auto grid max-w-[520px] grid-cols-6 gap-1.5" style={{ gridTemplateColumns: "repeat(6, minmax(0, 1fr))" }}>
@@ -73,7 +84,12 @@ export function MobileBottomNav({ chatUrl, theme }: { chatUrl: string; theme: Th
             labelLower.includes("chat") ||
             hrefLower === "/chat" ||
             hrefLower.startsWith("/chat#");
-          const resolvedHref = isChatItem ? (chatUrl && chatUrl.trim().length > 0 ? chatUrl : "/chat") : item.href;
+          const isProtected = hrefLower === "/history" || hrefLower === "/settings";
+          const resolvedHref = isChatItem
+            ? (chatUrl && chatUrl.trim().length > 0 ? chatUrl : "/chat")
+            : isProtected && hasMember === false
+              ? `${loginUrl}?returnUrl=${encodeURIComponent(item.href)}`
+              : item.href;
 
           const baseHref = (isChatItem ? "/chat" : resolvedHref).split("#")[0] ?? resolvedHref;
           const isHashOnly = baseHref === "/" && item.href.includes("#");
@@ -86,6 +102,7 @@ export function MobileBottomNav({ chatUrl, theme }: { chatUrl: string; theme: Th
           }`;
           
           const namedIcon =
+            item.iconUrl ??
             resolveUiAssetByName(item.label) ??
             resolveUiAssetByName(isChatItem ? "chat" : resolvedHref) ??
             resolveUiAssetByName(resolvedHref);

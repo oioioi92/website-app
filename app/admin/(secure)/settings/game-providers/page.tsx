@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { GameApiSettingsClient } from "@/components/admin/GameApiSettingsClient";
 import { GameProviderLogosClient } from "@/components/admin/GameProviderLogosClient";
 import { useLocale } from "@/lib/i18n/context";
 
+/** 一个页面合并：Create 游戏 + 每个游戏一行（Provider name / API Base URL / API Key / Secret / 分类 / Logo） */
 export default function AdminSettingsGameProvidersPage() {
   const { t } = useLocale();
   return (
@@ -19,15 +19,8 @@ export default function AdminSettingsGameProvidersPage() {
         <p>{t("admin.gameProviderLogos.pageSubtitle")}</p>
       </header>
 
-      <div className="mt-6 space-y-8">
-        <section className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-panel2)] p-6">
-          <h2 className="mb-4 text-sm font-semibold text-[var(--admin-text)]">{t("admin.settingsGameApi.sectionTitle")}</h2>
-          <GameApiSettingsClient compact inlineSave />
-        </section>
-        <section>
-          <h2 className="mb-3 text-sm font-semibold text-[var(--admin-text)]">{t("admin.gameProviders.pageTitle")}</h2>
-          <GameProviderLogosClient fullManagement />
-        </section>
+      <div className="mt-6">
+        <GameProviderLogosClient fullManagement />
       </div>
     </div>
   );
