@@ -54,9 +54,11 @@ export async function POST(req: NextRequest) {
     mkdirSync(path.dirname(fullPath), { recursive: true });
     writeFileSync(fullPath, body);
     const relativePath = `/${objectKey.replace(/\\/g, "/")}`;
-    // 优先用 NEXT_PUBLIC_APP_URL 生成绝对地址，确保跨域时也能正常加载
-    const appBase = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
-    const url = appBase ? `${appBase}${relativePath}` : relativePath;
+    // 优先用前台域名（不暴露后台）；生产环境务必配置其一，否则图片可能无法访问
+    const uploadBase =
+      process.env.NEXT_PUBLIC_UPLOAD_PUBLIC_URL?.trim().replace(/\/$/, "") ||
+      process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
+    const url = uploadBase ? `${uploadBase}${relativePath}` : relativePath;
     return NextResponse.json({ ok: true, url, filename: file.name, size: file.size });
   } catch (e) {
     console.error("[admin/upload/image]", e);

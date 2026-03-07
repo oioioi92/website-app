@@ -71,10 +71,6 @@ export function AdminImageToUrlClient() {
     );
   }
 
-  const fullUrl = result && typeof window !== "undefined"
-    ? (result.url.startsWith("http") ? result.url : `${window.location.origin}${result.url.startsWith("/") ? "" : "/"}${result.url}`)
-    : null;
-
   return (
     <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-panel)] p-6 max-w-2xl">
       <h2 className="text-base font-semibold text-[var(--admin-text)] mb-1">上传图片 → 获取网址</h2>
@@ -132,10 +128,10 @@ export function AdminImageToUrlClient() {
             {result.size > 0 && <span>（{(result.size / 1024).toFixed(1)} KB）</span>}
           </div>
 
-          {/* 推荐使用的地址（主要复制入口） */}
+          {/* 只展示 API 返回的地址，绝不使用当前页 origin，避免暴露后台域名 */}
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
             <label className="block text-xs font-semibold text-blue-700 mb-1">
-              📋 图片地址（复制后粘贴到后台各处）
+              📋 图片地址（复制后粘贴到主题等后台各处）
             </label>
             <div className="flex gap-2">
               <input
@@ -152,33 +148,16 @@ export function AdminImageToUrlClient() {
                 {copied === "relative" ? "✓ 已复制" : "复制"}
               </button>
             </div>
-            {result.url.startsWith("/") && (
+            {result.url.startsWith("/") ? (
+              <p className="mt-2 text-[11px] text-amber-700">
+                生产环境请配置 R2 云存储，或在 .env 中设置 <strong>NEXT_PUBLIC_UPLOAD_PUBLIC_URL</strong> 为前台域名（如 https://admin1167.com），否则图片可能无法访问。
+              </p>
+            ) : (
               <p className="mt-2 text-[11px] text-blue-600">
-                ⚠️ 此为相对路径，只在同一服务器上有效。若前台与后台在不同域名，建议配置 R2 云存储，或在 .env 中设置 NEXT_PUBLIC_APP_URL。
+                此地址可直接用于前台，不会暴露后台域名。
               </p>
             )}
           </div>
-
-          {fullUrl && fullUrl !== result.url && (
-            <div>
-              <label className="block text-xs font-medium text-[var(--admin-muted)] mb-1">完整网址（含域名，可用于跨站引用）</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={fullUrl}
-                  className="flex-1 min-w-0 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] px-3 py-2 text-[13px] text-[var(--admin-text)] font-mono"
-                />
-                <button
-                  type="button"
-                  onClick={() => copyToClipboard(fullUrl, "full")}
-                  className="shrink-0 px-4 py-2 rounded-lg border border-[var(--admin-border)] bg-[var(--admin-panel2)] text-[13px] text-[var(--admin-text)] hover:bg-[var(--admin-hover)]"
-                >
-                  {copied === "full" ? "✓ 已复制" : "复制"}
-                </button>
-              </div>
-            </div>
-          )}
 
           {result.url && (
             <div className="pt-2">
