@@ -25,7 +25,7 @@ const CARD: React.CSSProperties = {
 };
 
 // ─── Live tx list (desktop left column) ──────────────────
-const LTX_ROW_H = 44;
+const LTX_ROW_H = 50;
 const LTX_VISIBLE = 5;
 
 function DesktopLiveList({
@@ -60,21 +60,21 @@ function DesktopLiveList({
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{
-            fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 999,
+            fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 999,
             background: `${txColor}26`, color: txColor,
             border: `1px solid ${txColor}55`, textTransform: "uppercase", flexShrink: 0,
           }}>
             {isDeposit ? depositLabel : withdrawLabel}
           </span>
           <span style={{
-            fontSize: 13, fontWeight: 600, letterSpacing: "0.3px",
+            fontSize: 14, fontWeight: 600, letterSpacing: "0.3px",
             color: "rgba(230,222,255,0.88)", fontFamily: "monospace",
             fontVariantNumeric: "tabular-nums lining-nums",
           }}>
             {tx.userRefMasked}
           </span>
         </div>
-        <span style={{ fontSize: 13, fontWeight: 700, color: txColor, fontFamily: "monospace", fontVariantNumeric: "tabular-nums" }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: txColor, fontFamily: "monospace", fontVariantNumeric: "tabular-nums" }}>
           {tx.amountDisplay}
         </span>
       </div>
@@ -87,7 +87,7 @@ function DesktopLiveList({
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "12px 16px 10px", borderBottom: "1px solid rgba(120,80,255,0.15)",
       }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--vp-text)" }}>{titleText}</span>
+        <span style={{ fontSize: 15, fontWeight: 700, color: "var(--vp-text)" }}>{titleText}</span>
         <span style={{
           display: "inline-flex", alignItems: "center", gap: 5,
           background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)",
@@ -241,12 +241,12 @@ export function VividHomeClient({
       {/* ══════════════ TWO-COLUMN LAYOUT ══════════════ */}
       <div style={{ display: "flex", alignItems: "flex-start", minHeight: "calc(100vh - 120px)" }}>
 
-        {/* ── LEFT COLUMN (fixed 380px) ─────────────────── */}
+        {/* ── LEFT COLUMN (fixed 480px) ─────────────────── */}
         <div style={{
-          width: 380, flexShrink: 0,
+          width: 480, flexShrink: 0,
           borderRight: "1px solid rgba(120,80,255,0.15)",
-          padding: "16px 16px 80px",
-          display: "flex", flexDirection: "column", gap: 16,
+          padding: "20px 20px 80px",
+          display: "flex", flexDirection: "column", gap: 18,
           overflowY: "auto", maxHeight: "calc(100vh - 120px)", position: "sticky", top: 0,
         }}>
 
@@ -258,21 +258,21 @@ export function VividHomeClient({
           )}
 
           {/* 2. Quick Actions */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
             {QUICK_ACTIONS.map((a) => (
               <Link key={a.label} href={a.href} style={{
-                ...CARD, height: 82, padding: "12px 6px 10px",
+                ...CARD, height: 96, padding: "14px 8px 12px",
                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                gap: 7, textDecoration: "none", color: "var(--vp-text)",
+                gap: 8, textDecoration: "none", color: "var(--vp-text)",
               }}>
                 {a.iconUrl ? (
-                  <div style={{ width: 32, height: 32, borderRadius: 10, overflow: "hidden", flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, overflow: "hidden", flexShrink: 0 }}>
                     <FallbackImage src={a.iconUrl} alt="" className="w-full h-full object-cover object-center" />
                   </div>
                 ) : (
-                  <span style={{ fontSize: 26, lineHeight: 1, flexShrink: 0 }}>{a.icon}</span>
+                  <span style={{ fontSize: 30, lineHeight: 1, flexShrink: 0 }}>{a.icon}</span>
                 )}
-                <span style={{ fontSize: 11, fontWeight: 600, textAlign: "center", lineHeight: 1.2 }}>{a.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, textAlign: "center", lineHeight: 1.2 }}>{a.label}</span>
               </Link>
             ))}
           </div>
