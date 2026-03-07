@@ -76,19 +76,16 @@ export function ReferralBlock({
     >
       {/* Banner image (optional) */}
       {bannerImageUrl && (
-        <div style={{ width: "100%", aspectRatio: "16/7", overflow: "hidden" }}>
+        <div style={{ width: "100%", aspectRatio: "16/7", overflow: "hidden", flexShrink: 0 }}>
           <FallbackImage
             src={bannerImageUrl}
             alt="referral banner"
-            className="w-full h-full object-cover object-center"
+            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
           />
         </div>
       )}
 
       <div style={{ padding: "14px 16px" }}>
-      <p className="vp-referral-title" style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "var(--vp-text)" }}>
-        {t("public.vivid.referral.title")}
-      </p>
       {member === undefined ? (
         <p style={{ margin: 0, fontSize: 12, color: "var(--vp-muted)" }}>…</p>
       ) : (
