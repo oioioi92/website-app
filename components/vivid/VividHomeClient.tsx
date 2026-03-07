@@ -9,37 +9,13 @@ import { LiveTransactionTable } from "@/components/public/LiveTransactionTable";
 import { FallbackImage } from "@/components/FallbackImage";
 import { HeroPromotionSlider } from "@/components/public/HeroPromotionSlider";
 import { useLocale } from "@/lib/i18n/context";
-import type { ThemeConfig } from "@/lib/public/theme";
 
-type Promo = { id: string; title: string; coverUrl: string | null; percentText?: string | null; promoLink?: string | null };
+type Promo = { id: string; title: string; coverUrl: string | null; percentText?: string | null };
 type Game = { id: string; name: string; logoUrl: string | null };
 
 type HeroBanner = { imageUrl: string; linkUrl?: string | null };
 
-// ─── Desktop: same design language as mobile ─────────────────
-const CARD_STYLE: React.CSSProperties = {
-  background: "var(--vp-card)",
-  border: "1px solid rgba(120,80,255,0.2)",
-  borderRadius: 16,
-};
-
-function SectionHeader({ title }: { title: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-      <span style={{
-        width: 4, height: 18, borderRadius: 2, flexShrink: 0,
-        background: "linear-gradient(180deg,var(--vp-accent),var(--vp-accent2))",
-        display: "inline-block",
-      }} />
-      <span style={{ fontSize: 18, fontWeight: 700, color: "var(--vp-text)", lineHeight: 1 }}>
-        {title}
-      </span>
-    </div>
-  );
-}
-
 export function VividHomeClient({
-  theme,
   siteName = "KINGDOM888",
   promotions = [],
   games = [],
@@ -54,8 +30,9 @@ export function VividHomeClient({
   marqueeBg = null,
   marqueeBorder = null,
   marqueeTextColor = null,
+  livetxDepositColor = null,
+  livetxWithdrawColor = null,
 }: {
-  theme?: ThemeConfig;
   siteName?: string;
   promotions?: Promo[];
   games?: Game[];
@@ -70,13 +47,12 @@ export function VividHomeClient({
   marqueeBg?: string | null;
   marqueeBorder?: string | null;
   marqueeTextColor?: string | null;
+  livetxDepositColor?: string | null;
+  livetxWithdrawColor?: string | null;
 }) {
   const { t } = useLocale();
-  const heroBadge = (uiText.vividHeroBadge?.trim() || t("public.vivid.hero.badge")) as string;
-  const heroSubtitle = (uiText.vividHeroSubtitle?.trim() || t("public.vivid.hero.subtitle")) as string;
-  const heroTitle = (uiText.vividHeroTitle?.trim() || t("public.vivid.hero.title")) as string;
   const topGames = games.slice(0, 12);
-  const topPromos = promotions.slice(0, 6);
+  const topPromos = promotions.slice(0, 5);
   const heroSlides = heroBanners
     .filter((b) => b.imageUrl?.trim())
     .slice(0, 5)
@@ -96,16 +72,21 @@ export function VividHomeClient({
   const displayHeroSlides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
 
   const QUICK_ACTIONS = [
-    { label: t("public.actions.deposit"),  href: depositUrl,    icon: "💰" },
-    { label: t("public.actions.withdraw"), href: "/withdraw",   icon: "📤" },
-    { label: t("public.vivid.quickActions.bonus"), href: "/bonus", icon: "🎁" },
-    { label: t("public.nav.support"),      href: "/chat",       icon: "💬" },
+    { label: t("public.actions.deposit"), href: depositUrl, icon: "💰" },
+    { label: t("public.actions.withdraw"), href: "/withdraw", icon: "📤" },
+    { label: t("public.vivid.bottomNav.bonus"), href: "/bonus", icon: "🎁" },
+    { label: t("public.nav.support"), href: "/chat", icon: "💬" },
   ];
+
+  const FEATURE_PROMPOS = topPromos.slice(0, 3);
+  const LIVE_PROMOS = topPromos.slice(0, 2);
 
   return (
     <div className="vp-shell">
+      {/* [1] TOP HEADER */}
       <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
 
+      {/* [2] ANNOUNCEMENT BAR */}
       <AnnouncementMarquee
         text={announcementMarqueeText ?? (marqueeMessages.length > 0 ? undefined : (t("public.marquee.welcome") ?? "Welcome — Latest promotions and updates"))}
         messages={marqueeMessages.length > 0 ? marqueeMessages : undefined}
@@ -115,48 +96,58 @@ export function VividHomeClient({
         textColor={marqueeTextColor}
       />
 
-      <div className="vp-w vp-main">
-
-        {/* ── Banner: same as mobile (max 980px, 16:7), same radius ── */}
-        {displayHeroSlides.length > 0 ? (
-          <section className="overflow-hidden mx-auto w-full max-w-[980px]" style={{ ...CARD_STYLE, borderRadius: 20 }}>
+      {/* [3] MAIN HERO — single main visual, no duplicate welcome card */}
+      {displayHeroSlides.length > 0 && (
+        <section className="desk-hero" aria-label="Main banner">
+          <div className="desk-hero-inner">
             <HeroPromotionSlider compact slides={displayHeroSlides} />
+          </div>
+        </section>
+      )}
+
+      <div className="vp-w vp-main">
+        {/* [4] QUICK ACTION STRIP — flat strip, not big boxes */}
+        <section className="desk-quick-strip" aria-label="Quick actions">
+          {QUICK_ACTIONS.map((a) => (
+            <Link key={a.label} href={a.href} className="desk-quick-strip-item">
+              <span className="desk-quick-strip-icon">{a.icon}</span>
+              <span>{a.label}</span>
+            </Link>
+          ))}
+        </section>
+
+        {/* [5] FEATURE SECTION — 3 feature cards (activities) */}
+        {FEATURE_PROMPOS.length > 0 && (
+          <section className="desk-feature" aria-label="Featured promotions">
+            <div className="desk-feature-grid">
+              {FEATURE_PROMPOS.map((p, i) => (
+                <Link key={p.id} href="/promotion" className="desk-feature-card">
+                  <div className="desk-feature-card-img">
+                    {p.coverUrl ? (
+                      <FallbackImage src={p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
+                    ) : (
+                      <span>🎁</span>
+                    )}
+                  </div>
+                  <div className="desk-feature-card-body">
+                    {p.percentText && <span className="desk-feature-badge">{p.percentText}</span>}
+                    <p className="desk-feature-title">{p.title}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </section>
-        ) : null}
+        )}
 
-        {/* ── Hero: same tone as mobile (badge + title + CTA) ── */}
-        <section className="vp-hero">
-          <div className="vp-hero-badge">{heroBadge}</div>
-          <h1>{heroSubtitle} {siteName}<br />{heroTitle}</h1>
-          <div className="vp-hero-actions">
-            <Link href={registerUrl} className="vp-btn vp-btn-primary">{t("public.vivid.hero.register")}</Link>
-            <Link href={depositUrl} className="vp-btn vp-btn-outline">{t("public.vivid.hero.deposit")}</Link>
-          </div>
-        </section>
-
-        {/* ── Quick Actions: same card shell as mobile, 4 columns ── */}
-        <section>
-          <div className="vp-actions-grid vp-actions-unified">
-            {QUICK_ACTIONS.map((a) => (
-              <Link key={a.label} href={a.href} className="vp-action-item vp-action-unified">
-                <div className="icon">
-                  <span style={{ fontSize: 26 }}>{a.icon}</span>
-                </div>
-                <span>{a.label}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Live Transaction + Promotions: same design language ── */}
-        <section className="grid gap-6 lg:grid-cols-2">
-          {/* Live: same card shell as mobile, theme colors, table has own title + live badge */}
-          <div style={{ ...CARD_STYLE, overflow: "hidden", padding: "16px 16px 12px" }}>
-            <LiveTransactionTable
+        {/* [6] LIVE + PROMOTION — 40% | 60% */}
+        <section className="desk-live-promo">
+          <div className="desk-live-panel">
+            <div className="desk-live-panel-body">
+              <LiveTransactionTable
                 internalTestMode={internalTestMode}
                 variant="v3"
-                depositColor={theme?.livetxDepositColor ?? undefined}
-                withdrawColor={theme?.livetxWithdrawColor ?? undefined}
+                depositColor={livetxDepositColor}
+                withdrawColor={livetxWithdrawColor}
                 title={t("public.vivid.liveTable.title")}
                 depositLabel={t("public.vivid.liveTable.deposit")}
                 withdrawLabel={t("public.vivid.liveTable.withdraw")}
@@ -164,86 +155,53 @@ export function VividHomeClient({
                 demoLabel={t("public.vivid.liveTable.demo")}
                 loadingText={t("public.vivid.liveTable.loading")}
               />
+            </div>
           </div>
-
-          {/* Promotions: same card as mobile (1:1 image, title, buttons), 1 column in sidebar */}
-          <div>
-            <SectionHeader title={t("public.vivid.section.promos")} />
-            {topPromos.length > 0 ? (
-              <div className="flex flex-col gap-4">
-                {topPromos.map((p) => (
-                  <div
-                    key={p.id}
-                    style={{
-                      ...CARD_STYLE,
-                      display: "flex",
-                      flexDirection: "column",
-                      overflow: "hidden",
-                      padding: 0,
-                    }}
-                  >
-                    <div style={{ width: "100%", aspectRatio: "1/1", overflow: "hidden", background: "var(--vp-card2)" }}>
-                      {p.coverUrl ? (
-                        p.promoLink ? (
-                          <a href={p.promoLink} target="_blank" rel="noopener noreferrer" style={{ display: "block", height: "100%" }}>
-                            <FallbackImage src={p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
-                          </a>
-                        ) : (
-                          <Link href="/promotion" style={{ display: "block", height: "100%" }}>
-                            <FallbackImage src={p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
-                          </Link>
-                        )
-                      ) : (
-                        <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40 }}>🎁</div>
-                      )}
-                    </div>
-                    <div style={{ padding: "12px 16px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
-                      {p.percentText && (
-                        <span style={{
-                          display: "inline-flex", width: "fit-content",
-                          padding: "2px 8px", borderRadius: 999, fontSize: 11, fontWeight: 700,
-                          background: "rgba(245,158,11,0.2)", border: "1px solid rgba(245,158,11,0.4)", color: "#fcd34d",
-                        }}>
-                          {p.percentText}
-                        </span>
-                      )}
-                      <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "var(--vp-text)", lineHeight: 1.4, minHeight: 40 }}>
-                        {p.title}
-                      </p>
-                      <div style={{ display: "flex", gap: 8, height: 36 }}>
-                        <Link href="/deposit" className="vp-btn vp-btn-primary" style={{ flex: 1, height: 36, fontSize: 13, minWidth: 0 }}>
-                          {t("public.vivid.promo.claim") || "Claim"}
-                        </Link>
-                        <Link href="/promotion" className="vp-btn vp-btn-outline" style={{ flexShrink: 0, height: 36, fontSize: 12, padding: "0 12px" }}>
-                          {t("public.vivid.promo.tnc") || "Terms"}
-                        </Link>
-                      </div>
-                    </div>
+          <div className="desk-promo-stack">
+            {LIVE_PROMOS.length > 0 ? (
+              LIVE_PROMOS.map((p) => (
+                <Link key={p.id} href="/promotion" className="desk-promo-card">
+                  <div className="desk-promo-card-img">
+                    {p.coverUrl ? (
+                      <FallbackImage src={p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
+                    ) : (
+                      <span>🎁</span>
+                    )}
                   </div>
-                ))}
-              </div>
+                  <div className="desk-promo-card-body">
+                    {p.percentText && <span className="desk-promo-badge">{p.percentText}</span>}
+                    <p className="desk-promo-title">{p.title}</p>
+                    <span className="desk-promo-cta">{t("public.vivid.promo.claim") ?? "Claim"}</span>
+                  </div>
+                </Link>
+              ))
             ) : (
-              <div style={{ ...CARD_STYLE, padding: 32, textAlign: "center" }}>
-                <span style={{ fontSize: 40 }}>🎁</span>
-                <p style={{ margin: "12px 0 16px", fontSize: 14, color: "var(--vp-muted)" }}>{t("public.vivid.promo.empty") || "No promotions yet — stay tuned!"}</p>
-                <Link href="/promotion" className="vp-btn vp-btn-primary" style={{ height: 36, fontSize: 13 }}>{t("public.vivid.promo.viewAll") || "View Promos"}</Link>
+              <div className="desk-promo-empty">
+                <span>🎁</span>
+                <p>{t("public.vivid.section.promos") ?? "Promotions"}</p>
+                <Link href="/promotion" className="vp-btn vp-btn-primary" style={{ marginTop: 8, fontSize: 13 }}>
+                  View all
+                </Link>
               </div>
             )}
           </div>
         </section>
 
-        {/* ── Popular Games: same section header + same card shell as mobile ── */}
-        <section>
-          <SectionHeader title={t("public.vivid.section.games")} />
+        {/* [7] HOT GAMES */}
+        <section className="desk-hot-games" aria-label="Hot games">
+          <h2 className="vp-section-title m-0">
+            <span className="dot" />
+            {t("public.vivid.section.games")}
+          </h2>
           {topGames.length > 0 ? (
-            <div className="vp-tile-grid vp-tile-unified">
+            <div className="vp-tile-grid">
               {topGames.map((g) => (
-                <Link key={g.id} href={`/games/play/${g.id}`} className="vp-tile vp-tile-unified">
+                <Link key={g.id} href={`/games/play/${g.id}`} className="vp-tile">
                   <div className="thumb">
                     {g.logoUrl ? (
                       <FallbackImage src={g.logoUrl} alt={g.name} className="h-full w-full object-cover object-center" />
                     ) : (
-                      <span style={{ opacity: 0.6 }}>🎮</span>
+                      <span>🎮</span>
                     )}
                   </div>
                   <div className="label">{g.name}</div>
@@ -251,31 +209,31 @@ export function VividHomeClient({
               ))}
             </div>
           ) : (
-            <div style={{ ...CARD_STYLE, padding: 48, textAlign: "center" }}>
-              <span style={{ fontSize: 48 }}>🎮</span>
-              <p style={{ margin: "16px 0", fontSize: 14, color: "var(--vp-muted)" }}>{t("public.vivid.games.noGames") || "Games coming soon!"}</p>
-              <Link href="/games" className="vp-btn vp-btn-primary" style={{ height: 36, fontSize: 13 }}>{t("public.vivid.games.browse") || "Browse Games"}</Link>
+            <div className="vp-card flex items-center justify-center py-12 text-center">
+              <span className="text-5xl block mb-3">🎮</span>
+              <p className="m-0 text-sm" style={{ color: "var(--vp-muted)" }}>Games coming soon!</p>
+              <Link href="/games" className="vp-btn vp-btn-primary" style={{ marginTop: 16, height: 36, fontSize: 13 }}>Browse Games</Link>
             </div>
           )}
         </section>
 
-        {/* ── Trust strip: same card style ── */}
-        <section className="grid gap-4 sm:grid-cols-3">
+        {/* [8] TRUST / SERVICE */}
+        <section className="desk-trust grid gap-4 sm:grid-cols-3">
           {[
-            { icon: "🔒", titleKey: "public.vivid.trust.secureTitle",  descKey: "public.vivid.trust.secureDesc" },
-            { icon: "⚡", titleKey: "public.vivid.trust.payoutTitle",   descKey: "public.vivid.trust.payoutDesc" },
+            { icon: "🔒", titleKey: "public.vivid.trust.secureTitle", descKey: "public.vivid.trust.secureDesc" },
+            { icon: "⚡", titleKey: "public.vivid.trust.payoutTitle", descKey: "public.vivid.trust.payoutDesc" },
             { icon: "🎧", titleKey: "public.vivid.trust.supportTitle", descKey: "public.vivid.trust.supportDesc" },
           ].map((item) => (
-            <div key={item.titleKey} style={{ ...CARD_STYLE, padding: "24px 20px", textAlign: "center" }}>
-              <div style={{ fontSize: 28, marginBottom: 12 }}>{item.icon}</div>
-              <p style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700, color: "var(--vp-text)" }}>{t(item.titleKey)}</p>
-              <p style={{ margin: 0, fontSize: 12, color: "var(--vp-muted)" }}>{t(item.descKey)}</p>
+            <div key={item.titleKey} className="vp-card text-center desk-trust-card">
+              <div className="text-2xl mb-2">{item.icon}</div>
+              <p className="font-bold text-sm m-0 mb-1" style={{ color: "var(--vp-text)" }}>{t(item.titleKey)}</p>
+              <p className="text-xs m-0" style={{ color: "var(--vp-muted)" }}>{t(item.descKey)}</p>
             </div>
           ))}
         </section>
-
       </div>
 
+      {/* [9] FOOTER */}
       <VividFooter siteName={siteName} />
     </div>
   );

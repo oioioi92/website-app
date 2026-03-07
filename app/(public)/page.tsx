@@ -26,7 +26,6 @@ export default async function PublicHomePage() {
       <>
         <div className="hidden lg:block">
           <VividHomeClient
-            theme={theme}
             siteName={theme.siteName ?? "KINGDOM888"}
             promotions={promotionsUi}
             games={gamesUi}
@@ -41,6 +40,8 @@ export default async function PublicHomePage() {
             marqueeBg={theme.marqueeBg ?? null}
             marqueeBorder={theme.marqueeBorder ?? null}
             marqueeTextColor={theme.marqueeTextColor ?? null}
+            livetxDepositColor={theme.livetxDepositColor ?? null}
+            livetxWithdrawColor={theme.livetxWithdrawColor ?? null}
           />
         </div>
         <div className="lg:hidden">
@@ -102,7 +103,6 @@ export default async function PublicHomePage() {
       <>
         <div className="hidden lg:block">
           <VividHomeClient
-            theme={mockTheme}
             siteName={mockTheme.siteName ?? "Site"}
             promotions={mockPromotions}
             games={mockGames}
@@ -117,6 +117,8 @@ export default async function PublicHomePage() {
             marqueeBg={mockTheme.marqueeBg ?? null}
             marqueeBorder={mockTheme.marqueeBorder ?? null}
             marqueeTextColor={mockTheme.marqueeTextColor ?? null}
+            livetxDepositColor={mockTheme.livetxDepositColor ?? null}
+            livetxWithdrawColor={mockTheme.livetxWithdrawColor ?? null}
           />
         </div>
         <div className="lg:hidden">
