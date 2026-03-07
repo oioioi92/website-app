@@ -139,6 +139,7 @@ const CAT_ICONS: Record<string, string> = {
 // ═══════════════════════════════════════════════════════════
 export function VividHomeClient({
   siteName = "KINGDOM888",
+  logoUrl = null,
   promotions = [],
   games = [],
   loginUrl = "/login",
@@ -161,6 +162,7 @@ export function VividHomeClient({
   uiGameCategories: themeCategories = [],
 }: {
   siteName?: string;
+  logoUrl?: string | null;
   promotions?: Promo[];
   games?: Game[];
   loginUrl?: string;
@@ -227,7 +229,7 @@ export function VividHomeClient({
 
   return (
     <div className="vp-shell">
-      <VividTopbar siteName={siteName} loginUrl={loginUrl} registerUrl={registerUrl} />
+      <VividTopbar siteName={siteName} logoUrl={logoUrl} loginUrl={loginUrl} registerUrl={registerUrl} />
 
       <AnnouncementMarquee
         text={announcementMarqueeText ?? (marqueeMessages.length > 0 ? undefined : (t("public.marquee.welcome") ?? "Welcome — Latest promotions and updates"))}

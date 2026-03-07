@@ -288,13 +288,20 @@ export function VividMobileHome({
         borderBottom: "1px solid var(--vp-topbar-border)",
         backdropFilter: "blur(12px)",
       }}>
-        <span style={{
-          fontSize: 17, fontWeight: 800,
-          background: "linear-gradient(90deg,var(--vp-accent),var(--vp-accent2))",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-        }}>
-          {siteName}
-        </span>
+        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+          {theme.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={theme.logoUrl} alt={siteName} style={{ height: 36, width: "auto", objectFit: "contain", maxWidth: 160 }} />
+          ) : (
+            <span style={{
+              fontSize: 17, fontWeight: 800,
+              background: "linear-gradient(90deg,var(--vp-accent),var(--vp-accent2))",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+            }}>
+              {siteName}
+            </span>
+          )}
+        </Link>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
 
           {/* 🌐 Language picker */}

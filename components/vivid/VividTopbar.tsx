@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useLocale } from "@/lib/i18n/context";
@@ -20,8 +21,9 @@ const LANGS: Array<{ code: string; label: string; locale: Locale }> = [
   { code: "MY", label: "Bahasa Melayu", locale: "ms" },
 ];
 
-export function VividTopbar({ siteName = "KINGDOM888", loginUrl = "/login", registerUrl = "/register-wa" }: {
+export function VividTopbar({ siteName = "KINGDOM888", logoUrl = null, loginUrl = "/login", registerUrl = "/register-wa" }: {
   siteName?: string;
+  logoUrl?: string | null;
   loginUrl?: string;
   registerUrl?: string;
 }) {
@@ -53,7 +55,12 @@ export function VividTopbar({ siteName = "KINGDOM888", loginUrl = "/login", regi
   return (
     <div className="vp-bar">
       <div className="vp-w vp-bar-inner">
-        <Link href="/" className="vp-logo">{siteName}</Link>
+        <Link href="/" className="vp-logo" style={{ display: "flex", alignItems: "center" }}>
+          {logoUrl
+            ? <Image src={logoUrl} alt={siteName} width={140} height={40} style={{ height: 40, width: "auto", objectFit: "contain" }} unoptimized />
+            : siteName
+          }
+        </Link>
         <nav className="vp-nav">
           {NAV_ITEMS.map((n) => (
             <Link key={n.href} href={n.href} {...(path === n.href ? { "data-active": "" } : {})}>
