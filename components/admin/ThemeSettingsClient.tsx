@@ -97,7 +97,14 @@ function BannerRow({
   const hasImg = !!banner.imageUrl;
   return (
     <div className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4 space-y-3">
-      <p className="text-xs font-bold text-[var(--compact-muted)]">#{index + 1}</p>
+      <div className="flex items-center gap-2">
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--compact-primary)] text-[11px] font-bold text-white">{index + 1}</span>
+        {hasImg
+          ? <span className="text-[13px] font-semibold text-[var(--compact-success)]">✅ 已设置图片</span>
+          : <span className="text-[13px] text-[var(--compact-muted)] italic">空白（不显示）</span>
+        }
+        {banner.linkUrl && <span className="ml-auto rounded bg-[var(--compact-card-border)] px-2 py-0.5 text-[11px] text-[var(--compact-muted)] font-mono">{banner.linkUrl}</span>}
+      </div>
       <ImageInput
         label="图片"
         value={banner.imageUrl ?? ""}
@@ -364,7 +371,13 @@ export function ThemeSettingsClient() {
           <div className="space-y-3">
             {actions.map((a, i) => (
               <div key={i} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4">
-                <p className="mb-3 text-xs font-bold text-[var(--compact-muted)]">入口 #{i + 1}</p>
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--compact-primary)] text-[11px] font-bold text-white">{i + 1}</span>
+                  <span className="text-sm font-semibold text-[var(--compact-text)]">
+                    {a.label ? a.label : <span className="text-[var(--compact-muted)] font-normal italic">未设置名称</span>}
+                  </span>
+                  {a.url && <span className="ml-auto rounded bg-[var(--compact-card-border)] px-2 py-0.5 text-[11px] text-[var(--compact-muted)] font-mono">{a.url}</span>}
+                </div>
                 <div className="grid gap-3 sm:grid-cols-3">
                   <ImageInput
                     label="图片（用图片代替文字图标）"
@@ -438,7 +451,12 @@ export function ThemeSettingsClient() {
               };
               return (
                 <div key={def.href} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4">
-                  <p className="mb-3 text-xs font-bold text-[var(--compact-muted)]">导航 #{i + 1} — {def.href}</p>
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--compact-primary)] text-[11px] font-bold text-white">{i + 1}</span>
+                    <span className="text-sm font-semibold text-[var(--compact-text)]">{item.icon ?? def.icon} {item.label || def.label}</span>
+                    <span className="ml-auto rounded bg-[var(--compact-card-border)] px-2 py-0.5 text-[11px] text-[var(--compact-muted)] font-mono">{def.href}</span>
+                    {item.iconUrl && <span className="rounded bg-green-50 border border-green-200 px-2 py-0.5 text-[11px] text-green-700">已设图片</span>}
+                  </div>
                   <div className="grid gap-3 sm:grid-cols-3">
                     <ImageInput
                       label="图标图片（替换 emoji）"
