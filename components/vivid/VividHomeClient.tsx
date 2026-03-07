@@ -26,7 +26,7 @@ const CARD: React.CSSProperties = {
 
 // ─── Live tx list (desktop left column) ──────────────────
 const LTX_ROW_H = 44;
-const LTX_VISIBLE = 4;
+const LTX_VISIBLE = 6;
 const LTX_INTERVAL_MS = 3000;
 
 function DesktopLiveList({
