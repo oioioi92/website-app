@@ -71,6 +71,14 @@ export function AdminImageToUrlClient() {
     );
   }
 
+  // 接口若返回相对路径，用前台域名拼出完整地址（不暴露后台），便于复制与预览
+  const uploadBase =
+    (process.env.NEXT_PUBLIC_UPLOAD_PUBLIC_URL ?? "").trim().replace(/\/$/, "") ||
+    (process.env.NEXT_PUBLIC_FRONTEND_URL ?? "").trim().replace(/\/$/, "");
+  const displayUrl =
+    result &&
+    (result.url.startsWith("http") ? result.url : uploadBase ? `${uploadBase}${result.url.startsWith("/") ? "" : "/"}${result.url}` : result.url);
+
   return (
     <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-panel)] p-6 max-w-2xl">
       <h2 className="text-base font-semibold text-[var(--admin-text)] mb-1">上传图片 → 获取网址</h2>
@@ -128,7 +136,7 @@ export function AdminImageToUrlClient() {
             {result.size > 0 && <span>（{(result.size / 1024).toFixed(1)} KB）</span>}
           </div>
 
-          {/* 只展示 API 返回的地址，绝不使用当前页 origin，避免暴露后台域名 */}
+          {/* 展示完整地址（相对路径时用 NEXT_PUBLIC_FRONTEND_URL 拼接，不暴露后台） */}
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
             <label className="block text-xs font-semibold text-blue-700 mb-1">
               📋 图片地址（复制后粘贴到主题等后台各处）
@@ -137,24 +145,24 @@ export function AdminImageToUrlClient() {
               <input
                 type="text"
                 readOnly
-                value={result.url}
+                value={displayUrl}
                 className="flex-1 min-w-0 rounded-lg border border-blue-200 bg-white px-3 py-2 text-[13px] text-slate-800 font-mono"
               />
               <button
                 type="button"
-                onClick={() => copyToClipboard(result.url, "relative")}
+                onClick={() => copyToClipboard(displayUrl, "relative")}
                 className="shrink-0 px-4 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-medium hover:bg-blue-700"
               >
                 {copied === "relative" ? "✓ 已复制" : "复制"}
               </button>
             </div>
-            {result.url.startsWith("/") ? (
-              <p className="mt-2 text-[11px] text-amber-700">
-                生产环境请配置 R2 云存储，或在 .env 中设置 <strong>NEXT_PUBLIC_UPLOAD_PUBLIC_URL</strong> 为前台域名（如 https://admin1167.com），否则图片可能无法访问。
-              </p>
-            ) : (
+            {displayUrl.startsWith("http") ? (
               <p className="mt-2 text-[11px] text-blue-600">
                 此地址可直接用于前台，不会暴露后台域名。
+              </p>
+            ) : (
+              <p className="mt-2 text-[11px] text-amber-700">
+                请在 .env 中设置 <strong>NEXT_PUBLIC_FRONTEND_URL</strong> 或 <strong>NEXT_PUBLIC_UPLOAD_PUBLIC_URL</strong> 为前台域名，以便得到完整可访问链接。
               </p>
             )}
           </div>
@@ -164,7 +172,7 @@ export function AdminImageToUrlClient() {
               <label className="block text-xs font-medium text-[var(--admin-muted)] mb-1">预览</label>
               <div className="rounded-lg overflow-hidden border border-[var(--admin-border)] inline-block max-w-full">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={result.url} alt={result.filename} className="max-h-40 object-contain" />
+                <img src={displayUrl || result.url} alt={result.filename} className="max-h-40 object-contain" />
               </div>
             </div>
           )}
