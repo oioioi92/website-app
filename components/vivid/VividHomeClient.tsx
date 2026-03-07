@@ -5,6 +5,7 @@ import { useState } from "react";
 import "@/styles/vivid-portal.css";
 import { VividTopbar } from "./VividTopbar";
 import { VividFooter } from "./VividFooter";
+import { AnnouncementMarquee } from "@/components/public/AnnouncementMarquee";
 import { LiveTransactionTable } from "@/components/public/LiveTransactionTable";
 import { FallbackImage } from "@/components/FallbackImage";
 import { HeroPromotionSlider } from "@/components/public/HeroPromotionSlider";
@@ -34,6 +35,11 @@ export function VividHomeClient({
   internalTestMode = false,
   uiText = {},
   heroBanners = [],
+  marqueeText,
+  marqueeMessages,
+  marqueeBg,
+  marqueeBorder,
+  marqueeTextColor,
 }: {
   siteName?: string;
   promotions?: Promo[];
@@ -44,6 +50,11 @@ export function VividHomeClient({
   internalTestMode?: boolean;
   uiText?: Record<string, string>;
   heroBanners?: HeroBanner[];
+  marqueeText?: string | null;
+  marqueeMessages?: string[];
+  marqueeBg?: string | null;
+  marqueeBorder?: string | null;
+  marqueeTextColor?: string | null;
 }) {
   const { t } = useLocale();
   const heroBadge = (uiText.vividHeroBadge?.trim() || t("public.vivid.hero.badge")) as string;
@@ -65,16 +76,15 @@ export function VividHomeClient({
 
       <div className="vp-w vp-main">
 
-        {/* ── Announcement ── */}
-        <div className="vp-announce">
-          <div className="vp-announce-dot" />
-          <p className="text-sm m-0" style={{ color: "var(--vp-muted)", flex: 1 }}>
-            {t("public.vivid.announce")}
-          </p>
-          <Link href="/promotion" className="vp-btn vp-btn-outline" style={{ height: 30, padding: "0 14px", fontSize: 13 }}>
-            {t("public.nav.promotion")}
-          </Link>
-        </div>
+        {/* ── 跑马灯（与手机版一致，Theme 公告滚动条配置） ── */}
+        <AnnouncementMarquee
+          text={marqueeText ?? (marqueeMessages?.length ? undefined : (t("public.marquee.welcome") ?? "Welcome — Latest promotions and updates"))}
+          messages={marqueeMessages?.length ? marqueeMessages : undefined}
+          variant="vivid"
+          marqueeBg={marqueeBg}
+          marqueeBorder={marqueeBorder}
+          textColor={marqueeTextColor}
+        />
 
         {/* ── Hero ── */}
         <section className="vp-hero">

@@ -35,6 +35,11 @@ export default async function PublicHomePage() {
             internalTestMode={internalTestMode}
             uiText={theme.uiText ?? {}}
             heroBanners={theme.heroBanners ?? []}
+            marqueeText={theme.announcementMarqueeText ?? undefined}
+            marqueeMessages={theme.marqueeMessages?.length ? theme.marqueeMessages : undefined}
+            marqueeBg={theme.marqueeBg ?? undefined}
+            marqueeBorder={theme.marqueeBorder ?? undefined}
+            marqueeTextColor={theme.marqueeTextColor ?? undefined}
           />
         </div>
         <div className="lg:hidden">
@@ -105,6 +110,11 @@ export default async function PublicHomePage() {
             internalTestMode={internalTestMode}
             uiText={mockTheme.uiText ?? {}}
             heroBanners={mockTheme.heroBanners ?? []}
+            marqueeText={mockTheme.announcementMarqueeText ?? undefined}
+            marqueeMessages={mockTheme.marqueeMessages?.length ? mockTheme.marqueeMessages : undefined}
+            marqueeBg={mockTheme.marqueeBg ?? undefined}
+            marqueeBorder={mockTheme.marqueeBorder ?? undefined}
+            marqueeTextColor={mockTheme.marqueeTextColor ?? undefined}
           />
         </div>
         <div className="lg:hidden">
