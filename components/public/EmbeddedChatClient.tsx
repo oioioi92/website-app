@@ -439,7 +439,10 @@ export function EmbeddedChatClient({
           </div>
         </div>
 
-        <VividFooter siteName={siteName} />
+        {/* 电话版顾客画面不显示 footer（仅桌面显示） */}
+        <div className="hidden md:block">
+          <VividFooter siteName={siteName} />
+        </div>
       </div>
     );
   }
