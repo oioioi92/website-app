@@ -21,6 +21,7 @@ export function HeroPromotionSlider({
   const scrollRafRef = useRef<number | null>(null);
   const programmaticScrollRef = useRef(false);
   const scrollIdleTimerRef = useRef<number | null>(null);
+  const interactionTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (list.length <= 1) return;
@@ -78,8 +79,19 @@ export function HeroPromotionSlider({
     return () => {
       if (scrollRafRef.current) window.cancelAnimationFrame(scrollRafRef.current);
       window.clearTimeout(scrollIdleTimerRef.current ?? undefined);
+      window.clearTimeout(interactionTimerRef.current ?? undefined);
     };
   }, []);
+
+  function beginInteraction() {
+    window.clearTimeout(interactionTimerRef.current ?? undefined);
+    setIsInteracting(true);
+  }
+
+  function endInteraction(delay = 280) {
+    window.clearTimeout(interactionTimerRef.current ?? undefined);
+    interactionTimerRef.current = window.setTimeout(() => setIsInteracting(false), delay);
+  }
 
   if (list.length === 0) return null;
 
@@ -93,13 +105,14 @@ export function HeroPromotionSlider({
         <div className={compact ? "aspect-[16/7]" : "aspect-[16/9]"}>
           <div
             ref={scrollerRef}
-            className="ui-hide-scrollbar flex h-full w-full snap-x snap-mandatory overflow-x-auto scroll-smooth"
+            className="ui-hide-scrollbar flex h-full w-full snap-x snap-proximity overflow-x-auto scroll-smooth"
             // Allow native horizontal swiping; avoid blocking pan-x (pan-y here can make swipe feel sticky in some webviews).
-            style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
-            onTouchStart={() => setIsInteracting(true)}
-            onTouchEnd={() => window.setTimeout(() => setIsInteracting(false), 900)}
-            onMouseEnter={() => setIsInteracting(true)}
-            onMouseLeave={() => window.setTimeout(() => setIsInteracting(false), 900)}
+            style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x", overscrollBehaviorX: "contain" }}
+            onTouchStart={beginInteraction}
+            onTouchEnd={() => endInteraction(260)}
+            onTouchCancel={() => endInteraction(260)}
+            onMouseEnter={beginInteraction}
+            onMouseLeave={() => endInteraction(320)}
             onScroll={(e) => {
               const el = scrollerRef.current;
               if (!el || !viewportW) return;
@@ -124,7 +137,7 @@ export function HeroPromotionSlider({
               });
             }}
           >
-            {list.map((s) => (
+            {list.map((s, i) => (
               <button
                 key={s.id}
                 type="button"
@@ -136,7 +149,7 @@ export function HeroPromotionSlider({
                   src={s.imageUrl}
                   alt={s.title ?? "banner"}
                   className="ui-asset-img h-full w-full object-cover"
-                  loading={compact ? "eager" : "lazy"}
+                  loading={i === 0 ? "eager" : "lazy"}
                 />
                 {!compact ? (
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent p-4">
@@ -155,11 +168,11 @@ export function HeroPromotionSlider({
             type="button"
             aria-label={`第 ${i + 1} 张幻灯片`}
             onClick={() => {
-              setIsInteracting(true);
+              beginInteraction();
               const el = scrollerRef.current;
               if (el && viewportW) el.scrollTo({ left: i * viewportW, behavior: "smooth" });
               setIndex(i);
-              window.setTimeout(() => setIsInteracting(false), 900);
+              endInteraction(380);
             }}
             className={`h-2 w-2 rounded-full ${i === index ? "bg-[color:var(--front-gold)]" : "bg-white/30"}`}
           />

@@ -94,8 +94,8 @@ export function VividHomeClient({
 
         {/* ── 首页轮播图（后台 Theme 配置） ── */}
         {displayHeroSlides.length > 0 ? (
-          <section className="vp-card overflow-hidden" style={{ borderRadius: 16 }}>
-            <HeroPromotionSlider slides={displayHeroSlides} />
+          <section className="vp-card mx-auto w-full max-w-[980px] overflow-hidden" style={{ borderRadius: 16 }}>
+            <HeroPromotionSlider compact slides={displayHeroSlides} />
           </section>
         ) : null}
 
