@@ -131,6 +131,7 @@ function BannerRow({
 const SECTIONS = [
   { id: "background",     icon: "🖼️",  label: "整页背景" },
   { id: "logo",           icon: "🏷️",  label: "Logo 与站名" },
+  { id: "vividHero",      icon: "📣",  label: "首页主标语 (Vivid)" },
   { id: "heroBanners",    icon: "📸",  label: "首页轮播图" },
   { id: "buttons",        icon: "🔘",  label: "按钮图片" },
   { id: "quickActions",   icon: "⚡",  label: "快捷入口" },
@@ -210,6 +211,10 @@ export function ThemeSettingsClient() {
     if (!theme) return;
     setTheme({ ...theme, bottomNav: list });
   }
+  function patchUiText(key: string, value: string) {
+    if (!theme) return;
+    setTheme({ ...theme, uiText: { ...(theme.uiText ?? {}), [key]: value || "" } });
+  }
 
   function patchTrustBadges(list: ThemeConfig["trustBadges"]) {
     if (!theme) return;
@@ -266,7 +271,10 @@ export function ThemeSettingsClient() {
     /* ── 2. Logo 与站名 ── */
     if (activeSection === "logo") return (
       <div className="admin-card p-6 space-y-6">
-        <SectionTitle title="🏷️ Logo 与站名" desc="设置网站 Logo 图片和名称。" />
+        <SectionTitle
+          title="🏷️ Logo 与站名"
+          desc="Vivid 新版本顶栏只显示「网站名称」文字，不显示 Logo 图。Logo 图为桌面/旧版用。站名新版本必填。"
+        />
         <ImageInput
           label="Logo 图片"
           value={theme.logoUrl ?? ""}
@@ -287,10 +295,56 @@ export function ThemeSettingsClient() {
       </div>
     );
 
+    /* ── 2b. 首页主标语 (Vivid 新版本) ── */
+    if (activeSection === "vividHero") return (
+      <div className="admin-card p-6 space-y-6">
+        <SectionTitle
+          title="📣 首页主标语 (Vivid)"
+          desc="新版本首页紫色主卡上的文案，留空则使用默认多语言文案。"
+        />
+        <div>
+          <label className={labelClass}>限时优惠标签</label>
+          <input
+            type="text"
+            value={theme.uiText?.vividHeroBadge ?? ""}
+            onChange={(e) => patchUiText("vividHeroBadge", e.target.value)}
+            className={inputClass}
+            placeholder="⚡ 限时优惠"
+          />
+          <p className="text-[11px] text-[var(--compact-muted)] mt-1">显示在主卡上方小标签，如「限时优惠」。</p>
+        </div>
+        <div>
+          <label className={labelClass}>主标语前半句（副标题）</label>
+          <input
+            type="text"
+            value={theme.uiText?.vividHeroSubtitle ?? ""}
+            onChange={(e) => patchUiText("vividHeroSubtitle", e.target.value)}
+            className={inputClass}
+            placeholder="欢迎来到"
+          />
+          <p className="text-[11px] text-[var(--compact-muted)] mt-1">主卡大标题前半段，后面会接「网站名称」。</p>
+        </div>
+        <div>
+          <label className={labelClass}>主标语后半句（标题）</label>
+          <input
+            type="text"
+            value={theme.uiText?.vividHeroTitle ?? ""}
+            onChange={(e) => patchUiText("vividHeroTitle", e.target.value)}
+            className={inputClass}
+            placeholder="游戏赢大奖"
+          />
+          <p className="text-[11px] text-[var(--compact-muted)] mt-1">主卡大标题后半段。最终显示为：前半句 + 网站名称 + 后半句。</p>
+        </div>
+      </div>
+    );
+
     /* ── 3. 首页轮播图 ── */
     if (activeSection === "heroBanners") return (
       <div className="admin-card p-6 space-y-5">
-        <SectionTitle title="📸 首页轮播图" desc="最多 5 张。图片建议宽大于高，例如 1200×450。填入图片地址，可选填点击链接。" />
+        <SectionTitle
+          title="📸 首页轮播图"
+          desc="桌面版或部分布局使用。Vivid 新版本移动首页主区为紫色主卡（见「首页主标语」），不显示轮播图。最多 5 张，建议 1200×450。"
+        />
         <div className="space-y-4">
           {Array.from({ length: 5 }, (_, i) => (
             (theme.heroBanners ?? []).concat(emptyBanner, emptyBanner, emptyBanner, emptyBanner, emptyBanner)[i] ?? emptyBanner
@@ -325,7 +379,10 @@ export function ThemeSettingsClient() {
       ];
       return (
         <div className="admin-card p-6 space-y-6">
-          <SectionTitle title="🔘 按钮图片" desc="用照片替换各功能按钮。上传后前台按钮显示为图片，不显示文字。" />
+          <SectionTitle
+            title="🔘 按钮图片"
+            desc="仅桌面版操作栏使用。Vivid 新版本顶栏为文字「登录」「注册」，没有这些按钮图，无需上传。"
+          />
           <div className="grid gap-6 sm:grid-cols-2">
             {btnDefs.map(({ key, label }) => (
               <ImageInput
@@ -370,7 +427,7 @@ export function ThemeSettingsClient() {
       const actions = Array.from({ length: 8 }, (_, i) => (theme.quickActions ?? [])[i] ?? defaultAction);
       return (
         <div className="admin-card p-6 space-y-5">
-          <SectionTitle title="⚡ 快捷入口" desc="首页显示的快捷按钮，最多 8 个。每个可以设一张图片，有图片时前台只显示图片，没有图片则显示文字图标。" />
+          <SectionTitle title="⚡ 快捷入口" desc="Vivid 新版本首页主卡下方 4 个快捷按钮会用。最多 8 个，可设图片（有图则显示图，无图则显示 emoji）。" />
           <div className="space-y-3">
             {actions.map((a, i) => (
               <div key={i} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4">
@@ -443,7 +500,7 @@ export function ThemeSettingsClient() {
       const list = (theme.bottomNav ?? []).length >= 6 ? theme.bottomNav! : defaultSix;
       return (
         <div className="admin-card p-6 space-y-5">
-          <SectionTitle title="🧭 底部导航" desc="手机底部导航栏，共 6 个。可上传图标图片替换 emoji，也可修改显示文字。" />
+          <SectionTitle title="🧭 底部导航" desc="Vivid 新版本手机底部 6 个导航会用。可上传图标图片替换 emoji，也可改显示文字。" />
           <div className="space-y-3">
             {defaultSix.map((def, i) => {
               const item = list[i] ?? def;

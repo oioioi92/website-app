@@ -39,6 +39,10 @@ export function VividMobileHome({
   const siteName = theme.siteName ?? "KINGDOM888";
   const loginUrl = theme.loginUrl ?? "/login";
   const registerUrl = theme.registerUrl ?? "/register-wa";
+  const uiText = theme.uiText ?? {};
+  const heroBadge = (uiText.vividHeroBadge?.trim() || t("public.vivid.hero.badge")) as string;
+  const heroSubtitle = (uiText.vividHeroSubtitle?.trim() || t("public.vivid.hero.subtitle")) as string;
+  const heroTitle = (uiText.vividHeroTitle?.trim() || t("public.vivid.hero.title")) as string;
 
   const themeQuickActions = (theme.quickActions ?? []).filter((a) => a.label?.trim() && a.url?.trim());
   const QUICK_ACTIONS = themeQuickActions.length > 0
@@ -131,7 +135,7 @@ export function VividMobileHome({
       </header>
 
       <AnnouncementMarquee
-        text={theme.announcementMarqueeText ?? undefined}
+        text={theme.announcementMarqueeText ?? (theme.marqueeMessages?.length ? undefined : (t("public.marquee.welcome") ?? "Welcome — Latest promotions and updates"))}
         messages={theme.marqueeMessages?.length ? theme.marqueeMessages : undefined}
         variant="vivid"
         marqueeBg={theme.marqueeBg}
@@ -161,14 +165,14 @@ export function VividMobileHome({
             borderRadius: 999, padding: "3px 10px", fontSize: 11, fontWeight: 600, color: "var(--vp-accent)",
             marginBottom: 10,
           }}>
-            {t("public.vivid.hero.badge")}
+            {heroBadge}
           </div>
           <h1 style={{
             margin: 0, fontSize: 20, fontWeight: 800, lineHeight: 1.3,
             background: "linear-gradient(90deg,#fff,rgba(255,255,255,.7))",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
           }}>
-            {t("public.vivid.hero.subtitle")} {siteName}<br />{t("public.vivid.hero.title")}
+            {heroSubtitle} {siteName}<br />{heroTitle}
           </h1>
           <div style={{ display: "flex", gap: 10, marginTop: 16, position: "relative", zIndex: 1 }}>
             <Link
@@ -209,7 +213,13 @@ export function VividMobileHome({
                 fontWeight: 600,
               }}
             >
-              <span style={{ fontSize: 22 }}>{"icon" in a ? a.icon : "💰"}</span>
+              {"iconUrl" in a && a.iconUrl ? (
+                <div style={{ width: 28, height: 28, borderRadius: 8, overflow: "hidden", flexShrink: 0 }}>
+                  <FallbackImage src={a.iconUrl} alt="" className="w-full h-full object-cover" />
+                </div>
+              ) : (
+                <span style={{ fontSize: 22 }}>{"icon" in a ? a.icon : "💰"}</span>
+              )}
               <span>{a.label}</span>
             </Link>
           ))}
