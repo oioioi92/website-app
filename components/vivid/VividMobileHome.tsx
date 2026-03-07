@@ -334,7 +334,20 @@ export function VividMobileHome({
           ))}
         </div>
 
-        {/* ══════════════ 5. PROMOTIONS ══════════════ */}
+        {/* ══════════════ 5. LIVE TRANSACTIONS ══════════════ */}
+        <div>
+          <MobileLiveList
+            items={liveTxItems}
+            depositLabel={txDeposit}
+            withdrawLabel={txWithdraw}
+            liveLabel={txLive}
+            titleText={txTitle}
+            depositColor={theme.livetxDepositColor}
+            withdrawColor={theme.livetxWithdrawColor}
+          />
+        </div>
+
+        {/* ══════════════ 6. PROMOTIONS ══════════════ */}
         {topPromos.length > 0 && (
           <div>
             <SectionHeader title={t("public.vivid.section.promos") as string || "最新活动"} />
@@ -405,19 +418,6 @@ export function VividMobileHome({
             </div>
           </div>
         )}
-
-        {/* ══════════════ 6. LIVE TRANSACTIONS ══════════════ */}
-        <div>
-          <MobileLiveList
-            items={liveTxItems}
-            depositLabel={txDeposit}
-            withdrawLabel={txWithdraw}
-            liveLabel={txLive}
-            titleText={txTitle}
-            depositColor={theme.livetxDepositColor}
-            withdrawColor={theme.livetxWithdrawColor}
-          />
-        </div>
 
         {/* ══════════════ 7. REFERRAL BLOCK ══════════════ */}
         <div>
