@@ -84,24 +84,38 @@ export default async function PublicLayout({ children }: { children: ReactNode }
   const vpStyle = (vpVars.length || fontFamilyCss || fontSizeCss) ? `.vp-shell { ${vpVars.join("; ")}${vpVars.length ? "; " : ""}${fontFamilyCss} ${fontSizeCss} }` : "";
   const deskStyle = deskVars.length ? `.public-desktop-shell { ${deskVars.join("; ")} }` : "";
   const rootStyle = rootVars.length ? `:root { ${rootVars.join("; ")} }` : "";
-  // 整页背景：在 Vivid 下也应用 theme 的 background 图/色（覆盖 vivid-portal 默认）
+  // 整页背景：直接覆盖 .vp-shell 的 background（vivid-portal.css 默认渐变会被此处 !important 替换）
   let pageBgStyle = "";
   if (theme?.pageBackgroundUrl || theme?.pageBackgroundColor) {
     const safeUrl = theme.pageBackgroundUrl?.replace(/\\/g, "\\\\").replace(/"/g, '\\"') ?? "";
-    const parts = [
-      theme.pageBackgroundColor ? `background-color: ${theme.pageBackgroundColor}` : "",
-      safeUrl ? `background-image: url("${safeUrl}"); background-size: cover; background-position: center` : "",
-    ].filter(Boolean);
-    if (parts.length) pageBgStyle = `body:has(.vp-shell) .min-h-screen { ${parts.join("; ")} !important; }`;
+    const colorLayer = theme.pageBackgroundColor ?? "#080810";
+    // background-image 用多层：自定义图 在最上，保留紫色光晕渐变，最底是纯色
+    const bgImage = safeUrl
+      ? `url("${safeUrl}"), radial-gradient(ellipse 70% 50% at 80% -10%, rgba(140,60,255,0.14) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 90%, rgba(100,80,255,0.09) 0%, transparent 60%)`
+      : `radial-gradient(ellipse 70% 50% at 80% -10%, rgba(140,60,255,0.18) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 90%, rgba(100,80,255,0.12) 0%, transparent 60%)`;
+    pageBgStyle = [
+      `.vp-shell { background-image: ${bgImage} !important; background-color: ${colorLayer} !important; background-size: cover, auto, auto !important; background-position: center, center, center !important; background-attachment: fixed !important; }`,
+      // 同时覆盖 .min-h-screen 防止白边
+      `body:has(.vp-shell) .min-h-screen { background: ${colorLayer} !important; }`,
+    ].join("\n");
   }
-  // 整体设计风格预设：圆角、主色、氛围一键切换
-  const designPresets: Record<string, string> = {
-    minimal: ".design-style-minimal .vp-shell { --vp-r-card: 8px; --vp-r-btn: 6px; --vp-accent: #94a3b8; --vp-accent2: #64748b; --vp-border: rgba(255,255,255,0.08); --vp-topbar-border: rgba(255,255,255,0.1); }",
-    luxury: ".design-style-luxury .vp-shell { --vp-r-card: 20px; --vp-r-btn: 14px; --vp-accent: #d4af37; --vp-accent2: #f4e4bc; --vp-gold: #d4af37; --vp-border: rgba(212,175,55,0.35); --vp-topbar-border: rgba(212,175,55,0.4); }",
-    gaming: ".design-style-gaming .vp-shell { --vp-r-card: 12px; --vp-r-btn: 10px; --vp-accent: #a855f7; --vp-accent2: #06b6d4; --vp-border: rgba(168,85,247,0.45); --vp-topbar-border: rgba(168,85,247,0.5); }",
-    soft: ".design-style-soft .vp-shell { --vp-r-card: 24px; --vp-r-btn: 16px; --vp-border: rgba(255,255,255,0.12); --vp-topbar-border: rgba(255,255,255,0.15); }",
+  // 整体设计风格预设：圆角、主色、整页氛围（用 data-design-style 确保命中）
+  const hasCustomPageBg = Boolean(theme?.pageBackgroundUrl || theme?.pageBackgroundColor);
+  const designPresetsBg: Record<string, string> = hasCustomPageBg ? {} : {
+    minimal: "[data-design-style=minimal].min-h-screen { background: #0f1115 !important; }",
+    luxury: "[data-design-style=luxury].min-h-screen { background: linear-gradient(180deg, #1a1510 0%, #0f0d0a 50%, #0a0806 100%) !important; }",
+    gaming: "[data-design-style=gaming].min-h-screen { background: linear-gradient(135deg, #0d0a14 0%, #0f0d1a 50%, #0a0812 100%) !important; }",
+    soft: "[data-design-style=soft].min-h-screen { background: linear-gradient(180deg, #121118 0%, #0e0d12 100%) !important; }",
   };
-  const designStyleCss = theme?.designStyle && designPresets[theme.designStyle] ? designPresets[theme.designStyle] : "";
+  const designPresetsVars: Record<string, string> = {
+    minimal: "[data-design-style=minimal] .vp-shell { --vp-r-card: 8px; --vp-r-btn: 6px; --vp-accent: #94a3b8; --vp-accent2: #64748b; --vp-border: rgba(255,255,255,0.08); --vp-topbar-bg: rgba(15,17,21,0.97); --vp-topbar-border: rgba(255,255,255,0.1); }",
+    luxury: "[data-design-style=luxury] .vp-shell { --vp-r-card: 20px; --vp-r-btn: 14px; --vp-accent: #d4af37; --vp-accent2: #f4e4bc; --vp-gold: #d4af37; --vp-border: rgba(212,175,55,0.35); --vp-topbar-bg: rgba(26,21,16,0.97); --vp-topbar-border: rgba(212,175,55,0.4); }",
+    gaming: "[data-design-style=gaming] .vp-shell { --vp-r-card: 12px; --vp-r-btn: 10px; --vp-accent: #a855f7; --vp-accent2: #06b6d4; --vp-border: rgba(168,85,247,0.45); --vp-topbar-bg: rgba(13,10,20,0.97); --vp-topbar-border: rgba(168,85,247,0.5); }",
+    soft: "[data-design-style=soft] .vp-shell { --vp-r-card: 24px; --vp-r-btn: 16px; --vp-border: rgba(255,255,255,0.12); --vp-topbar-border: rgba(255,255,255,0.15); }",
+  };
+  const designStyleCss = theme?.designStyle && (designPresetsBg[theme.designStyle] ?? designPresetsVars[theme.designStyle])
+    ? [designPresetsBg[theme.designStyle], designPresetsVars[theme.designStyle]].filter(Boolean).join(" ")
+    : "";
   const themeOverrideCss = [rootStyle, vpStyle, deskStyle, pageBgStyle, designStyleCss].filter(Boolean).join("\n");
   return (
     <MobileShell theme={theme} chatUrl={chatUrl} socialLinks={social} useVividPortal={true}>
