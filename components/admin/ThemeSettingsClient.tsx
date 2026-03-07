@@ -299,9 +299,12 @@ export function ThemeSettingsClient() {
     if (activeSection === "vividHero") return (
       <div className="admin-card p-6 space-y-6">
         <SectionTitle
-          title="📣 首页主标语 (Vivid)"
-          desc="新版本首页紫色主卡上的文案，留空则使用默认多语言文案。"
+          title="📣 首页主标语 (Vivid 桌面)"
+          desc="桌面版首页左侧主卡上的文案。手机版首页已改为直接显示轮播图（欢迎主卡已删除），此配置目前仅影响桌面版宽屏布局。留空则使用默认多语言文案。"
         />
+        <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-[12px] text-amber-800">
+          📱 手机版首页已删除欢迎主卡，改为直接显示轮播图作为主视觉。以下文案只在桌面版（宽屏）显示。
+        </div>
         <div>
           <label className={labelClass}>限时优惠标签</label>
           <input
@@ -311,7 +314,7 @@ export function ThemeSettingsClient() {
             className={inputClass}
             placeholder="⚡ 限时优惠"
           />
-          <p className="text-[11px] text-[var(--compact-muted)] mt-1">显示在主卡上方小标签，如「限时优惠」。</p>
+          <p className="text-[11px] text-[var(--compact-muted)] mt-1">桌面版主卡上方小标签，如「限时优惠」。</p>
         </div>
         <div>
           <label className={labelClass}>主标语前半句（副标题）</label>
@@ -322,7 +325,7 @@ export function ThemeSettingsClient() {
             className={inputClass}
             placeholder="欢迎来到"
           />
-          <p className="text-[11px] text-[var(--compact-muted)] mt-1">主卡大标题前半段，后面会接「网站名称」。</p>
+          <p className="text-[11px] text-[var(--compact-muted)] mt-1">桌面版主卡大标题前半段，后面会接「网站名称」。</p>
         </div>
         <div>
           <label className={labelClass}>主标语后半句（标题）</label>
@@ -333,7 +336,7 @@ export function ThemeSettingsClient() {
             className={inputClass}
             placeholder="游戏赢大奖"
           />
-          <p className="text-[11px] text-[var(--compact-muted)] mt-1">主卡大标题后半段。最终显示为：前半句 + 网站名称 + 后半句。</p>
+          <p className="text-[11px] text-[var(--compact-muted)] mt-1">桌面版主卡大标题后半段。最终显示：前半句 + 网站名称 + 后半句。</p>
         </div>
       </div>
     );
@@ -343,7 +346,7 @@ export function ThemeSettingsClient() {
       <div className="admin-card p-6 space-y-5">
         <SectionTitle
           title="📸 首页轮播图"
-          desc="Vivid 新版本会用：桌面与手机首页主卡下方都会显示。最多 5 张，横图 16:9 最佳（如 1200×675）；可填点击链接。"
+          desc="手机版：轮播图是首页主视觉区（最顶部），已取代欢迎主卡。桌面版：显示在内容区，最大宽 980px。最多 5 张，建议横图 16:9（如 1200×675）；可填点击跳转链接。"
         />
         <div className="space-y-4">
           {Array.from({ length: 5 }, (_, i) => (
@@ -427,7 +430,7 @@ export function ThemeSettingsClient() {
       const actions = Array.from({ length: 8 }, (_, i) => (theme.quickActions ?? [])[i] ?? defaultAction);
       return (
         <div className="admin-card p-6 space-y-5">
-          <SectionTitle title="⚡ 快捷入口" desc="Vivid 新版本首页主卡下方 4 个快捷按钮会用。最多 8 个，可设图片（有图则显示图，无图则显示 emoji）。" />
+          <SectionTitle title="⚡ 快捷入口" desc="Vivid 手机版首页轮播图下方 4 个快捷按钮（取前 4 个）。最多配置 8 个，手机只显示前 4 个；可设图片（有图则显示图，无图则显示 emoji）。图标实际显示约 32px，但建议上传 56×56 或 64×64 以保证清晰。" />
           <div className="space-y-3">
             {actions.map((a, i) => (
               <div key={i} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4">
@@ -447,7 +450,7 @@ export function ThemeSettingsClient() {
                       next[i] = { ...next[i], iconUrl: v || null };
                       patchQuickActions(next.filter(x => x.label || x.url || x.iconUrl));
                     }}
-                    size="56×56 或 64×64 方图（Vivid 显示约 28px）"
+                    size="56×56 或 64×64 方图（Vivid 手机版显示约 32px）"
                   />
                   <div className="space-y-3">
                     <div>
@@ -546,7 +549,7 @@ export function ThemeSettingsClient() {
     /* ── 7. 促销设置 ── */
     if (activeSection === "promos") return (
       <div className="admin-card p-6 space-y-6">
-        <SectionTitle title="🎁 促销设置" desc="促销卡片的显示方式与图片高度。" />
+        <SectionTitle title="🎁 促销设置" desc="促销卡片的显示方式与图片高度。「图片区高度」同时控制手机版首页活动卡的图片高度（默认 140px）与促销列表页卡片高度。" />
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label className={labelClass}>卡片排列方式</label>
@@ -586,7 +589,7 @@ export function ThemeSettingsClient() {
               }}
               className={inputClass}
             />
-            <p className="mt-1 text-[11px] text-[var(--compact-muted)]">80 ~ 600 px，建议 160~240</p>
+            <p className="mt-1 text-[11px] text-[var(--compact-muted)]">80 ~ 600 px；手机首页活动卡建议 130~160，促销列表页建议 160~240</p>
           </div>
         </div>
         <div>
@@ -1060,8 +1063,8 @@ export function ThemeSettingsClient() {
           <p className="mb-2 text-xs font-bold text-[var(--compact-muted)] uppercase">流水 / 推荐 / 客服颜色</p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { key: "livetxDepositColor",  label: "流水存款色",   ph: "#1e3a5f" },
-              { key: "livetxWithdrawColor", label: "流水提款色",   ph: "#e6b800" },
+              { key: "livetxDepositColor",  label: "流水存款色（手机列表+桌面表格）",   ph: "#4ade80" },
+              { key: "livetxWithdrawColor", label: "流水提款色（手机列表+桌面表格）",   ph: "#fbbf24" },
               { key: "referralBlockBg",     label: "推荐区块背景", ph: "rgba(120,80,255,0.08)" },
               { key: "referralBlockBorder", label: "推荐区块边框", ph: "rgba(120,80,255,0.25)" },
               { key: "chatFabBg",           label: "客服悬浮背景", ph: "#080808" },

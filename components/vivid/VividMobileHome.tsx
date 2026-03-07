@@ -51,12 +51,16 @@ function MobileLiveList({
   withdrawLabel,
   liveLabel,
   titleText,
+  depositColor,
+  withdrawColor,
 }: {
   items: Array<{ id: string; userRefMasked: string; amountDisplay: string; kind: "deposit" | "withdraw" }>;
   depositLabel: string;
   withdrawLabel: string;
   liveLabel: string;
   titleText: string;
+  depositColor?: string | null;
+  withdrawColor?: string | null;
 }) {
   return (
     <div style={{ ...CARD, overflow: "hidden" }}>
@@ -80,6 +84,9 @@ function MobileLiveList({
       <div style={{ padding: "8px 0" }}>
         {items.slice(0, 6).map((tx, i) => {
           const isDeposit = tx.kind === "deposit";
+          const dColor = depositColor ?? "#4ade80";
+          const wColor = withdrawColor ?? "#fbbf24";
+          const txColor = isDeposit ? dColor : wColor;
           return (
             <div key={tx.id} style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -89,9 +96,9 @@ function MobileLiveList({
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{
                   fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 999,
-                  background: isDeposit ? "rgba(34,197,94,0.15)" : "rgba(245,158,11,0.15)",
-                  color: isDeposit ? "#4ade80" : "#fbbf24",
-                  border: `1px solid ${isDeposit ? "rgba(34,197,94,0.3)" : "rgba(245,158,11,0.3)"}`,
+                  background: `${txColor}26`,
+                  color: txColor,
+                  border: `1px solid ${txColor}55`,
                   textTransform: "uppercase",
                   flexShrink: 0,
                 }}>
@@ -103,7 +110,7 @@ function MobileLiveList({
               </div>
               <span style={{
                 fontSize: 13, fontWeight: 700,
-                color: isDeposit ? "#4ade80" : "#fbbf24",
+                color: txColor,
                 fontFamily: "monospace",
               }}>
                 {tx.amountDisplay}
@@ -218,6 +225,7 @@ export function VividMobileHome({
   const txDeposit     = (t("public.vivid.liveTable.deposit")  || "存款")     as string;
   const txWithdraw    = (t("public.vivid.liveTable.withdraw") || "提款")     as string;
   const txLive        = (t("public.vivid.liveTable.live")     || "实时")     as string;
+  const promoImgH     = theme.vividPromoCardConfig?.imgHeight ?? 140;
 
   return (
     <div className="vp-shell lg:hidden" style={{ paddingBottom: 80 }}>
@@ -324,8 +332,8 @@ export function VividMobileHome({
                     display: "flex", flexDirection: "column",
                   }}
                 >
-                  {/* Image — fixed 140px height */}
-                  <div style={{ height: 140, overflow: "hidden", borderRadius: "16px 16px 0 0", background: "var(--vp-card)" }}>
+                  {/* Image — height from admin config (vividPromoCardConfig.imgHeight) */}
+                  <div style={{ height: promoImgH, overflow: "hidden", borderRadius: "16px 16px 0 0", background: "var(--vp-card)" }}>
                     {(p.coverUrlMobilePromo || p.coverUrl) ? (
                       p.promoLink ? (
                         <a href={p.promoLink} target="_blank" rel="noopener noreferrer" style={{ display: "block", height: "100%" }}>
@@ -387,6 +395,8 @@ export function VividMobileHome({
             withdrawLabel={txWithdraw}
             liveLabel={txLive}
             titleText={txTitle}
+            depositColor={theme.livetxDepositColor}
+            withdrawColor={theme.livetxWithdrawColor}
           />
         </div>
 
