@@ -82,8 +82,11 @@ export function AdminImageToUrlClient() {
   return (
     <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-panel)] p-6 max-w-2xl">
       <h2 className="text-base font-semibold text-[var(--admin-text)] mb-1">上传图片 → 获取网址</h2>
-      <p className="text-[13px] text-[var(--admin-muted)] mb-4">
+      <p className="text-[13px] text-[var(--admin-muted)] mb-1">
         支持 JPG / PNG / WEBP / GIF，单张最大 {MAX_MB}MB。上传后得到可填到后台各处的图片链接。
+      </p>
+      <p className="text-[12px] text-[var(--admin-muted)] mb-4">
+        想和静态站一样得到固定 CDN 链接（如 <code className="rounded bg-black/5 px-1">https://static.xxx.com/...</code>）？在服务器 .env 中配置 R2（R2_ENDPOINT、R2_BUCKET、R2_PUBLIC_BASE_URL 等），上传后即返回该固定域名，无需关心前后台是否同机。
       </p>
 
       <div
