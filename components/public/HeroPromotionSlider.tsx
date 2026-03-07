@@ -105,9 +105,13 @@ export function HeroPromotionSlider({
         <div className={compact ? "aspect-[16/7]" : "aspect-[16/9]"}>
           <div
             ref={scrollerRef}
-            className="ui-hide-scrollbar flex h-full w-full snap-x snap-proximity overflow-x-auto scroll-smooth"
-            // Allow native horizontal swiping; avoid blocking pan-x (pan-y here can make swipe feel sticky in some webviews).
-            style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x", overscrollBehaviorX: "contain" }}
+            className="ui-hide-scrollbar flex h-full w-full snap-x snap-start overflow-x-auto"
+            style={{
+              WebkitOverflowScrolling: "touch",
+              touchAction: "pan-x",
+              overscrollBehaviorX: "contain",
+              scrollBehavior: "auto",
+            }}
             onTouchStart={beginInteraction}
             onTouchEnd={() => endInteraction(260)}
             onTouchCancel={() => endInteraction(260)}

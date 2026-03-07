@@ -1,5 +1,22 @@
 const SEP = " \u00A0 \u2022 \u00A0 ";
 
+/** 单条展示单元（重复两份以实现无缝循环） */
+function MarqueeUnit({
+  content,
+  sep,
+  color,
+}: {
+  content: string;
+  sep: string;
+  color?: string | null;
+}) {
+  return (
+    <span className="inline-block whitespace-nowrap px-4 py-2 text-[12px] font-semibold tracking-wide" style={{ color: color ?? "#fff" }}>
+      {content}{sep}
+    </span>
+  );
+}
+
 export function AnnouncementMarquee({
   text,
   messages,
@@ -29,24 +46,29 @@ export function AnnouncementMarquee({
   const bg = containerStyle?.background ?? marqueeBg ?? (isVivid ? "var(--vp-marquee-bg, var(--vp-card))" : undefined);
   const border = containerStyle?.borderBottom ?? (marqueeBorder ? `1px solid ${marqueeBorder}` : undefined) ?? (isVivid ? "1px solid var(--vp-marquee-border, var(--vp-border))" : undefined);
   const color = textColor ?? (isVivid ? "var(--vp-marquee-text, var(--vp-text))" : undefined);
+  const unitContent = displayText + SEP;
   return (
     <div
-      className="overflow-hidden lg:border-t"
-      style={
-        isVivid
+      className="overflow-hidden lg:border-t shrink-0"
+      style={{
+        ...(isVivid
           ? { background: bg, borderBottom: border }
-          : { borderBottom: "1px solid var(--p44-green-dark)", background: "var(--p44-bar-green)" }
-      }
+          : { borderBottom: "1px solid var(--p44-green-dark)", background: "var(--p44-bar-green)" }),
+        minHeight: "2.5rem",
+      }}
       data-testid="announcement-marquee"
     >
       <div
-        className="marquee-scroll inline-block whitespace-nowrap px-4 py-2 text-[12px] font-semibold tracking-wide will-change-transform"
+        className="marquee-scroll vp-marquee-track"
         style={{
+          display: "inline-flex",
+          width: "max-content",
           minWidth: "max-content",
-          color: color ?? "#fff",
         }}
+        aria-hidden="true"
       >
-        {displayText} {SEP} {displayText}
+        <MarqueeUnit content={displayText} sep={SEP} color={color} />
+        <MarqueeUnit content={displayText} sep={SEP} color={color} />
       </div>
     </div>
   );

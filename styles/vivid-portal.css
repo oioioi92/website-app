@@ -64,6 +64,22 @@ body:has(.vp-shell) .min-h-screen                   { background: #080810 !impor
   line-height: 1.6;
 }
 
+/* 跑马灯横向滚动（Vivid 下确保动画生效） */
+@keyframes vp-marquee {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+.vp-shell .vp-marquee-track,
+.vp-marquee-track {
+  animation: vp-marquee 28s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vp-shell .vp-marquee-track,
+  .vp-marquee-track { animation-duration: 50s; }
+}
+
 /* ---- Container ---- */
 .vp-shell .vp-w {
   width: 100%;
@@ -880,14 +896,20 @@ body:has(.vp-shell) .min-h-screen                   { background: #080810 !impor
    Mobile (≤ 1024px) overrides — Vivid Portal
    ============================================================ */
 @media (max-width: 1023px) {
-  /* Topbar compact */
+  /* Topbar compact + 安全区域，避免刘海/圆角裁切 */
   .vp-shell .vp-bar-inner {
     height: 52px;
-    gap: 12px;
+    gap: 10px;
     padding: 0 14px;
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+    min-width: 0;
   }
   .vp-shell .vp-logo {
     font-size: 16px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   /* Hide desktop nav on mobile; topbar shows logo + actions only */
   .vp-shell .vp-nav {
@@ -896,11 +918,26 @@ body:has(.vp-shell) .min-h-screen                   { background: #080810 !impor
   .vp-shell .vp-bar-actions {
     gap: 6px;
     margin-left: auto;
+    flex-shrink: 0;
+    min-width: 0;
   }
   .vp-shell .vp-btn {
-    height: 34px;
-    padding: 0 14px;
-    font-size: 13px;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  /* Live Chat 页：高度 = 视口减去底部导航，贴合屏幕不溢出 */
+  .vp-shell.vp-chat-page {
+    height: calc(100dvh - 5rem - env(safe-area-inset-bottom, 0px));
+    min-height: calc(100dvh - 5rem - env(safe-area-inset-bottom, 0px));
+  }
+  .vp-shell.vp-chat-page .vp-chat-content {
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+  }
+  .vp-shell.vp-chat-page .vp-chat-window {
+    min-height: 180px;
   }
 
   /* Container padding */
