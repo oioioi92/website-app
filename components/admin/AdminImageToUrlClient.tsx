@@ -145,18 +145,18 @@ export function AdminImageToUrlClient() {
               <input
                 type="text"
                 readOnly
-                value={displayUrl}
+                value={displayUrl ?? ""}
                 className="flex-1 min-w-0 rounded-lg border border-blue-200 bg-white px-3 py-2 text-[13px] text-slate-800 font-mono"
               />
               <button
                 type="button"
-                onClick={() => copyToClipboard(displayUrl, "relative")}
+                onClick={() => copyToClipboard(displayUrl ?? "", "relative")}
                 className="shrink-0 px-4 py-2 rounded-lg bg-blue-600 text-white text-[13px] font-medium hover:bg-blue-700"
               >
                 {copied === "relative" ? "✓ 已复制" : "复制"}
               </button>
             </div>
-            {displayUrl.startsWith("http") ? (
+            {(displayUrl ?? "").startsWith("http") ? (
               <p className="mt-2 text-[11px] text-blue-600">
                 此地址可直接用于前台，不会暴露后台域名。
               </p>
