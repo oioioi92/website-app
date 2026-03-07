@@ -103,11 +103,9 @@ export function LiveTransactionTable({
           </div>
         ) : (
           (() => {
-            /* 效仿参考：DEPOSIT 深蓝、WITHDRAW 亮黄，标题文字白色 */
-            const DEPOSIT_BLUE = "#1e3a5f";
-            const WITHDRAW_YELLOW = "#e6b800";
-            const depositBg = depositColor ?? DEPOSIT_BLUE;
-            const withdrawBg = withdrawColor ?? WITHDRAW_YELLOW;
+            /* 与手机端 MobileLiveList 统一：Deposit 绿、Withdraw 金，可与 Theme 覆盖 */
+            const depositBg = depositColor ?? "#4ade80";
+            const withdrawBg = withdrawColor ?? "#fbbf24";
             const deposits = items.filter((t) => t.kind === "deposit").slice(0, VISIBLE_ROWS_V3);
             const withdraws = items.filter((t) => t.kind === "withdraw").slice(0, VISIBLE_ROWS_V3);
             const rows = Array.from({ length: VISIBLE_ROWS_V3 }).map((_, i) => ({
@@ -147,12 +145,12 @@ export function LiveTransactionTable({
                                 {demoLabelResolved}
                               </span>
                             ) : null}
-                            <span className="livetx-live-badge-blink inline-flex items-center gap-1 rounded bg-red-600 px-2 py-0.5 text-[10px] font-extrabold text-white">
-{liveLabelResolved}
-                              <span className="relative ml-1 inline-flex h-2 w-2 items-center justify-center">
-                                <span className="absolute inline-flex h-full w-full rounded-full bg-white/70 opacity-75 animate-ping" />
-                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-400/30 bg-red-500/15 px-2.5 py-1 text-[10px] font-bold text-red-200">
+                              <span className="relative inline-flex h-2 w-2 shrink-0 items-center justify-center">
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-red-500/60 animate-ping" />
+                                <span className="relative h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]" />
                               </span>
+                              {liveLabelResolved}
                             </span>
                           </span>
                         </div>

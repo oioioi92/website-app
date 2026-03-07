@@ -26,6 +26,7 @@ export default async function PublicHomePage() {
       <>
         <div className="hidden lg:block">
           <VividHomeClient
+            theme={theme}
             siteName={theme.siteName ?? "KINGDOM888"}
             promotions={promotionsUi}
             games={gamesUi}
@@ -101,6 +102,7 @@ export default async function PublicHomePage() {
       <>
         <div className="hidden lg:block">
           <VividHomeClient
+            theme={mockTheme}
             siteName={mockTheme.siteName ?? "Site"}
             promotions={mockPromotions}
             games={mockGames}

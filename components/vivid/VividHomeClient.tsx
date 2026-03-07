@@ -9,6 +9,7 @@ import { LiveTransactionTable } from "@/components/public/LiveTransactionTable";
 import { FallbackImage } from "@/components/FallbackImage";
 import { HeroPromotionSlider } from "@/components/public/HeroPromotionSlider";
 import { useLocale } from "@/lib/i18n/context";
+import type { ThemeConfig } from "@/lib/public/theme";
 
 type Promo = { id: string; title: string; coverUrl: string | null; percentText?: string | null };
 type Game  = { id: string; name: string; logoUrl: string | null };
@@ -30,6 +31,7 @@ export function VividHomeClient({
   marqueeBg = null,
   marqueeBorder = null,
   marqueeTextColor = null,
+  theme: themeProp = null,
 }: {
   siteName?: string;
   promotions?: Promo[];
@@ -45,6 +47,7 @@ export function VividHomeClient({
   marqueeBg?: string | null;
   marqueeBorder?: string | null;
   marqueeTextColor?: string | null;
+  theme?: ThemeConfig | null;
 }) {
   const { t } = useLocale();
   const heroBadge = (uiText.vividHeroBadge?.trim() || t("public.vivid.hero.badge")) as string;
@@ -129,11 +132,18 @@ export function VividHomeClient({
 
         {/* ── Live Transaction + Featured Promos ── */}
         <section className="grid gap-6 lg:grid-cols-2">
-          <div className="vp-card flex flex-col gap-4">
-            <p className="vp-card-title m-0">{t("public.vivid.section.live")}</p>
+          <div className="vp-card vp-livetx-card flex flex-col gap-0 overflow-hidden">
             <LiveTransactionTable
               internalTestMode={internalTestMode}
               variant="v3"
+              title={t("public.vivid.liveTable.title") || "实时交易"}
+              depositLabel={t("public.vivid.liveTable.deposit") || "存款"}
+              withdrawLabel={t("public.vivid.liveTable.withdraw") || "提款"}
+              liveLabel={t("public.vivid.liveTable.live") || "实时"}
+              loadingText={t("public.vivid.liveTable.loading") || "加载中…"}
+              demoLabel={t("public.vivid.liveTable.demo") || "DEMO"}
+              depositColor={themeProp?.livetxDepositColor ?? undefined}
+              withdrawColor={themeProp?.livetxWithdrawColor ?? undefined}
             />
           </div>
           <div className="flex flex-col gap-4">

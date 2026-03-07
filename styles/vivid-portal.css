@@ -80,6 +80,22 @@ body:has(.vp-shell) .min-h-screen                   { background: #080810 !impor
   .vp-marquee-track { animation-duration: 50s; }
 }
 
+/* Live Transaction 统一设计 token（desktop 与 mobile 同一套视觉） */
+.vp-shell .vp-livetx-card .livetx-wrapper {
+  border-radius: 0;
+  border: none;
+}
+.vp-shell .vp-livetx-card .ui-livetx-th-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vp-text);
+}
+.vp-shell .vp-livetx-card .ui-livetx-table-wrap {
+  --ui-livetx-table-border: rgba(120, 80, 255, 0.15);
+  --ui-livetx-cell-text: rgba(230, 222, 255, 0.88);
+  --ui-livetx-head-text: var(--vp-text);
+}
+
 /* ---- Container ---- */
 .vp-shell .vp-w {
   width: 100%;
