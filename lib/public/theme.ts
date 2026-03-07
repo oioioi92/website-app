@@ -510,16 +510,17 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
       ? t.heroBanners
           .map((b) => {
             // Backward-compatible: accept multiple legacy keys.
+            const raw = b as Record<string, unknown>;
             const imageUrl = normalizeUrlForUi(
-              b.imageUrl
-              ?? b.logoUrl
-              ?? b.url
-              ?? b.src
+              (raw.imageUrl as string | undefined)
+              ?? (raw.logoUrl as string | undefined)
+              ?? (raw.url    as string | undefined)
+              ?? (raw.src    as string | undefined)
             ) ?? "";
             return {
               imageUrl,
-              linkUrl: normalizeUrlForUi(b.linkUrl),
-              title: b.title ? sanitizeText(b.title, 80) : null
+              linkUrl: normalizeUrlForUi(raw.linkUrl as string | undefined),
+              title: raw.title ? sanitizeText(raw.title as string, 80) : null
             };
           })
           .filter((b) => Boolean(b.imageUrl))
