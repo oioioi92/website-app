@@ -129,20 +129,22 @@ function BannerRow({
 
 /* ─── 左侧导航列表 ──────────────────────────────────────────── */
 const SECTIONS = [
-  { id: "background",  icon: "🖼️",  label: "整页背景" },
-  { id: "logo",        icon: "🏷️",  label: "Logo 与站名" },
-  { id: "heroBanners", icon: "📸",  label: "首页轮播图" },
-  { id: "buttons",     icon: "🔘",  label: "按钮图片" },
-  { id: "quickActions",icon: "⚡",  label: "快捷入口" },
-  { id: "bottomNav",   icon: "🧭",  label: "底部导航" },
-  { id: "promos",      icon: "🎁",  label: "促销设置" },
-  { id: "partners",    icon: "🤝",  label: "品牌与合作" },
-  { id: "otherImages", icon: "🗂️",  label: "其他图片" },
-  { id: "downloadBar", icon: "📲",  label: "下载 App 条" },
-  { id: "marquee",     icon: "📢",  label: "公告滚动" },
-  { id: "gameCategories", icon: "🎮", label: "游戏分类" },
-  { id: "ageGate",     icon: "🔞",  label: "年龄验证" },
-  { id: "advanced",    icon: "⚙️",  label: "高级（颜色）" },
+  { id: "background",     icon: "🖼️",  label: "整页背景" },
+  { id: "logo",           icon: "🏷️",  label: "Logo 与站名" },
+  { id: "heroBanners",    icon: "📸",  label: "首页轮播图" },
+  { id: "buttons",        icon: "🔘",  label: "按钮图片" },
+  { id: "quickActions",   icon: "⚡",  label: "快捷入口" },
+  { id: "bottomNav",      icon: "🧭",  label: "底部导航" },
+  { id: "marquee",        icon: "📢",  label: "公告滚动条" },
+  { id: "promos",         icon: "🎁",  label: "促销设置" },
+  { id: "partners",       icon: "🤝",  label: "品牌与合作" },
+  { id: "trustBadges",    icon: "🏅",  label: "信任徽章" },
+  { id: "floatingActions",icon: "💬",  label: "悬浮侧边按钮" },
+  { id: "otherImages",    icon: "🗂️",  label: "其他图片" },
+  { id: "downloadBar",    icon: "📲",  label: "下载 App 条" },
+  { id: "gameCategories", icon: "🎮",  label: "游戏分类" },
+  { id: "ageGate",        icon: "🔞",  label: "年龄验证" },
+  { id: "advanced",       icon: "⚙️",  label: "高级（颜色）" },
 ] as const;
 
 type SectionId = typeof SECTIONS[number]["id"];
@@ -207,6 +209,16 @@ export function ThemeSettingsClient() {
   function patchBottomNav(list: ThemeConfig["bottomNav"]) {
     if (!theme) return;
     setTheme({ ...theme, bottomNav: list });
+  }
+
+  function patchTrustBadges(list: ThemeConfig["trustBadges"]) {
+    if (!theme) return;
+    setTheme({ ...theme, trustBadges: list });
+  }
+
+  function patchFloatingActions(list: ThemeConfig["floatingActions"]) {
+    if (!theme) return;
+    setTheme({ ...theme, floatingActions: list });
   }
 
   function save() {
@@ -649,34 +661,172 @@ export function ThemeSettingsClient() {
 
     /* ── 11. 公告滚动 ── */
     if (activeSection === "marquee") return (
-      <div className="admin-card p-6 space-y-5">
-        <SectionTitle title="📢 公告滚动条" desc="顶部滚动文字公告。每行一条。" />
-        <div>
-          <label className={labelClass}>单条公告</label>
-          <input
-            type="text"
-            value={theme.announcementMarqueeText ?? ""}
-            onChange={(e) => patch({ announcementMarqueeText: e.target.value || null })}
-            className={inputClass}
-            placeholder="欢迎光临…"
-          />
+      <div className="admin-card p-6 space-y-6">
+        <SectionTitle title="📢 公告滚动条" desc="顶部滚动文字公告，以及跑马灯条的外观设置。" />
+
+        <div className="space-y-4">
+          <div>
+            <label className={labelClass}>单条公告文字</label>
+            <input
+              type="text"
+              value={theme.announcementMarqueeText ?? ""}
+              onChange={(e) => patch({ announcementMarqueeText: e.target.value || null })}
+              className={inputClass}
+              placeholder="欢迎光临…"
+            />
+          </div>
+          <div>
+            <label className={labelClass}>多条公告（每行一条，循环滚动）</label>
+            <textarea
+              value={(theme.marqueeMessages ?? []).join("\n")}
+              onChange={(e) => patch({ marqueeMessages: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })}
+              className={`${inputClass} min-h-[120px]`}
+              rows={5}
+              placeholder={"第一条公告\n第二条公告\n第三条公告"}
+            />
+          </div>
         </div>
-        <div>
-          <label className={labelClass}>多条公告（每行一条）</label>
-          <textarea
-            value={(theme.marqueeMessages ?? []).join("\n")}
-            onChange={(e) => patch({ marqueeMessages: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })}
-            className={`${inputClass} min-h-[120px]`}
-            rows={5}
-            placeholder={"第一条公告\n第二条公告\n第三条公告"}
+
+        <div className="border-t border-[var(--compact-card-border)] pt-5 space-y-4">
+          <p className="text-sm font-bold text-[var(--compact-text)]">🎨 跑马灯条外观</p>
+          <p className="text-[12px] text-[var(--compact-muted)]">不填则用默认深色条。可以设颜色，也可以上传图片作为背景。</p>
+
+          <ImageInput
+            label="跑马灯背景图片"
+            value={theme.marqueeBg?.startsWith("url(") ? theme.marqueeBg.slice(4, -1).replace(/"/g, "") : ""}
+            onChange={(v) => patch({ marqueeBg: v ? `url("${v}")` : null })}
+            hint="上传图片后，跑马灯条会用此图片作为背景。留空则用背景颜色或默认样式。"
           />
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className={labelClass}>背景颜色（纯色）</label>
+              <input
+                type="text"
+                value={theme.marqueeBg?.startsWith("url(") ? "" : (theme.marqueeBg ?? "")}
+                onChange={(e) => patch({ marqueeBg: e.target.value || null })}
+                className={inputClass}
+                placeholder="如 #1a1a2e 或 rgba(0,0,0,0.8)"
+              />
+              <p className="mt-1 text-[11px] text-[var(--compact-muted)]">有图片时此项被覆盖</p>
+            </div>
+            <div>
+              <label className={labelClass}>文字颜色</label>
+              <input
+                type="text"
+                value={theme.marqueeTextColor ?? ""}
+                onChange={(e) => patch({ marqueeTextColor: e.target.value || null })}
+                className={inputClass}
+                placeholder="#ffffff"
+              />
+            </div>
+            <div>
+              <label className={labelClass}>边框颜色</label>
+              <input
+                type="text"
+                value={theme.marqueeBorder ?? ""}
+                onChange={(e) => patch({ marqueeBorder: e.target.value || null })}
+                className={inputClass}
+                placeholder="rgba(255,255,255,0.1)"
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
 
-    /* ── 12. 链接与路径 ── */
+    /* ── 信任徽章 ── */
+    if (activeSection === "trustBadges") {
+      const GROUPS = ["Game License", "Certification & Security", "Payment Methods", "Follow Social Media"];
+      return (
+        <div className="admin-card p-6 space-y-6">
+          <SectionTitle title="🏅 信任徽章" desc="网站底部显示的牌照、安全认证、支付方式图标。分成 4 个分组，每组最多放若干图片。" />
+          {GROUPS.map((group) => {
+            const items = (theme.trustBadges ?? []).filter(b => b.group === group);
+            const padded = [...items, ...Array.from({ length: Math.max(0, 4 - items.length) }, () => ({ group, imageUrl: "", title: null }))].slice(0, 8);
+            return (
+              <div key={group} className="rounded-xl border border-[var(--compact-card-border)] p-4 space-y-3">
+                <p className="text-sm font-bold text-[var(--compact-text)]">{group}</p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {padded.map((item, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <ImageInput
+                        label={`图片 #${idx + 1}`}
+                        value={item.imageUrl ?? ""}
+                        onChange={(v) => {
+                          const allBadges = (theme.trustBadges ?? []).filter(b => b.group !== group);
+                          const groupItems = padded.map((x, i) => i === idx ? { ...x, imageUrl: v } : x).filter(x => x.imageUrl);
+                          patchTrustBadges([...allBadges, ...groupItems]);
+                        }}
+                        size="120×60"
+                      />
+                      {item.imageUrl && (
+                        <input
+                          type="text"
+                          value={item.title ?? ""}
+                          onChange={(e) => {
+                            const allBadges = (theme.trustBadges ?? []).filter(b => b.group !== group);
+                            const groupItems = padded.map((x, i) => i === idx ? { ...x, title: e.target.value || null } : x).filter(x => x.imageUrl);
+                            patchTrustBadges([...allBadges, ...groupItems]);
+                          }}
+                          className={inputClass}
+                          placeholder="图片说明（可选）"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
 
-    /* ── 13. 游戏分类 ── */
+    /* ── 悬浮侧边按钮 ── */
+    if (activeSection === "floatingActions") {
+      const defaultAction = { label: "", url: "", variant: "subscribe" as const, iconKey: null, iconUrl: null };
+      const actions = Array.from({ length: 4 }, (_, i) => (theme.floatingActions ?? [])[i] ?? defaultAction);
+      return (
+        <div className="admin-card p-6 space-y-5">
+          <SectionTitle
+            title="💬 悬浮侧边按钮"
+            desc="页面右侧显示的悬浮按钮，最多 4 个。常用于「订阅」「投诉」等入口。留空则不显示。"
+          />
+          <div className="space-y-3">
+            {actions.map((a, i) => (
+              <div key={i} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--compact-primary)] text-[11px] font-bold text-white">{i + 1}</span>
+                  <span className="text-sm font-semibold text-[var(--compact-text)]">
+                    {a.label ? a.label : <span className="italic text-[var(--compact-muted)] font-normal">未设置</span>}
+                  </span>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <label className={labelClass}>按钮文字</label>
+                    <input type="text" value={a.label} onChange={(e) => { const next = [...actions]; next[i] = { ...next[i], label: e.target.value }; patchFloatingActions(next.filter(x => x.label)); }} className={inputClass} placeholder="如：订阅" />
+                  </div>
+                  <div>
+                    <label className={labelClass}>跳转链接</label>
+                    <input type="text" value={a.url} onChange={(e) => { const next = [...actions]; next[i] = { ...next[i], url: e.target.value }; patchFloatingActions(next.filter(x => x.label)); }} className={inputClass} placeholder="https://..." />
+                  </div>
+                  <div>
+                    <label className={labelClass}>按钮样式</label>
+                    <select value={a.variant} onChange={(e) => { const next = [...actions]; next[i] = { ...next[i], variant: e.target.value as "subscribe" | "complain" }; patchFloatingActions(next.filter(x => x.label)); }} className={inputClass}>
+                      <option value="subscribe">订阅（金色）</option>
+                      <option value="complain">投诉（红色）</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    /* ── 游戏分类 ── */
     if (activeSection === "gameCategories") return (
       <div className="admin-card p-6 space-y-5">
         <SectionTitle title="🎮 游戏分类" desc="前台显示的游戏类别列表，以及分类筛选标签。" />

@@ -38,6 +38,7 @@ export function MobileShell({
   return (
     <div
       className={wrapperClass}
+      {...(designStyle ? { "data-design-style": designStyle } : {})}
       style={Object.keys(bgStyle).length > 0 ? { ...bgStyle } : { backgroundColor: "var(--p44-grey-bg)" }}
     >
       <div data-frontedit="header">
@@ -47,6 +48,10 @@ export function MobileShell({
         <AnnouncementMarquee
           text={theme.announcementMarqueeText ?? (t.marqueedefaulttext ?? "Welcome — Latest promotions and updates")}
           messages={theme.marqueeMessages}
+          variant="vivid"
+          marqueeBg={theme.marqueeBg}
+          marqueeBorder={theme.marqueeBorder}
+          textColor={theme.marqueeTextColor}
         />
       </div>
       <div data-mobile-shell-content className={contentClass}>{children}</div>
