@@ -48,17 +48,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, url, filename: file.name, size: file.size });
     }
 
-    // 未配置 R2 时写入本地 public/uploads/<module>/，供 desktop game provider 等使用
+    // 未配置 R2 时写入本地 public/uploads/<module>/，由 /api/public/uploads/ 提供访问
     const publicDir = path.join(process.cwd(), "public");
     const fullPath = path.join(publicDir, objectKey);
     mkdirSync(path.dirname(fullPath), { recursive: true });
     writeFileSync(fullPath, body);
-    const relativePath = `/${objectKey.replace(/\\/g, "/")}`;
-    // 优先用前台域名（不暴露后台）；生产环境务必配置其一，否则图片可能无法访问
+    // 使用 API 路径，确保线上由本应用直接提供文件，不依赖 Nginx/静态目录
+    const relativeKey = objectKey.replace(/^uploads\/?/, "").replace(/\\/g, "/");
+    const apiPath = `/api/public/uploads/${relativeKey}`;
     const uploadBase =
       process.env.NEXT_PUBLIC_UPLOAD_PUBLIC_URL?.trim().replace(/\/$/, "") ||
-      process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
-    const url = uploadBase ? `${uploadBase}${relativePath}` : relativePath;
+      process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "") ||
+      process.env.NEXT_PUBLIC_FRONTEND_URL?.trim().replace(/\/$/, "");
+    const url = uploadBase ? `${uploadBase}${apiPath}` : apiPath;
     return NextResponse.json({ ok: true, url, filename: file.name, size: file.size });
   } catch (e) {
     console.error("[admin/upload/image]", e);
