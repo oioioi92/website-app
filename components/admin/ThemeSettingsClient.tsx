@@ -579,9 +579,10 @@ export function ThemeSettingsClient() {
             <input type="text" value={theme.pageBackgroundColor ?? ""} onChange={(e) => patch({ pageBackgroundColor: e.target.value || null })} className={inputClass} placeholder="#0a0a0a" />
           </div>
         </div>
+        <p className="text-[12px] text-[var(--compact-muted)]">{t("admin.site.pageBackgroundHint")}</p>
       </div>
 
-      {/* ── 12. 主题色与展示风格 ── */}
+      {/* 12. Theme colors & display */}
       <div className="admin-card p-6 space-y-6">
         <SectionTitle title={t("admin.site.sectionDisplay")} />
         <p className="text-[13px] text-[var(--compact-muted)] -mt-2">{t("admin.site.themeColorsDesc")}</p>

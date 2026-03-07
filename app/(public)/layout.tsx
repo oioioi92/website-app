@@ -84,7 +84,17 @@ export default async function PublicLayout({ children }: { children: ReactNode }
   const vpStyle = (vpVars.length || fontFamilyCss || fontSizeCss) ? `.vp-shell { ${vpVars.join("; ")}${vpVars.length ? "; " : ""}${fontFamilyCss} ${fontSizeCss} }` : "";
   const deskStyle = deskVars.length ? `.public-desktop-shell { ${deskVars.join("; ")} }` : "";
   const rootStyle = rootVars.length ? `:root { ${rootVars.join("; ")} }` : "";
-  const themeOverrideCss = [rootStyle, vpStyle, deskStyle].filter(Boolean).join("\n");
+  // 整页背景：在 Vivid 下也应用 theme 的 background 图/色（覆盖 vivid-portal 默认）
+  let pageBgStyle = "";
+  if (theme?.pageBackgroundUrl || theme?.pageBackgroundColor) {
+    const safeUrl = theme.pageBackgroundUrl?.replace(/\\/g, "\\\\").replace(/"/g, '\\"') ?? "";
+    const parts = [
+      theme.pageBackgroundColor ? `background-color: ${theme.pageBackgroundColor}` : "",
+      safeUrl ? `background-image: url("${safeUrl}"); background-size: cover; background-position: center` : "",
+    ].filter(Boolean);
+    if (parts.length) pageBgStyle = `body:has(.vp-shell) .min-h-screen { ${parts.join("; ")} !important; }`;
+  }
+  const themeOverrideCss = [rootStyle, vpStyle, deskStyle, pageBgStyle].filter(Boolean).join("\n");
   return (
     <MobileShell theme={theme} chatUrl={chatUrl} socialLinks={social} useVividPortal={true}>
       {themeOverrideCss && (
