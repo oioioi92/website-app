@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "@/styles/vivid-portal.css";
 import { VividTopbar } from "./VividTopbar";
 import { VividFooter } from "./VividFooter";
@@ -26,8 +26,7 @@ const CARD: React.CSSProperties = {
 
 // ─── Live tx list (desktop left column) ──────────────────
 const LTX_ROW_H = 44;
-const LTX_VISIBLE = 6;
-const LTX_INTERVAL_MS = 3000;
+const LTX_VISIBLE = 5;
 
 function DesktopLiveList({
   items,
@@ -46,21 +45,7 @@ function DesktopLiveList({
   depositColor?: string | null;
   withdrawColor?: string | null;
 }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const slice = items.slice(0, 6);
-  const displayList = slice.length > 0 ? [...slice, ...slice] : [];
-
-  useEffect(() => {
-    if (slice.length === 0) return;
-    const el = scrollRef.current;
-    if (!el) return;
-    const singleSetHeight = slice.length * LTX_ROW_H;
-    const id = window.setInterval(() => {
-      const next = el.scrollTop + LTX_ROW_H;
-      el.scrollTop = next >= singleSetHeight ? 0 : next;
-    }, LTX_INTERVAL_MS);
-    return () => window.clearInterval(id);
-  }, [slice.length]);
+  const displayList = items.slice(0, LTX_VISIBLE);
 
   function renderRow(tx: typeof items[number], key: string) {
     const isDeposit = tx.kind === "deposit";
@@ -115,11 +100,9 @@ function DesktopLiveList({
           {liveLabel}
         </span>
       </div>
-      <div ref={scrollRef} className="ui-hide-scrollbar" style={{
-        height: LTX_ROW_H * LTX_VISIBLE, overflowY: "auto", overflowX: "hidden",
-      }}>
+      <div style={{ height: LTX_ROW_H * LTX_VISIBLE }}>
         {displayList.length > 0
-          ? displayList.map((tx, i) => renderRow(tx, `${tx.id}-${i}`))
+          ? displayList.map((tx) => renderRow(tx, tx.id))
           : <div style={{ padding: 16, textAlign: "center", color: "var(--vp-muted)", fontSize: 12 }}>—</div>
         }
       </div>

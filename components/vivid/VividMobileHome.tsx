@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "@/styles/vivid-portal.css";
 import { FallbackImage } from "@/components/FallbackImage";
 import { AnnouncementMarquee } from "@/components/public/AnnouncementMarquee";
@@ -44,10 +44,9 @@ const CARD: React.CSSProperties = {
   borderRadius: 16,
 };
 
-// ─── Live tx row height for vertical ticker ───────────────
+// ─── Live tx row height ───────────────────────────────────
 const LIVE_TX_ROW_HEIGHT = 44;
-const LIVE_TX_VISIBLE_ROWS = 3;
-const LIVE_TX_TICKER_INTERVAL_MS = 3000;
+const LIVE_TX_VISIBLE_ROWS = 5;
 
 // ─── Mobile Live Tx List ─────────────────────────────────
 function MobileLiveList({
@@ -67,21 +66,7 @@ function MobileLiveList({
   depositColor?: string | null;
   withdrawColor?: string | null;
 }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const slice = items.slice(0, 6);
-  const displayList = slice.length > 0 ? [...slice, ...slice] : [];
-
-  useEffect(() => {
-    if (slice.length === 0) return;
-    const el = scrollRef.current;
-    if (!el) return;
-    const singleSetHeight = slice.length * LIVE_TX_ROW_HEIGHT;
-    const id = window.setInterval(() => {
-      const next = el.scrollTop + LIVE_TX_ROW_HEIGHT;
-      el.scrollTop = next >= singleSetHeight ? 0 : next;
-    }, LIVE_TX_TICKER_INTERVAL_MS);
-    return () => window.clearInterval(id);
-  }, [slice.length]);
+  const displayList = items.slice(0, LIVE_TX_VISIBLE_ROWS);
 
   function renderRow(
     tx: { id: string; userRefMasked: string; amountDisplay: string; kind: "deposit" | "withdraw" },
@@ -154,17 +139,9 @@ function MobileLiveList({
           {liveLabel}
         </span>
       </div>
-      {/* List — vertical ticker: show 3 rows, scroll every 3s */}
-      <div
-        ref={scrollRef}
-        className="ui-hide-scrollbar"
-        style={{
-          height: LIVE_TX_ROW_HEIGHT * LIVE_TX_VISIBLE_ROWS,
-          overflowY: "auto",
-          overflowX: "hidden",
-        }}
-      >
-        {displayList.length > 0 ? displayList.map((tx, i) => renderRow(tx, i, `${tx.id}-${i}`)) : (
+      {/* Static list — 5 rows */}
+      <div style={{ height: LIVE_TX_ROW_HEIGHT * LIVE_TX_VISIBLE_ROWS }}>
+        {displayList.length > 0 ? displayList.map((tx, i) => renderRow(tx, i, tx.id)) : (
           <div style={{ padding: "16px", textAlign: "center", color: "var(--vp-muted)", fontSize: 12 }}>—</div>
         )}
       </div>
