@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import "@/styles/vivid-portal.css";
 import { FallbackImage } from "@/components/FallbackImage";
 import { AnnouncementMarquee } from "@/components/public/AnnouncementMarquee";
@@ -203,9 +203,27 @@ export function VividMobileHome({
   games?: Game[];
   internalTestMode?: boolean;
 }) {
-  const { t } = useLocale();
+  const { t, locale, setLocale } = useLocale();
   const siteName = theme.siteName ?? "KINGDOM888";
   const loginUrl = theme.loginUrl ?? "/login";
+
+  // ── Language picker ──────────────────────────────────────
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!langOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [langOpen]);
+  const LANGS = [
+    { code: "EN", label: "English",       locale: "en" as const },
+    { code: "ZH", label: "华语",          locale: "zh" as const },
+    { code: "MY", label: "Bahasa Melayu", locale: "ms" as const },
+  ];
+  const activeLang = LANGS.find((l) => l.locale === locale)?.code ?? "EN";
   const registerUrl = theme.registerUrl ?? "/register-wa";
 
   // ── Live Tx ──────────────────────────────────────────────
@@ -277,7 +295,57 @@ export function VividMobileHome({
         }}>
           {siteName}
         </span>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+
+          {/* 🌐 Language picker */}
+          <div ref={langRef} style={{ position: "relative" }}>
+            <button
+              type="button"
+              onClick={() => setLangOpen((v) => !v)}
+              style={{
+                height: 36, padding: "0 10px", borderRadius: 12,
+                border: "1.5px solid rgba(120,80,255,0.35)",
+                background: "transparent", color: "#d0c8ff",
+                display: "flex", alignItems: "center", gap: 4,
+                fontSize: 12, fontWeight: 600, cursor: "pointer",
+              }}
+            >
+              <span style={{ fontSize: 14 }}>🌐</span>
+              <span>{activeLang}</span>
+            </button>
+            {langOpen && (
+              <div style={{
+                position: "absolute", right: 0, top: "calc(100% + 8px)",
+                minWidth: 160, background: "var(--vp-card)",
+                border: "1px solid var(--vp-border)", borderRadius: 12,
+                padding: 6, zIndex: 200,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+              }}>
+                {LANGS.map((l) => {
+                  const isActive = locale === l.locale;
+                  return (
+                    <button
+                      key={l.code}
+                      type="button"
+                      onClick={() => { setLocale(l.locale); setLangOpen(false); }}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        width: "100%", padding: "10px 14px", borderRadius: 8,
+                        border: "none",
+                        background: isActive ? "rgba(176,96,255,0.22)" : "transparent",
+                        color: isActive ? "#d4a0ff" : "rgba(255,255,255,0.7)",
+                        fontSize: 14, fontWeight: isActive ? 700 : 500, cursor: "pointer",
+                      }}
+                    >
+                      <span>{l.label}</span>
+                      <span style={{ fontSize: 11, opacity: 0.5 }}>{l.code}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           <Link href={loginUrl} style={{
             height: 36, padding: "0 16px", borderRadius: 12,
             border: "1.5px solid rgba(120,80,255,0.4)", color: "#f0eeff",
