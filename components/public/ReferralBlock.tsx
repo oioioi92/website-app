@@ -99,7 +99,7 @@ export function ReferralBlock({
               <Link
                 href="/me/referral"
                 className="vp-btn vp-btn-outline"
-                style={{ gridColumn: "1 / -1", display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, fontSize: 13, padding: "0 14px", marginTop: 2 }}
+                style={{ gridColumn: "1 / -1", display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, fontSize: 13, padding: "0 14px", marginTop: 12 }}
               >
                 {t("public.vivid.referral.checkDownlines")}
               </Link>
@@ -123,7 +123,7 @@ export function ReferralBlock({
               <Link
                 href={effectiveLoginHref}
                 className="vp-btn vp-btn-outline"
-                style={{ gridColumn: "1 / -1", display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, fontSize: 13, padding: "0 14px", marginTop: 2 }}
+                style={{ gridColumn: "1 / -1", display: "inline-flex", alignItems: "center", justifyContent: "center", height: 48, fontSize: 13, padding: "0 14px", marginTop: 12 }}
               >
                 {t("public.vivid.referral.checkDownlines")}
               </Link>

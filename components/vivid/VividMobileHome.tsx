@@ -126,7 +126,7 @@ function MobileLiveList({
             {tx.userRefMasked}
           </span>
         </div>
-        <span style={{ fontSize: 13, fontWeight: 700, color: txColor, fontFamily: "monospace" }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: txColor, fontFamily: "monospace", fontVariantNumeric: "tabular-nums" }}>
           {tx.amountDisplay}
         </span>
       </div>
@@ -330,7 +330,7 @@ export function VividMobileHome({
         ) : null}
 
         {/* ══════════════ 4. QUICK ACTIONS ══════════════ */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           {QUICK_ACTIONS.map((a) => (
             <Link
               key={a.label}
@@ -345,7 +345,7 @@ export function VividMobileHome({
             >
               {a.iconUrl ? (
                 <div style={{ width: 32, height: 32, borderRadius: 10, overflow: "hidden", flexShrink: 0 }}>
-                  <FallbackImage src={a.iconUrl} alt="" className="w-full h-full object-cover" />
+                  <FallbackImage src={a.iconUrl} alt="" className="w-full h-full object-cover object-center" />
                 </div>
               ) : (
                 <span style={{ fontSize: 26, lineHeight: 1, flexShrink: 0 }}>{a.icon}</span>
@@ -380,10 +380,10 @@ export function VividMobileHome({
                     {(p.coverUrlMobilePromo || p.coverUrl) ? (
                       p.promoLink ? (
                         <a href={p.promoLink} target="_blank" rel="noopener noreferrer" style={{ display: "block", height: "100%" }}>
-                          <FallbackImage src={p.coverUrlMobilePromo || p.coverUrl} alt={p.title} className="h-full w-full object-cover" />
+                          <FallbackImage src={p.coverUrlMobilePromo || p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
                         </a>
                       ) : (
-                        <FallbackImage src={p.coverUrlMobilePromo || p.coverUrl} alt={p.title} className="h-full w-full object-cover" />
+                        <FallbackImage src={p.coverUrlMobilePromo || p.coverUrl} alt={p.title} className="h-full w-full object-cover object-center" />
                       )
                     ) : (
                       <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36 }}>🎁</div>
@@ -513,7 +513,7 @@ export function VividMobileHome({
                     fontSize: 32,
                   }}>
                     {g.logoUrl
-                      ? <FallbackImage src={g.logoUrl} alt={g.name} className="h-full w-full object-cover" />
+                      ? <FallbackImage src={g.logoUrl} alt={g.name} className="h-full w-full object-cover object-center" />
                       : <span style={{ opacity: 0.6 }}>🎮</span>}
                   </div>
                   {/* Title — min-height ensures alignment */}

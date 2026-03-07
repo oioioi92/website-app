@@ -152,7 +152,7 @@ export function HeroPromotionSlider({
                 <FallbackImage
                   src={s.imageUrl}
                   alt={s.title ?? "banner"}
-                  className="ui-asset-img h-full w-full object-cover"
+                  className="ui-asset-img h-full w-full object-cover object-center"
                   loading={i === 0 ? "eager" : "lazy"}
                 />
                 {!compact ? (
