@@ -355,7 +355,7 @@ export function AdminLiveChatClient() {
     }
   };
 
-  const patchStatus = async (conversationId: string, status: "open" | "closed") => {
+  const patchStatus = async (conversationId: string, status: "open" | "closed"): Promise<boolean> => {
     setStatusLoading(conversationId);
     try {
       const res = await fetch(`/api/admin/chat/conversations/${conversationId}/status`, {
@@ -364,7 +364,11 @@ export function AdminLiveChatClient() {
         credentials: "include",
         body: JSON.stringify({ status })
       });
-      if (res.ok) loadQueue();
+      if (res.ok) {
+        loadQueue();
+        return true;
+      }
+      return false;
     } finally {
       setStatusLoading(null);
     }
@@ -676,7 +680,11 @@ export function AdminLiveChatClient() {
                         <button
                           type="button"
                           disabled={!!statusLoading}
-                          onClick={() => patchStatus(selected.id, "closed")}
+                          onClick={() => {
+                            patchStatus(selected.id, "closed").then((ok) => {
+                              if (ok) setSelectedId(null);
+                            });
+                          }}
                           className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                         >
                           Close
