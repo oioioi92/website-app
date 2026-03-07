@@ -26,15 +26,19 @@
 
 ## 桌面版首页（Vivid Desktop）
 
-**主组件**：`components/vivid/VividHomeClient.tsx`
+**主组件**：`components/vivid/VividHomeClient.tsx`  
+**设计原则**：与 Mobile 同一套设计语言（颜色、间距、圆角、CARD、边框、Typography、图片处理、Promotion/Live 卡片风格一致）；桌面为「放大版 / 更完整信息版」，非另一套视觉系统。
 
 | 模块       | 组件/实现位置 | 说明 |
 |------------|----------------|------|
 | 跑马灯     | `AnnouncementMarquee` | 同手机 |
-| 轮播图     | `HeroPromotionSlider` | compact，max-w 980px |
-| Hero 主卡  | 内联于 `VividHomeClient` | 主标语 + CTA（仅桌面） |
-| 实时交易   | `LiveTransactionTable` | 表格版，variant v3 |
-| 其他       | 与手机共用部分公共组件 | |
+| Banner     | 内联于 `VividHomeClient` | 与 Mobile 同风格（深色+渐变遮罩、按钮、标题层级），max-w 980px |
+| 快捷入口   | 内联于 `VividHomeClient` | 同 Mobile 卡片壳与 icon，横排 4 列，`.vp-action-unified` |
+| 最新活动   | 内联于 `VividHomeClient` | 同 Mobile：1:1 图、标题、领取/条款按钮，`.vp-card` |
+| 实时交易   | `LiveTransactionTable` | variant v3，接收 theme 颜色与 i18n，CARD_STYLE 包裹 |
+| 热门游戏   | 内联于 `VividHomeClient` | 同 SectionHeader + `.vp-tile-unified` 卡片 |
+| 信任条/Footer | 内联于 `VividHomeClient` | CARD_STYLE，`--vp-bg2`、统一边框与字色 |
+| 其他       | 与手机共用公共组件 | 见 `styles/vivid-portal.css` 统一 token |
 
 ---
 
