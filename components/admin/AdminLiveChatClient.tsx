@@ -646,13 +646,7 @@ export function AdminLiveChatClient() {
                 {/* 头部一格：单行紧凑 会话 | 状态 | 访客信息 | 已连接 等待 */}
                 <div className="px-4 py-2.5 bg-slate-50/50 border-b border-slate-100">
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                    <span className="text-sm font-semibold text-slate-800">{t("admin.chat.sessionLabel")}：{getVisitorDisplayLabel(selected)}</span>
-                    <Link
-                      href={getProfileSearchQuery(selected) ? `/admin/players?search=${encodeURIComponent(getProfileSearchQuery(selected))}` : "/admin/players"}
-                      className="text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
-                    >
-                      {t("admin.chat.viewProfile")}
-                    </Link>
+                    <span className="text-sm font-semibold text-slate-800">{getVisitorDisplayLabel(selected)}</span>
                     {(selected.pendingCustomerMsgAt != null && selected.firstReplyAt == null)
                       ? <span className="text-[11px] text-amber-600 font-medium">{t("admin.chat.customerPending")}</span>
                       : selected.status === "closed"
@@ -1040,15 +1034,6 @@ export function AdminLiveChatClient() {
               e.target.value = "";
             }}
           />
-          <button
-            type="button"
-            disabled={uploadingImage || !selectedId}
-            onClick={() => imageInputRef.current?.click()}
-            className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 shrink-0 disabled:opacity-50"
-            title={t("admin.chat.image")}
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" /></svg>
-          </button>
           <button
             type="button"
             disabled={uploadingImage || !selectedId}
