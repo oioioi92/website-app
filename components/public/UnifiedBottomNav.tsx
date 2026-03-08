@@ -12,14 +12,14 @@ import { useLocale } from "@/lib/i18n/context";
 import { FallbackImage } from "@/components/FallbackImage";
 import type { ThemeConfig } from "@/lib/public/theme";
 
-const ITEMS = [
-  { href: "/", labelKey: "public.vivid.bottomNav.home" as const, emoji: "🏠" },
-  { href: "/games", labelKey: "public.vivid.bottomNav.games" as const, emoji: "🎮" },
-  { href: "/promotion", labelKey: "public.vivid.bottomNav.promo" as const, emoji: "🎁" },
-  { href: "/history", labelKey: "public.vivid.bottomNav.history" as const, emoji: "📜" },
-  { href: "/chat", labelKey: "public.vivid.bottomNav.liveChat" as const, emoji: "💬" },
-  { href: "/settings", labelKey: "public.vivid.bottomNav.setting" as const, emoji: "⚙️" },
-] as const;
+const DEFAULT_ITEMS = [
+  { href: "/",          labelKey: "public.vivid.bottomNav.home"     as const, emoji: "🏠", label: "Home" },
+  { href: "/games",     labelKey: "public.vivid.bottomNav.games"    as const, emoji: "🎮", label: "Games" },
+  { href: "/promotion", labelKey: "public.vivid.bottomNav.promo"    as const, emoji: "🎁", label: "Promo" },
+  { href: "/history",   labelKey: "public.vivid.bottomNav.history"  as const, emoji: "📜", label: "History" },
+  { href: "/chat",      labelKey: "public.vivid.bottomNav.liveChat" as const, emoji: "💬", label: "Live Chat" },
+  { href: "/settings",  labelKey: "public.vivid.bottomNav.setting"  as const, emoji: "⚙️", label: "Settings" },
+];
 
 type Variant = "vivid" | "default";
 
@@ -41,6 +41,21 @@ export function UnifiedBottomNav({ theme, variant = "default" }: { theme?: Theme
       .then((d) => setHasMember(!!d?.member))
       .catch(() => setHasMember(false));
   }, []);
+
+  // Build final 6 items: prefer theme.bottomNav (which may have custom href/label/emoji/iconUrl),
+  // fall back slot-by-slot to DEFAULT_ITEMS.
+  const navItems = DEFAULT_ITEMS.map((def, i) => {
+    // If theme has data at this slot index, use it; otherwise match by href; otherwise use default.
+    const byIndex = themeNav[i];
+    const byHref = themeNav.find((x) => normHref(x.href) === normHref(def.href));
+    const src = byIndex ?? byHref ?? null;
+    return {
+      href: src?.href?.trim() || def.href,
+      label: src?.label?.trim() || t(def.labelKey) || def.label,
+      emoji: src?.icon?.trim() || def.emoji,
+      iconUrl: src?.iconUrl ?? null,
+    };
+  });
 
   return (
     <nav
@@ -74,19 +89,16 @@ export function UnifiedBottomNav({ theme, variant = "default" }: { theme?: Theme
             }),
       }}
     >
-      {ITEMS.map((n) => {
-        const isProtected = n.href === "/history" || n.href === "/settings";
+      {navItems.map((n) => {
+        const isProtected = normHref(n.href) === "/history" || normHref(n.href) === "/settings";
         const effectiveHref = isProtected && hasMember === false ? `${loginUrl}?returnUrl=${encodeURIComponent(n.href)}` : n.href;
-        const themeItem = themeNav.find((x) => normHref(x.href) === normHref(n.href));
-        const iconUrl = themeItem?.iconUrl ?? null;
-        const label = themeItem?.label?.trim() || (n.href === "/chat" ? "Live Chat" : (t(n.labelKey) || n.labelKey.split(".").pop()));
         const active = path === n.href || (n.href !== "/" && path.startsWith(n.href));
         return (
           <Link
             key={n.href}
             href={effectiveHref}
-            aria-label={label}
-            data-nav-item={n.href === "/chat" ? "live-chat" : undefined}
+            aria-label={n.label}
+            data-nav-item={normHref(n.href) === "/chat" ? "live-chat" : undefined}
             className={isVivid ? "" : "flex min-h-[44px] flex-col items-center justify-center rounded-xl border border-transparent text-[9px] font-bold tracking-wide transition"}
             style={{
               minWidth: 0,
@@ -104,14 +116,14 @@ export function UnifiedBottomNav({ theme, variant = "default" }: { theme?: Theme
                 : { color: active ? "var(--p44-green-dark)" : "rgba(255,255,255,0.7)" }),
             }}
           >
-            {iconUrl ? (
+            {n.iconUrl ? (
               <span className="flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden>
-                <FallbackImage src={iconUrl} alt="" className="h-full w-full object-contain" />
+                <FallbackImage src={n.iconUrl} alt="" className="h-full w-full object-contain" />
               </span>
             ) : (
               <span style={{ fontSize: 20 }} aria-hidden>{n.emoji}</span>
             )}
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{label}</span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>{n.label}</span>
             {isVivid && active && (
               <span
                 style={{

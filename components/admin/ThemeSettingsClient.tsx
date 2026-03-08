@@ -555,25 +555,25 @@ export function ThemeSettingsClient() {
           <div className="space-y-3">
             {defaultSix.map((def, i) => {
               const item = list[i] ?? def;
-              const upd = (field: "label" | "icon" | "iconUrl", value: string | null) => {
+              const upd = (field: "label" | "icon" | "iconUrl" | "href", value: string | null) => {
                 const next = list.length >= 6 ? [...list] : [...defaultSix];
-                next[i] = { ...next[i]!, [field]: value };
+                next[i] = { ...next[i]!, [field]: value ?? "" };
                 patchBottomNav(next);
               };
               return (
-                <div key={def.href} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4">
+                <div key={i} className="rounded-xl border border-[var(--compact-card-border)] bg-[var(--compact-card-bg)] p-4">
                   <div className="mb-3 flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--compact-primary)] text-[11px] font-bold text-white">{i + 1}</span>
                     <span className="text-sm font-semibold text-[var(--compact-text)]">{item.icon ?? def.icon} {item.label || def.label}</span>
-                    <span className="ml-auto rounded bg-[var(--compact-card-border)] px-2 py-0.5 text-[11px] text-[var(--compact-muted)] font-mono">{def.href}</span>
+                    <span className="ml-auto rounded bg-[var(--compact-card-border)] px-2 py-0.5 text-[11px] text-[var(--compact-muted)] font-mono">{item.href || def.href}</span>
                     {item.iconUrl && <span className="rounded bg-green-50 border border-green-200 px-2 py-0.5 text-[11px] text-green-700">已设图片</span>}
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <ImageInput
                       label="图标图片（替换 emoji）"
                       value={item.iconUrl ?? ""}
                       onChange={(v) => upd("iconUrl", v || null)}
-                      size="48×48 或 56×56 透明 PNG"
+                      size="56×56 透明 PNG"
                       aspectRatio="1/1"
                       hint="底部栏实际显示约 20px，建议上传 56×56 高分辨率版。"
                     />
@@ -585,6 +585,10 @@ export function ThemeSettingsClient() {
                       <div>
                         <label className={labelClass}>Emoji 图标（无图片时显示）</label>
                         <input type="text" value={item.icon ?? ""} onChange={(e) => upd("icon", e.target.value || null)} className={inputClass} placeholder={def.icon ?? "🏠"} />
+                      </div>
+                      <div>
+                        <label className={labelClass}>跳转链接（可改目标页面）</label>
+                        <input type="text" value={item.href ?? def.href} onChange={(e) => upd("href", e.target.value)} className={inputClass} placeholder={def.href} />
                       </div>
                     </div>
                   </div>

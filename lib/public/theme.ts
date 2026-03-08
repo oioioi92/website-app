@@ -624,7 +624,7 @@ export function sanitizeThemeJsonForWrite(raw: Prisma.JsonValue | unknown): Pris
             iconUrl: normalizeUrlForUi(x.iconUrl),
             badge: x.badge ? sanitizeText(x.badge, 20) : null
           }))
-          .filter((x) => Boolean(x.href) && Boolean(x.label))
+          .filter((x) => Boolean(x.href))
           .slice(0, 10)
       : defaults.bottomNav,
     uiGameCategories: Array.isArray(t.uiGameCategories)
@@ -804,9 +804,9 @@ export function parseThemeJson(raw: Prisma.JsonValue | unknown): ThemeConfig {
           .map((item) => {
             const row = asRecord(item);
             if (!row) return null;
-            const href = normalizeUrlForUi(row.href);
-            const label = asString(row.label);
-            if (!href || !label) return null;
+            const href = asString(row.href) || normalizeUrlForUi(row.href);
+            if (!href) return null;
+            const label = asString(row.label) ?? "";
             return {
               href,
               label,
